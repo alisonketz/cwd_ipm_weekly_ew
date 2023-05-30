@@ -299,10 +299,10 @@ d_surv$periodweek_recap[d_surv$periodweek_recap != 0] <-
           nT_period_precollar
 
 #monthly adjustment
-d_surv$emonth <- d_surv$emonth + nT_period_precollar_m
-d_surv$rmonth <- d_surv$rmonth + nT_period_precollar_m
-d_surv$smonth <- d_surv$smonth + nT_period_precollar_m
+d_surv$emonth <- d_surv$emonth + nT_period_precollar_monthly
+d_surv$rmonth <- d_surv$rmonth + nT_period_precollar_monthly
+d_surv$smonth <- d_surv$smonth + nT_period_precollar_monthly
 d_surv$periodmonth_recap[d_surv$periodmonth_recap != 0] <- 
           d_surv$periodmonth_recap[d_surv$periodmonth_recap != 0] + 
-          nT_period_precollar_m
+          nT_period_precollar_monthly
 
