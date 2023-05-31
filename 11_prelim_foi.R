@@ -1,21 +1,7 @@
-######################################################################################
-###
-### Preliminary constants for running in the model
-###
-######################################################################################
-
-n_year_ext <- length(1992:2021)
-n_year <- length(1994:2021)
-n_ageclass <- 7
-n_ageclassm <- 6
-n_ageclassf <- 7
-n_agem <- 7
-n_agef <- 10
-n_sex <- 2
-
 ####################################################################################
 ###
-### calculating age_lookup, which is the ageclass given the number of months age
+### calculating age_lookup for AAH population model, 
+### which is the ageclass given the number of weeks age
 ###
 ####################################################################################
 
@@ -26,7 +12,7 @@ age_lookup_f_conv <- c(rep(1:4, each = intvl_step_yr_weekly),
 age_lookup_m_conv <- c(rep(1:4, each = intvl_step_yr_weekly),
                        rep(5, 2 * intvl_step_yr_weekly),
                        rep(6, 3 * intvl_step_yr_weekly))
-Nage_lookup_conv <- length(age_lookup_f_conv)
+n_age_lookup_conv <- length(age_lookup_f_conv)
 
 # This is what I used before
 age_lookup_f <- c(rep(1:4, each = intvl_step_yr_weekly),
@@ -35,7 +21,7 @@ age_lookup_f <- c(rep(1:4, each = intvl_step_yr_weekly),
                        7)
 age_lookup_m <- age_lookup_f
 age_lookup_m[age_lookup_m == 7] <- 6
-Nage_lookup <- length(age_lookup_f)
+n_age_lookup <- length(age_lookup_f)
 
 ###################################################################################
 ### age to date conversion within model
@@ -124,10 +110,3 @@ period_week_indx_col <- period_week_indx + n_year_precollar
 
 d_fit_hunt_neg <- cwd_df[cwd_df$teststatus == 0, ]
 d_fit_hunt_pos <- cwd_df[cwd_df$teststatus == 1, ]
-
-sect_hunt_neg <- sect[cwd_df$teststatus == 0]
-sect_hunt_pos <- sect[cwd_df$teststatus == 1]
-
-d_fit_hunt_neg$sect_hunt_neg <- sect_hunt_neg
-d_fit_hunt_pos$sect_hunt_pos <- sect_hunt_pos
-
