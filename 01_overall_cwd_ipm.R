@@ -65,49 +65,50 @@ source("04_homerange_data_survival.R")
 ###########################################################
 
 source("05_load_clean_data_aah.R")
+source("06_load_agg_data_aah.R")
 
 ###########################################################
 ### Format data for fitting age-period survival models
 ###########################################################
 
-source("06_format_data_survival.R")
+source("07_format_data_survival.R")
 
 ##########################################################
 ### Setup collar data for FOI + Survival
 ##########################################################
 
-source("07_format_data_combine_foi_surv.R")
+source("08_format_data_combine_foi_surv.R")
 
 ##########################################################
 ### Setup collar data for FOI + Survival
 ##########################################################
 
-source("08_format_data_cause.R")
+source("09_format_data_cause.R")
 
 ###########################################################
 ### Setup consts etc for running the model
 ###########################################################
 
-source("09_prelim_survival.R")
-source("10_prelim_foi.R")
-source("11_prelim_collar_foi.R")
-source("12_prelim_aah.R")
+source("10_prelim_survival.R")
+source("11_prelim_foi.R")
+source("12_prelim_collar_foi.R")
+source("13_prelim_aah.R")
 
 ###########################################################
 ### Run model
 ###########################################################
 
-source("13_distributions_check.R")
-source("13_distributions.R")
+source("14_distributions_check.R")
+source("14_distributions.R")
 
 ###########################################################
 ### Run model
 ###########################################################
 
-source("14_run_model.R")
+source("15_run_model.R")
 
 ###########################################################
 ### Post processing
 ###########################################################
 
-source("15_post_process.R")
+source("16_post_process.R")
