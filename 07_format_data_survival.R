@@ -9,12 +9,18 @@
 
 #setting the maximum number of periods that are estimated by the collar data
 nT_period_collar <- interval("2017-01-09","2022-05-15") %/% weeks(1)
+nT_period_collar_monthly <- interval("2017-01-09","2022-05-15") %/% months(1)
 
 #the first birth is in 1992
 # weekly calculation
 nT_period_overall_ext <- interval("1992-05-15","2022-05-09") %/% weeks(1)
 nT_period_overall <- interval("1994-05-15","2022-05-09") %/% weeks(1)
 nT_period_precollar <- nT_period_overall_ext - nT_period_collar
+
+
+nT_period_overall_ext_monthly <- interval("1992-05-15","2022-05-09") %/% months(1)
+nT_period_precollar_monthly <- nT_period_overall_ext_monthly - nT_period_collar
+
 
 ########################################################
 ###
