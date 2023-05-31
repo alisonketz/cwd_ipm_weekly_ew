@@ -45,7 +45,7 @@ library(tidyr)
 ### Source summary function for posteriors
 ###########################################################
 
-source("summarize.R")
+source("support_functions.R")
 
 ###########################################################
 # Load Data
