@@ -20,11 +20,12 @@ low_icap <- d_surv$lowtag[d_surv$cwd_cap == 1]
 low_idead <- d_surv$lowtag[d_surv$cwd_mort == 1 & !is.na(d_surv$cwd_mort)]
 low_idead <- low_idead[!(low_idead %in% c(low_recap, low_icap))]
 
-# all individuals that are alive at the end of the study that weren't recaptured
-# low_endlive <- d_surv$lowtag[!(d_surv$lowtag %in% as.integer(unique(c(d_cens$lowtag, d_mort$lowtag))))]
+### all individuals that are alive at the end of the study that weren't recaptured
+# low_endlive <- d_surv$lowtag[!(d_surv$lowtag %in% 
+#          as.integer(unique(c(d_cens$lowtag, d_mort$lowtag))))]
 low_endlive 
 
-# never tested positive, and were tested at 
+# never tested positive, and were tested at
 low_sus <- low_sus[!(low_sus %in% unique(c(low_icap, low_recap, low_idead, low_endlive)))]
 
 d_fit_sus <- d_surv[d_surv$lowtag %in% low_sus, ]
@@ -182,7 +183,7 @@ data_cases <- rownames(rbind(n_fit_hunt_neg,
 
 obs_sample_sizes <- data.frame(data_cases, num_observations, row.names = NULL)
 
-write.csv(obs_sample_sizes, file = "obs_sample_sizes.csv", row.names=FALSE)
+write.csv(obs_sample_sizes, file = "results/obs_sample_sizes.csv", row.names=FALSE)
 
 d_fit_icap_cens$left_period_e - d_fit_icap_cens$left_age_e
 
