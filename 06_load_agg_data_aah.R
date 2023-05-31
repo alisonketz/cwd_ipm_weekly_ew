@@ -7,12 +7,15 @@
 
 ### Number of age classes and sex classes
 n_study_area <- 2
-n_ageclassf <- 7
+n_year_ext <- length(1992:2022)-1
+n_year <- length(1994:2022)-1
+n_ageclass <- 7
 n_ageclassm <- 6
+n_ageclassf <- 7
+n_agem <- 7
+n_agef <- 10
 n_sex <- 2
 
-### number of years in the study
-n_year <- length(unique(df_age_sus$year))
 
 #structuring classification data to fit into the model
 Cage_sus <- array(NA,c(n_study_area,n_sex,n_ageclassf,n_year))
@@ -81,12 +84,6 @@ Ototal[2,,] <- t(Ototal_west[,4:3])
 
 report_df <- suppressWarnings(read_excel("datafiles/ComplianceRate2020.xlsx",sheet=7))
 report_hyp_sum <- apply(report_df[,2:3],2,mean)
-
-beta.moments <- function(mu,sigma){
-	alpha = (mu^2-mu^3-mu*sigma^2)/sigma^2
-	beta = (mu-2*mu^2+mu^3-sigma^2+mu*sigma^2)/(sigma^2)
-	return(list(alpha = alpha, beta = beta))
-}
 
 report_hyp_all <- unlist(beta.moments(report_hyp_sum[1], report_hyp_sum[2]))
 report_hyp_y <- matrix(NA, nrow(report_df), 2)
