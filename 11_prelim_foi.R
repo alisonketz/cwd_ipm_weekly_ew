@@ -100,6 +100,7 @@ period_week_indx_col <- period_week_indx + n_year_precollar
 
 ###############################################################
 ###
+### Setting up aggregation by study
 ### Separating hunter harvested
 ### CWD test positive deer from CWD test negative
 ###
@@ -108,5 +109,10 @@ period_week_indx_col <- period_week_indx + n_year_precollar
 ###
 ##############################################################
 
-d_fit_hunt_neg <- cwd_df[cwd_df$teststatus == 0, ]
-d_fit_hunt_pos <- cwd_df[cwd_df$teststatus == 1, ]
+cwd_df_agg <- cwd_df %>% 
+              group_by(teststatus, ageweeks, birthweek, sex, ew) %>%
+              summarise(n_cases = n(), .groups = 'drop')
+cwd_df_agg
+
+d_fit_hunt_neg <- cwd_df_agg[cwd_df_agg$teststatus == 0, ]
+d_fit_hunt_pos <- cwd_df_agg[cwd_df_agg$teststatus == 1, ]
