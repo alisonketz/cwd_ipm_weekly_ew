@@ -1,12 +1,12 @@
-
+######################################################################################
 ###
+### Preliminary constants for running in the model
+###
+######################################################################################
+
 ### Number of age effects for survival
-###
-
 nT_age_surv <- max(d_surv$right_age_s, na.rm = TRUE) - 1
 nT_age_surv_aah <- intvl_step_yr_weekly * n_agef
-
-nT_period_collar
 
 ### The first 2 years period effects for survival 
 ### should be set to be the same as 1994 period effect
@@ -234,20 +234,20 @@ nknots_period <- dim(Z_period)[2]
 ###
 #########################################
 
-intvl_period <- 1
-knots_period <- c(seq(1,
-                      nT_period_collar,
-                      by = intvl_period),
-                nT_period_collar)
-knots_period <- unique(knots_period)
-nknots_period <- length(knots_period)
+# intvl_period <- 1
+# knots_period <- c(seq(1,
+#                       nT_period_collar,
+#                       by = intvl_period),
+#                 nT_period_collar)
+# knots_period <- unique(knots_period)
+# nknots_period <- length(knots_period)
 
-Z_period <- matrix(0, nT_period_collar, nknots_period)
-for (i in 1:nrow(Z_period)) {
-  for (j in 1:nknots_period) {
-    Z_period[i, j] <- abs(i - knots_period[j])
-  }
-}
+# Z_period <- matrix(0, nT_period_collar, nknots_period)
+# for (i in 1:nrow(Z_period)) {
+#   for (j in 1:nknots_period) {
+#     Z_period[i, j] <- abs(i - knots_period[j])
+#   }
+# }
 
 
 #############################################################
