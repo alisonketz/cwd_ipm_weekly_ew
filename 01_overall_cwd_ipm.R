@@ -64,7 +64,7 @@ source("04_homerange_data_survival.R")
 ### Format data for fitting age at harvest data
 ###########################################################
 
-source("05_load_clean_data_aah.R")
+source("05_load_calibrate_data_aah.R")
 source("06_load_agg_data_aah.R")
 
 ###########################################################
