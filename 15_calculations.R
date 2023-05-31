@@ -11,7 +11,7 @@ calc_surv_aah <- nimble::nimbleFunction(
         nT_age = double(0),
         nT_period = double(0),
         beta0 = double(0),
-        beta_sex = double(0),
+        beta_male = double(0),
         age_effect = double(1),
         period_effect = double(1),
         yr_start = double(1),
@@ -38,7 +38,7 @@ calc_surv_aah <- nimble::nimbleFunction(
    for(i in 1:nT_age) {
         for(j in 1:nT_period) {
             UCH[1, i, j] <- exp(beta0 +
-                                beta_sex +
+                                beta_male +
                                 age_effect[i] +
                                 period_effect[j])
             UCH[2, i, j] <- exp(beta0 +
@@ -73,7 +73,7 @@ Ccalc_surv_aah <- compileNimble(calc_surv_aah)
 # 	nT_age = n_agef*intvl_step_yr,
 #     nT_period = n_year*intvl_step_yr,
 #     beta0 = sus_beta0_survival,
-#     beta_sex = sus_beta_sex_survival,
+#     beta_male = sus_beta_sex_survival,
 #     age_effect = age_effect_survival,        # length = 962
 #     period_effect = period_effect_survival,  # length = 1564
 # 	  yr_start = d_fit_season$yr_start,
@@ -91,7 +91,7 @@ Ccalc_surv_aah <- compileNimble(calc_surv_aah)
 # 	      nT_age = n_agef*intvl_step_yr,
 #         nT_period = n_year*intvl_step_yr,
 #         beta0 = inf_beta0_survival,
-#         beta_sex = inf_beta_sex_survival,
+#         beta_male = inf_beta_sex_survival,
 #         age_effect = age_effect_survival,
 #         period_effect = period_effect_survival,
 #         yr_end = d_fit_season$yr_end,
@@ -109,7 +109,7 @@ Ccalc_surv_aah <- compileNimble(calc_surv_aah)
 #	  nT_age = n_agef*intvl_step_yr,
 #     nT_period = n_year*intvl_step_yr,
 #     beta0 = sus_beta0_survival,
-#     beta_sex = sus_beta_sex_survival,
+#     beta_male = sus_beta_sex_survival,
 #     age_effect = age_effect_survival,
 #     period_effect = period_effect_survival,
 #     yr_end_indx = d_fit_season$yr_end,
@@ -122,7 +122,7 @@ Ccalc_surv_aah <- compileNimble(calc_surv_aah)
 #	      nT_age = n_agef*intvl_step_yr,
 #         nT_period = n_year*intvl_step_yr,
 #         beta0 = inf_beta0_survival,
-#         beta_sex = sus_beta_sex_survival,
+#         beta_male = sus_beta_sex_survival,
 #         age_effect = age_effect_survival,
 #         period_effect = period_effect_survival,
 #         yr_end_indx = d_fit_season$yr_end,
@@ -144,7 +144,7 @@ calc_surv_harvest <- nimble::nimbleFunction(
         nT_age = double(0),
         nT_period = double(0),
         beta0 = double(0),
-        beta_sex = double(0),
+        beta_male = double(0),
         age_effect = double(1),
         period_effect = double(1),
         intvl_step_yr = double(0),
@@ -183,7 +183,7 @@ calc_surv_harvest <- nimble::nimbleFunction(
     for(i in 1:nT_age) {
         for(j in 1:nT_period) {
             UCH[1,i,j] <- exp(beta0 +
-                              beta_sex +
+                              beta_male +
                               age_effect[i] +
                               period_effect[j])
             UCH[2,i,j] <- exp(beta0 +
@@ -244,7 +244,7 @@ Ccalc_surv_harvest <- compileNimble(calc_surv_harvest)
 # sh_sus <- Ccalc_surv_harvest(nT_age = n_agef*intvl_step_yr,
 #         nT_period = n_year*intvl_step_yr,
 #         beta0 = sus_beta0_survival,
-#         beta_sex = sus_beta_sex_survival,
+#         beta_male = sus_beta_sex_survival,
 #         age_effect = age_effect_survival,
 #         period_effect = period_effect_survival,
 #         #yr_end_indx = d_fit_season$yr_end,
@@ -272,7 +272,7 @@ Ccalc_surv_harvest <- compileNimble(calc_surv_harvest)
 # sh_sus[1:2,1:n_agef,1:n_year] <- Ccalc_surv_harvest(nT_age = nT_age_surv,
 #         nT_period = nT_period_surv,
 #         beta0 = sus_beta0_survival,
-#         beta_sex = sus_beta_sex_survival,
+#         beta_male = sus_beta_sex_survival,
 #         age_effect = age_effect_survival,
 #         period_effect = period_effect_survival,
 #         intvl_step_yr = intvl_step_yr,
