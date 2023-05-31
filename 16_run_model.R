@@ -1253,7 +1253,13 @@ initsFun <- function()list(
                           beta0_cause = rnorm(1,0,1),
                           beta_cause_gun = rnorm(1,0,1),
                           beta_cause_ng = rnorm(1,0,1),
-                          beta_cause_maleage = rnorm(1,0)
+                          beta_cause_maleage = rnorm(1,0),
+                          tau_obs = matrix(runif(4, 1, 3),2,2),
+                          tau_pop = matrix(runif(4, .5, 1),2,2),
+                          report_overall = report_overall_init,
+                          report = report_init,  fec_epsilon = fec_eps_init,#rnorm(n_year_fec_early, 0, sd = .01),
+                          mu_fec = rnorm(1, mu_fec_init, .01),
+                          fec_prec_eps = runif(1, 5, 10)
                           )
 nimInits <- initsFun()
 
