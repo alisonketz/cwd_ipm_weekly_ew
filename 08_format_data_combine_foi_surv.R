@@ -105,8 +105,6 @@ d_fit_rec_neg_cens_postno <- d_fit_rec_neg_cens[is.na(d_fit_rec_neg_cens$cwd_mor
 d_fit_icap_cens <- d_fit_icap[d_fit_icap$censored == 1, ]
 d_fit_icap_mort <- d_fit_icap[d_fit_icap$censored == 0, ]
 
-# n_fit_sus_cens <- nrow(d_fit_sus_cens)
-# n_fit_sus_mort <- nrow(d_fit_sus_mort)
 n_fit_sus_cens_posttest <- nrow(d_fit_sus_cens_posttest)
 n_fit_sus_cens_postno <- nrow(d_fit_sus_cens_postno)
 n_fit_sus_mort_posttest <- nrow(d_fit_sus_mort_posttest)
@@ -147,49 +145,49 @@ d_fit_icap_mort$fast <- ifelse(d_fit_icap_mort$left_age_e ==
 ###
 ###############################################################
 
-num_observations <- rbind(n_fit_hunt_neg,
-        n_fit_hunt_pos,
-        n_fit_sus_cens_posttest,
-        n_fit_sus_cens_postno,
-        n_fit_sus_mort_posttest,
-        n_fit_sus_mort_postno,
-        n_fit_icap_cens,
-        n_fit_icap_mort,
-        n_fit_rec_neg_cens_posttest,
-        n_fit_rec_neg_cens_postno,
-        n_fit_rec_neg_mort,
-        n_fit_rec_pos_cens,
-        n_fit_rec_pos_mort,
-        n_fit_idead,
-        n_fit_endlive)
+# num_observations <- rbind(n_fit_hunt_neg,
+#         n_fit_hunt_pos,
+#         n_fit_sus_cens_posttest,
+#         n_fit_sus_cens_postno,
+#         n_fit_sus_mort_posttest,
+#         n_fit_sus_mort_postno,
+#         n_fit_icap_cens,
+#         n_fit_icap_mort,
+#         n_fit_rec_neg_cens_posttest,
+#         n_fit_rec_neg_cens_postno,
+#         n_fit_rec_neg_mort,
+#         n_fit_rec_pos_cens,
+#         n_fit_rec_pos_mort,
+#         n_fit_idead,
+#         n_fit_endlive)
 
 
-data_cases <- rownames(rbind(n_fit_hunt_neg,
-        n_fit_hunt_pos,
-        n_fit_sus_cens_posttest,
-        n_fit_sus_cens_postno,
-        n_fit_sus_mort_posttest,
-        n_fit_sus_mort_postno,
-        n_fit_icap_cens,
-        n_fit_icap_mort,
-        n_fit_rec_neg_cens_posttest,
-        n_fit_rec_neg_cens_postno,
-        n_fit_rec_neg_mort,
-        n_fit_rec_pos_cens,
-        n_fit_rec_pos_mort,
-        n_fit_idead,
-        n_fit_endlive)
-        )
+# data_cases <- rownames(rbind(n_fit_hunt_neg,
+#         n_fit_hunt_pos,
+#         n_fit_sus_cens_posttest,
+#         n_fit_sus_cens_postno,
+#         n_fit_sus_mort_posttest,
+#         n_fit_sus_mort_postno,
+#         n_fit_icap_cens,
+#         n_fit_icap_mort,
+#         n_fit_rec_neg_cens_posttest,
+#         n_fit_rec_neg_cens_postno,
+#         n_fit_rec_neg_mort,
+#         n_fit_rec_pos_cens,
+#         n_fit_rec_pos_mort,
+#         n_fit_idead,
+#         n_fit_endlive)
+#         )
 
-obs_sample_sizes <- data.frame(data_cases, num_observations, row.names = NULL)
+# obs_sample_sizes <- data.frame(data_cases, num_observations, row.names = NULL)
 
-write.csv(obs_sample_sizes, file = "results/obs_sample_sizes.csv", row.names=FALSE)
+# write.csv(obs_sample_sizes, file = "results/obs_sample_sizes.csv", row.names=FALSE)
 
-d_fit_icap_cens$left_period_e - d_fit_icap_cens$left_age_e
+# d_fit_icap_cens$left_period_e - d_fit_icap_cens$left_age_e
 
-png("figures/icap_birth_relative_study.png")
-hist(d_fit_icap_mort$left_period_e - d_fit_icap_mort$left_age_e,breaks=100)
-dev.off()
+# png("figures/icap_birth_relative_study.png")
+# hist(d_fit_icap_mort$left_period_e - d_fit_icap_mort$left_age_e,breaks=100)
+# dev.off()
 
 
 # obs_sample_sizes_desc <- read.csv("../obs_sample_sizes_description.csv")

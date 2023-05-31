@@ -12,14 +12,9 @@ nT_period_collar <- interval("2017-01-09","2022-05-15") %/% weeks(1)
 
 #the first birth is in 1992
 # weekly calculation
-nT_period_overall <- interval("1992-05-15","2022-05-09") %/% weeks(1)
-nT_period_precollar <- nT_period_overall - nT_period_collar
-
-# monthly calculation of constants
-nT_period_overall_monthly <- interval("1992-05-15","2022-05-09") %/% months(1)
-nT_period_precollar_monthly <- interval("1992-05-15","2017-01-09") %/% months(1)
-nT_period_collar_monthly <- nT_period_overall_monthly - nT_period_precollar_monthly
-
+nT_period_overall_ext <- interval("1992-05-15","2022-05-09") %/% weeks(1)
+nT_period_overall <- interval("1994-05-15","2022-05-09") %/% weeks(1)
+nT_period_precollar <- nT_period_overall_ext - nT_period_collar
 
 ########################################################
 ###
