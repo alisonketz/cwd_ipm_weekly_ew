@@ -151,8 +151,8 @@ nrow(df_cap) - (nrow(d_cens) + nrow(d_mort))
 
 #Right censor these
 d_surv[which(is.na(d_surv[, 2])), 2] <- nT_period_collar
-d_surv$rmonth[which(d_surv$rmonth == 0)] <- nT_period_collar_month
-d_surv$smonth[which(d_surv$smonth == 0)] <- nT_period_collar_month
+d_surv$rmonth[which(d_surv$rmonth == 0)] <- nT_period_collar_monthly
+d_surv$smonth[which(d_surv$smonth == 0)] <- nT_period_collar_monthly
 
 # hist(d_surv$rmonth)
 
