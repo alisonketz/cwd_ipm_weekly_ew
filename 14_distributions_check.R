@@ -10,10 +10,10 @@ beta0_survival_inf <- -8
 beta_male <- .5
 
 age_effect_survival_test <- 2*exp(-.09*seq(1:nT_age_surv))
-age_effect_survival_test[600:nT_period_surv] <- .00001*exp(.009*seq(600:nT_period_overall))
+age_effect_survival_test[600:nT_period_collar] <- .00001*exp(.009*seq(600:nT_period_overall))
 age_effect_survival_test <- age_effect_survival_test- mean(age_effect_survival_test)
 
-period_effect_survival_test <- 1 * sin(2/52 * pi * (1:nT_period_surv)) + rnorm(nT_period_surv,0,.1)
+period_effect_survival_test <- 1 * sin(2/52 * pi * (1:nT_period_collar)) + rnorm(nT_period_collar,0,.1)
 period_effect_survival_test <- period_effect_survival - mean(period_effect_survival)
 
 ##########################################################################
