@@ -50,6 +50,16 @@ cwd_df <- cwd_df[!is.na(cwd_df$range_dir),]
 cwd_df <- cwd_df[order(cwd_df$kill_date),]
 cwd_df <- cwd_df[!is.na(cwd_df$kill_date),]
 
+#removing surveillence data with no town, range, range direction, or section
+cwd_df <- cwd_df[!is.na(cwd_df$sect),]
+cwd_df <- cwd_df[!is.na(cwd_df$town),]
+cwd_df <- cwd_df[!is.na(cwd_df$range),]
+cwd_df <- cwd_df[!is.na(cwd_df$range_dir),]
+cwd_df$trs <- paste0(cwd_df$town,"-",cwd_df$range,"-",cwd_df$sect)
+cwd_df <- cwd_df[order(cwd_df$kill_date),]
+cwd_df <- cwd_df[!is.na(cwd_df$kill_date),]
+
+
 source("cleanData_foi.R")
 
 cwd_df <- cleanData(cwd_df)

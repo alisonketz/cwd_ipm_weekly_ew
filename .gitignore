@@ -47,3 +47,12 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+# don't upload data
+datafiles/
+
+# don't upload figures
+figures/
+
+#don't upload results
+results/
