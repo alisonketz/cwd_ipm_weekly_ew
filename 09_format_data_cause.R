@@ -156,6 +156,8 @@ colnames(d_fit_season) <- c("yr_start",
 #saving for aah_disease test
 save(d_fit_season, file = paste0(filepath, "d_fit_season.Rdata"))
 
+d_fit_season$year <- 1994:2021
+
 ###
 ### Preliminaries gun season (not used)
 ###
