@@ -601,7 +601,7 @@ modelcode <- nimbleCode({
         a = aah_ageweeks[i],
         sex = aah_sex[i],
         age2date = aah_age2date[i],
-        n_ind = aah_n[i],
+        n_cases = aah_n[i],
         beta_male = beta_male,
         beta0_sus = beta0_survival_sus,
         beta0_inf = beta0_survival_inf,

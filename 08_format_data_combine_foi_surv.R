@@ -199,9 +199,3 @@ d_fit_icap_mort$fast <- ifelse(d_fit_icap_mort$left_age_e ==
 
 # obs_sample_sizes_desc <- read.csv("../obs_sample_sizes_description.csv")
 # print(xtable(obs_sample_sizes_desc),include.rownames=FALSE)
-
-
-        # d_fit_sus_cens_postno
-        # n_fit_sus_mort_postno
-        # n_fit_rec_neg_cens_postno
-        # n_fit_endlive
