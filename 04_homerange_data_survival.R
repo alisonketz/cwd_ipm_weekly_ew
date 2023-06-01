@@ -366,3 +366,15 @@ n_cens <- nrow(d_cens)
 n_cap
 n_mort
 n_cens
+
+##################################################################
+###
+### setting east/west (ew) study area 
+### in combined capture dataframe
+###
+##################################################################
+
+df_cap$ew <- c()
+for(i in 1:n_cap){
+    df_cap$ew[i] <- study_df$ew[which(study_df$dsection %in% df_cap$home_section[i])]
+}
