@@ -7,11 +7,17 @@
 ###
 ######################################################################
 
+######################################################################
 ###
 ### setting up nested indexing for the harvest surveillance data, 
 ### for the individuals that are born prior to the start of the study
 ###
+######################################################################
 
+
+lookup_pe_surv <- c(rep(1, intvl_step_yr_weekly * 2), 1:nT_period_overall)
+length(lookup_pe_surv)
+nT_period_overall_ext
 
 
 

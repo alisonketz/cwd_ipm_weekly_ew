@@ -39,7 +39,7 @@ library(splines)
 library(MetBrewer)
 library(ggforce)
 library(tidyr)
-library(abind)
+
 
 ###########################################################
 ### Source summary function for posteriors
@@ -95,20 +95,26 @@ source("12_prelim_collar_foi.R")
 source("13_prelim_aah.R")
 
 ###########################################################
-### Run model
+### Likelihoods
 ###########################################################
 
 source("14_distributions_check.R")
 source("14_distributions.R")
 
 ###########################################################
+### Functions for Efficient Calculations
+###########################################################
+
+source("15_calculations.R")
+
+###########################################################
 ### Run model
 ###########################################################
 
-source("15_run_model.R")
+source("16_run_model.R")
 
 ###########################################################
 ### Post processing
 ###########################################################
 
-source("16_post_process.R")
+source("17_post_process.R")
