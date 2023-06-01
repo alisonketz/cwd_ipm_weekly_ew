@@ -883,7 +883,7 @@ dSusMortTest <- nimble::nimbleFunction(
                 for (j in 1:(s[i] - 1)) {
                     #  up foi hazard from 1  to j
                     lam_foi <- lam_foi +
-					           exp(space[i] +
+					           exp(space[sect[i]] +
 							       f_age_foi[age_lookup_f[j]] +
 								   f_period_foi[period_lookup[age2date[i] + j]])
                     if (j > (e[i] - 1) & j < r[i]) {
@@ -906,7 +906,7 @@ dSusMortTest <- nimble::nimbleFunction(
                 for (j in 1:(s[i] - 1)) {
                     #  up foi hazard from 1  to j
                     lam_foi <- lam_foi +
-					           exp(space[i] +
+					           exp(space[sect[i]] +
 							       m_age_foi[age_lookup_f[j]] +
 								   m_period_foi[period_lookup[age2date[i] + j]])
                     if (j > (e[i] - 1) & j < r[i]) {
@@ -970,9 +970,10 @@ nimble::registerDistributions(list(
 # ###for a user-defined distribution
 assign("dSusMortTest", dSusMortTest, envir = .GlobalEnv)
 
+
 # start <- Sys.time()
 # test <- dSusMortTest(
-#         x = rep(1,nrow(d_fit_sus_mort_posttest)),
+#         x = 1,
 # 		n_samples = nrow(d_fit_sus_mort_posttest),
 #         e = d_fit_sus_mort_posttest$left_age_e,
 #         r = d_fit_sus_mort_posttest$right_age_r,
