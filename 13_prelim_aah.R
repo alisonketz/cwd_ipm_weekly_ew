@@ -1,106 +1,394 @@
 ###########################################################################
 ###
-### Formatting/combining of data
+### Setup for Age-At-Harvest (AAH population model)
 ###
 ###########################################################################
 
-####################################################
+####################################
 ###
-### setup age at harvest to estimate period effects
+### Calculating sex ratio prior to 
+### study starting
 ###
-###################################################
+####################################
 
-df_age_nocwd$birthweek <-floor(as.duration(ymd("1992-05-15") %--% ymd(df_age_nocwd$birth_date))/dweeks(1))
-df_age_nocwd$birthmonth <-floor(as.duration(ymd("1992-05-15") %--% ymd(df_age_nocwd$birth_date))/dmonths(1))
-df_age_nocwd$age2date_weeks <-floor(as.duration(ymd("1992-05-15") %--% ymd(df_age_nocwd$birth_date))/dweeks(1))-1
-df_age_nocwd$age2date_months <-floor(as.duration(ymd("1992-05-15") %--% ymd(df_age_nocwd$birth_date))/dmonths(1))-1
+df_age_before_female <- df_age_before %>% 
+                          group_by(age, sex) %>%
+                          summarise(n = sum(n)) %>%
+                          filter(sex == "Female")
+df_age_before_male <- df_age_before %>%
+                        group_by(age, sex) %>%
+                        summarise(n = sum(n)) %>%
+                        filter(sex == "Male")
 
-d_fit_age_nocwd <- df_age_nocwd[df_age_nocwd$n>0,]
 
-# d_fit_age_nocwd[is.na(test),]
+df_age_before_antlerless <- df_age_before_female
+df_age_before_antlered <- df_age_before_male
 
-####################################################
+df_age_before_antlerless$n[df_age_before_antlerless$age == 0] <-
+              df_age_before_female$n[df_age_before_female$age == 0] +
+              df_age_before_male$n[df_age_before_male$age == 0]
+
+df_age_before_antlered <- df_age_before_male %>% filter(age != 0)
+df_age_before_female_nofawn <- df_age_before_female %>% filter(age != 0)
+
+doe_per <- df_age_before_female_nofawn$n[
+                df_age_before_female_nofawn$age == 1] /
+                sum(df_age_before_female_nofawn$n)
+buck_per <- df_age_before_antlered$n[
+                df_age_before_antlered$age == 1] /
+                sum(df_age_before_antlered$n)
+
+sex_ratio_early <- doe_per / buck_per
+
+df_age_before_antlerless$proportion <- 
+    df_age_before_antlerless$n / sum(df_age_before_antlerless$n)
+df_age_before_antlered$proportion <-
+    df_age_before_antlered$n / sum(df_age_before_antlered$n)
+df_age_before_female$proportion <-
+    df_age_before_female$n / sum(df_age_before_female$n)
+df_age_before_male$proportion <-
+    df_age_before_male$n / sum(df_age_before_male$n)
+
+########################################
 ###
-### setup for age at harvest pop model
+### Hyper prior for  sex-age
+### structured initial population size
 ###
-###################################################
+########################################
 
-# n_year <- length(2002:2021)
-# n_year <- length(1992:2021)
-n_year <- length(1994:2021)
-n_ageclass <- 7
-n_ageclassm <- 6
-n_ageclassf <- 7
-n_agem <- 7
-n_agef <- 10
-n_sex <- 2
+###################
+### East
+###################
 
-#assumed starting population >>> by sex/age class (needs to be logpop for model)
-assumN_sus <- array(0, dim = c(n_year,n_sex,n_agef))
+prevalence_f_east <- apply(Cage_inf[1, 1, , ], 2, sum) /
+                      apply(Cage[1, 1, , 9:28], 2, sum)
+prevalence_m_east <- apply(Cage_inf[1, 2, , ], 2, sum) /
+                      apply(Cage[1, 2, , 9:28],2,sum)
 
-# or we could values from lit? estimate these?
-# assumN_sus.f.1 <- c(2229,2008,1115, 651,414,284,212,158,122,393) 
-# assumN_sus.m.1 <- c(2529,2098,1115, 651,414,284,212,158,122,3)
+df_prev_f_east <- data.frame(x = 2002:2021,
+                    prevalence_f_east = log(prevalence_f_east))
+lm_f_east <- lm(prevalence_f_east ~ x,
+                data = df_prev_f_east)
+# summary(lm_f_east)
+df_prev_m_east <- data.frame(x = 2002:2021, 
+                    prevalence_m_east = log(prevalence_m_east))
+lm_m_east <- lm(prevalence_m_east ~ x,
+                data = df_prev_m_east)
+# summary(lm_m_east)
 
+pred_prev_f_east <- exp(predict(lm_f_east,
+                      newdata = data.frame(x = 1994:2001)))
+pred_prev_m_east <- exp(predict(lm_m_east,
+                      newdata = data.frame(x = 1994:2001)))
+
+###################
+### West
+###################
+
+prevalence_f_west <- apply(Cage_inf[2, 1, , ], 2, sum) /
+                     apply(Cage[2, 1, , 9:28], 2, sum)
+prevalence_m_west <- apply(Cage_inf[2, 2, , ], 2, sum) /
+                     apply(Cage[2, 2, , 9:28], 2, sum)
+#tricking prevalence to be super small rather than 0 to fit the log linear model. 
+prevalence_f_west[prevalence_f_west == 0] <- .0000001
+
+df_prev_f_west <- data.frame(x = 2002:2021,
+                    prevalence_f_west = log(prevalence_f_west))
+lm_f_west <- lm(prevalence_f_west ~ x,
+                    data = df_prev_f_west)
+# summary(lm_f_west)
+df_prev_m_west <- data.frame(x = 2002:2021,
+                    prevalence_m_west = log(prevalence_m_west))
+lm_m_west <- lm(prevalence_m_west ~ x,
+                  data = df_prev_m_west)
+# summary(lm_m_west)
+
+pred_prev_f_west <- exp(predict(lm_f_west,
+                        newdata = data.frame(x = 1994:2001)))
+pred_prev_m_west <- exp(predict(lm_m_west,
+                        newdata = data.frame(x = 1994:2001)))
+
+df_prev_f_west <- data.frame(x = 2002:2021,
+                      prevalence_f_west = log(prevalence_f_west))
+lm_f_west <- lm(prevalence_f_west ~ x,
+                data = df_prev_f_west)
+# summary(lm_f_west)
+df_prev_m_west <- data.frame(x = 2002:2021,
+                    prevalence_m_west = log(prevalence_m_west))
+lm_m_west <- lm(prevalence_m_west ~ x,
+                  data = df_prev_m_west)
+# summary(lm_m_west)
+
+pred_prev_f_west <- exp(predict(lm_f_west,
+                      newdata = data.frame(x = 1994:2001)))
+pred_prev_m_west <- exp(predict(lm_m_west,
+                          newdata = data.frame(x = 1994:2001)))
+
+
+pred_prev_f_east
+pred_prev_m_east
+pred_prev_f_west
+pred_prev_m_west
+
+########################################
 ###
-### For 2002 - 2021, when we have age classification data
+### Hyper prior for  sex-age
+### structured initial population size
 ###
+########################################
 
-for(y in 1:n_year){
-  for(a in 1:4){
-    assumN_sus[y,1,a] <- Ototal$antlerless[y]*Cage_sus[y,1,a]/sum(Cage_sus[y,1,]) #F,1,2,3,
-  }
-  assumN_sus[y,1,5] <- (Ototal$antlerless[y]*Cage_sus[y,1,5]/sum(Cage_sus[y,1,]))/2 #F,1,2,3,4
-  assumN_sus[y,1,6] <- (Ototal$antlerless[y]*Cage_sus[y,1,5]/sum(Cage_sus[y,1,]))/2 #5
-  assumN_sus[y,1,7] <- (Ototal$antlerless[y]*Cage_sus[y,1,6]/sum(Cage_sus[y,1,]))/3 #6
-  assumN_sus[y,1,8] <- (Ototal$antlerless[y]*Cage_sus[y,1,6]/sum(Cage_sus[y,1,]))/3 #7
-  assumN_sus[y,1,9] <- (Ototal$antlerless[y]*Cage_sus[y,1,6]/sum(Cage_sus[y,1,]))/3 #8
-  assumN_sus[y,1,10] <- Ototal$antlerless[y]*Cage_sus[y,1,7]/sum(Cage_sus[y,1,]) #9+
+initN_sus <- array(0, dim = c(n_study_area, n_sex, n_agef))
+initN_inf <- array(0, dim = c(n_study_area, n_sex, n_agef))
 
-  for(a in 1:4){
-    assumN_sus[y,2,a] <- Ototal$antlered[y]*Cage_sus[y,1,a]/sum(Cage_sus[y,1,]) #F,1,2,3,
-  }
-  assumN_sus[y,2,5] <- (Ototal$antlered[y]*Cage_sus[y,1,5]/sum(Cage_sus[y,1,]))/2 #4
-  assumN_sus[y,2,6] <- (Ototal$antlered[y]*Cage_sus[y,1,5]/sum(Cage_sus[y,1,]))/2 #5
-  assumN_sus[y,2,7] <-  Ototal$antlered[y]*Cage_sus[y,1,6]/sum(Cage_sus[y,1,])
+#######################
+### East
+#######################
+
+### Total population initialized from SAK estimate from 1994
+init0_east <- c()
+init0_east$female <- sex_ratio_early * pop_estimate_east
+init0_east$male <- (1 - sex_ratio_early) * pop_estimate_east
+
+
+###susceptible initial population
+###females
+initN_sus[1, 1, 1] <- init0_east$female *
+                   .5 *
+                   df_age_before_antlerless$proportion[1] *
+                   (1 - pred_prev_f_east[1])   #F
+for(a in 2:4){
+      initN_sus[1, 1, a] <- init0_east$female *
+                         df_age_before_antlerless$proportion[a] *
+                         (1 - pred_prev_f_east[1])   #1,2,3
 }
-pop_sus_init <- assumN_sus
+initN_sus[1, 1, 5] <- init0_east$female * 
+                   df_age_before_antlerless$proportion[5] *
+                   (2/3) *
+                   (1 - pred_prev_f_east[[1]])  #4
+initN_sus[1, 1, 6] <- init0_east$female *
+                   df_age_before_antlerless$proportion[5] *
+                   (1/3) * (1 - pred_prev_f_east[[1]])  #5
+initN_sus[1, 1, 7] <- init0_east$female *
+                   df_age_before_antlerless$proportion[6] * 
+                   (1/2) * 
+                   (1 - pred_prev_f_east[[1]])  #6
+initN_sus[1, 1, 8] <- init0_east$female *
+                   df_age_before_antlerless$proportion[6] *
+                   (1/4) *
+                   (1 - pred_prev_f_east[[1]]) #7
+initN_sus[1, 1, 9] <- init0_east$female * 
+                   df_age_before_antlerless$proportion[6]*
+                   (1/6) *
+                   (1 - pred_prev_f_east[[1]]) #8
+initN_sus[1, 1, 10] <- init0_east$female *
+                    df_age_before_antlerless$proportion[6] *
+                    (1/12) *
+                    (1 - pred_prev_f_east[[1]])  #9+,same as 6-8, decaying from 6-8
 
-#assumed starting population >>> by sex/age class (needs to be logpop for model)
-assumN_inf <- array(0, dim = c(n_year,n_sex,n_agef))
-
-#or we could values from lit? estimate these?
-# assumN_inf.f.1 <- c(2229,2008,1115, 651,414,284,212,158,122,393) 
-# assumN_inf.m.1 <- c(2529,2098,1115, 651,414,284,212,158,122,3)
-for(y in 9:n_year){
-  for(a in 1:4){
-    assumN_inf[y,1,a] <- Ototal$antlerless[y]*Cage_inf[y - 8,1,a]/sum(Cage_inf[y - 8,1,]) #F,1,2,3,
-  }
-  assumN_inf[y,1,5] <- (Ototal$antlerless[y]*Cage_inf[y - 8,1,5]/sum(Cage_inf[y - 8,1,]))/2 #F,1,2,3,4
-  assumN_inf[y,1,6] <- (Ototal$antlerless[y]*Cage_inf[y - 8,1,5]/sum(Cage_inf[y - 8,1,]))/2 #5
-  assumN_inf[y,1,7] <- (Ototal$antlerless[y]*Cage_inf[y - 8,1,6]/sum(Cage_inf[y - 8,1,]))/3 #6
-  assumN_inf[y,1,8] <- (Ototal$antlerless[y]*Cage_inf[y - 8,1,6]/sum(Cage_inf[y - 8,1,]))/3 #7
-  assumN_inf[y,1,9] <- (Ototal$antlerless[y]*Cage_inf[y - 8,1,6]/sum(Cage_inf[y - 8,1,]))/3 #8
-  assumN_inf[y,1,10] <- Ototal$antlerless[y]*Cage_inf[y - 8,1,7]/sum(Cage_inf[y - 8,1,]) #9+
-
-
-  for(a in 1:4){
-    assumN_inf[y,2,a] <- Ototal$antlered[y]*Cage_inf[y - 8,1,a]/sum(Cage_inf[y - 8,1,]) #F,1,2,3,
-  }
-  assumN_inf[y,2,5] <- (Ototal$antlered[y]*Cage_inf[y - 8,1,5]/sum(Cage_inf[y - 8,1,]))/2 #4
-  assumN_inf[y,2,6] <- (Ototal$antlered[y]*Cage_inf[y - 8,1,5]/sum(Cage_inf[y - 8,1,]))/2 #5
-  assumN_inf[y,2,7] <-  Ototal$antlered[y]*Cage_inf[y - 8,1,6]/sum(Cage_inf[y - 8,1,])
+###antlered
+initN_sus[1, 2, 1] <- init0_east$female *
+                   .5 *
+                   df_age_before_antlerless$proportion[1] *
+                   (1 - pred_prev_m_east[1]) 
+for(a in 2:4){
+      initN_sus[1, 2, a] <- init0_east$male *
+                         df_age_before_antlered$proportion[a - 1] *
+                         (1 - pred_prev_m_east[1])  #1,2,3,
 }
-pop_inf_init <- assumN_inf
- 
-f_logpop_inf <- log(assumN_inf[1,1,])
-f_logpop_sus <- log(assumN_sus[1,1,])
-m_logpop_inf <- log(assumN_inf[1,2,1:n_agem])
-m_logpop_sus <- log(assumN_sus[1,2,1:n_agem])
-f_logpop_sus <- ifelse(f_logpop_sus<0,-5,f_logpop_sus)
-m_logpop_sus <- ifelse(m_logpop_sus<0,-5,m_logpop_sus)
-f_logpop_inf <- ifelse(f_logpop_inf<0,-5,f_logpop_inf)
-m_logpop_inf <- ifelse(m_logpop_inf<0,-5,m_logpop_inf)
+initN_sus[1, 2, 5] <- 1 * (1 - pred_prev_m_east[1]) # 4
+initN_sus[1, 2, 6] <- 1 * (1 - pred_prev_m_east[1]) # 5
+initN_sus[1, 2, 7] <- 1 * (1 - pred_prev_m_east[1]) # 6+
+
+####################################
+###infected initial population
+####################################
+
+###antlerless
+initN_inf[1, 1, 1] <- init0_east$female *
+                   .5 *
+                   df_age_before_antlerless$proportion[1] *
+                   (pred_prev_f_east[1])   #F
+for(a in 2:4){
+      initN_inf[1, 1, a] <- init0_east$female *
+                         df_age_before_antlerless$proportion[a] *
+                         (pred_prev_f_east[1])   #1,2,3
+}
+initN_inf[1, 1, 5] <- init0_east$female *
+                   df_age_before_antlerless$proportion[5] *
+                   (2 / 3) *
+                   (pred_prev_f_east[[1]])  #4
+initN_inf[1, 1, 6] <- init0_east$female * 
+                   df_age_before_antlerless$proportion[5] *
+                   (1 / 3) *
+                   (pred_prev_f_east[[1]])  #5
+initN_inf[1, 1, 7] <- init0_east$female *
+                   df_age_before_antlerless$proportion[6] *
+                   (1 / 2) *
+                   (pred_prev_f_east[[1]])  #6
+initN_inf[1, 1, 8] <- init0_east$female *
+                   df_age_before_antlerless$proportion[6] *
+                   (1 / 4) *
+                   (pred_prev_f_east[[1]]) #7
+initN_inf[1, 1, 9] <- init0_east$female *
+                   df_age_before_antlerless$proportion[6] *
+                   (1 / 6) *
+                   (pred_prev_f_east[[1]]) #8
+initN_inf[1, 1, 10] <- init0_east$female *
+                    df_age_before_antlerless$proportion[6] *
+                    (1 / 12) *
+                    (pred_prev_f_east[[1]])  # 9+, set as same proportion from 6-8
+
+###antlered
+initN_inf[1, 2, 1] <- init0_east$female *
+                   .5 *
+                   df_age_before_antlerless$proportion[1] *
+                   (pred_prev_m_east[1])  #F
+for(a in 2:4) {
+      initN_inf[1, 2, a] <- init0_east$male *
+                         df_age_before_antlered$proportion[a - 1] *
+                         (pred_prev_m_east[1])  #1,2,3
+}
+initN_inf[1, 2, 5] <- 1  * (pred_prev_m_east[1])# 4
+initN_inf[1, 2, 6] <- 1  * (pred_prev_m_east[1])# 5
+initN_inf[1, 2, 7] <- 1  * (pred_prev_m_east[1])# 6+
+
+#######################
+### West Study Area
+#######################
+
+### Total population initialized from SAK estimate from 1994
+init0_west <- c()
+init0_west$female <- sex_ratio_early * pop_estimate_west
+init0_west$male <- (1 - sex_ratio_early) * pop_estimate_west
+
+###susceptible initial population
+###females
+initN_sus[2, 1, 1] <- init0_west$female *
+                   .5 *
+                   df_age_before_antlerless$proportion[1] *
+                   (1 - pred_prev_f_west[1])   #F
+for(a in 2:4){
+      initN_sus[2, 1, a] <- init0_west$female *
+                         df_age_before_antlerless$proportion[a] *
+                         (1 - pred_prev_f_west[1])   #1,2,3
+}
+initN_sus[2, 1, 5] <- init0_west$female * 
+                   df_age_before_antlerless$proportion[5] *
+                   (2/3) *
+                   (1 - pred_prev_f_west[[1]])  #4
+initN_sus[2, 1, 6] <- init0_west$female *
+                   df_age_before_antlerless$proportion[5] *
+                   (1/3) * (1 - pred_prev_f_west[[1]])  #5
+initN_sus[2, 1, 7] <- init0_west$female *
+                   df_age_before_antlerless$proportion[6] * 
+                   (1/2) * 
+                   (1 - pred_prev_f_west[[1]])  #6
+initN_sus[2, 1, 8] <- init0_west$female *
+                   df_age_before_antlerless$proportion[6] *
+                   (1/4) *
+                   (1 - pred_prev_f_west[[1]]) #7
+initN_sus[2, 1, 9] <- init0_west$female * 
+                   df_age_before_antlerless$proportion[6]*
+                   (1/6) *
+                   (1 - pred_prev_f_west[[1]]) #8
+initN_sus[2, 1, 10] <- init0_west$female *
+                    df_age_before_antlerless$proportion[6] *
+                    (1/12) *
+                    (1 - pred_prev_f_west[[1]])  #9+,same as 6-8, decaying from 6-8
+
+###antlered
+initN_sus[2, 2, 1] <- init0_west$female *
+                   .5 *
+                   df_age_before_antlerless$proportion[1] *
+                   (1 - pred_prev_m_west[1]) 
+for(a in 2:4){
+      initN_sus[2, 2, a] <- init0_west$male *
+                         df_age_before_antlered$proportion[a - 1] *
+                         (1 - pred_prev_m_west[1])  #1,2,3,
+}
+initN_sus[2, 2, 5] <- 1 * (1 - pred_prev_m_west[1]) # 4
+initN_sus[2, 2, 6] <- 1 * (1 - pred_prev_m_west[1]) # 5
+initN_sus[2, 2, 7] <- 1 * (1 - pred_prev_m_west[1]) # 6+
+
+####################################
+###infected initial population
+####################################
+
+###antlerless
+initN_inf[2, 1, 1] <- init0_west$female *
+                   .5 *
+                   df_age_before_antlerless$proportion[1] *
+                   (pred_prev_f_west[1])   #F
+for(a in 2:4){
+      initN_inf[2, 1, a] <- init0_west$female *
+                         df_age_before_antlerless$proportion[a] *
+                         (pred_prev_f_west[1])   #1,2,3
+}
+initN_inf[2, 1, 5] <- init0_west$female *
+                   df_age_before_antlerless$proportion[5] *
+                   (2 / 3) *
+                   (pred_prev_f_west[[1]])  #4
+initN_inf[2, 1, 6] <- init0_west$female * 
+                   df_age_before_antlerless$proportion[5] *
+                   (1 / 3) *
+                   (pred_prev_f_west[[1]])  #5
+initN_inf[2, 1, 7] <- init0_west$female *
+                   df_age_before_antlerless$proportion[6] *
+                   (1 / 2) *
+                   (pred_prev_f_west[[1]])  #6
+initN_inf[2, 1, 8] <- init0_west$female *
+                   df_age_before_antlerless$proportion[6] *
+                   (1 / 4) *
+                   (pred_prev_f_west[[1]]) #7
+initN_inf[2, 1, 9] <- init0_west$female *
+                   df_age_before_antlerless$proportion[6] *
+                   (1 / 6) *
+                   (pred_prev_f_west[[1]]) #8
+initN_inf[2, 1, 10] <- init0_west$female *
+                    df_age_before_antlerless$proportion[6] *
+                    (1 / 12) *
+                    (pred_prev_f_west[[1]])  # 9+, set as same proportion from 6-8
+
+###antlered
+initN_inf[2, 2, 1] <- init0_west$female *
+                   .5 *
+                   df_age_before_antlerless$proportion[1] *
+                   (pred_prev_m_west[1])  #F
+for(a in 2:4) {
+      initN_inf[2, 2, a] <- init0_west$male *
+                         df_age_before_antlered$proportion[a - 1] *
+                         (pred_prev_m_west[1])  #1,2,3
+}
+initN_inf[2, 2, 5] <- 1  * (pred_prev_m_west[1])# 4
+initN_inf[2, 2, 6] <- 1  * (pred_prev_m_west[1])# 5
+initN_inf[2, 2, 7] <- 1  * (pred_prev_m_west[1])# 6+
+
+
+################################################
+f_logpop_sus_east <- log(initN_sus[1, 1,])
+f_logpop_inf_east <- log(initN_inf[1, 1,])
+m_logpop_sus_east <- log(initN_sus[1, 2,1:n_agem])
+m_logpop_inf_east <- log(initN_inf[1, 2,1:n_agem])
+
+
+f_logpop_sus_west <- log(initN_sus[2, 1,])
+f_logpop_inf_west <- log(initN_inf[2, 1,])
+m_logpop_sus_west <- log(initN_sus[2, 2,1:n_agem])
+m_logpop_inf_west <- log(initN_inf[2, 2,1:n_agem])
+
+
+
+f_logpop_sus <- rbind(f_logpop_sus_east,
+                      f_logpop_sus_west)
+
+f_logpop_inf <- rbind(f_logpop_inf_east,
+                      f_logpop_inf_west)
+
+m_logpop_sus <- rbind(m_logpop_sus_east,
+                      m_logpop_sus_west)
+                      
+m_logpop_inf <- rbind(m_logpop_inf_east,
+                      m_logpop_inf_west)
 
 ################################################
 ###
@@ -109,11 +397,17 @@ m_logpop_inf <- ifelse(m_logpop_inf<0,-5,m_logpop_inf)
 ################################################
 
 #adding antlerless male fawns to the Cage_less data
-Cage_less <- cbind(Cage[,1,],Cage[,2,1])
-Cage_ant <- Cage[,2,2:6]
+Cage_less <- rbind(Cage[1,,], Cage[2,1,])
+Cage_ant <- Cage[2,2:6,]
 
-sizeCage_f <- apply(Cage_less,1,sum)
-sizeCage_m <- apply(Cage_ant,1,sum)
+sizeCage_f <- apply(Cage_less,2,sum)
+sizeCage_m <- apply(Cage_ant,2,sum)
+
+pCage_ant <- matrix(NA,nr=5,nc=n_year)
+for(i in 1:n_year){
+      pCage_ant[,i] <- Cage_ant[,i]/sum(Cage_ant[,i])
+}
+
 
 #############################################
 ###
@@ -121,10 +415,14 @@ sizeCage_m <- apply(Cage_ant,1,sum)
 ###
 #############################################
 
-report_overall_init <- rbeta(1,report_hyp_all[1], report_hyp_all[2])
-report_init <- rep(report_overall_init,n_year)
-for(y in 23:28) {
-    report_init[y] <- rbeta(1,report_hyp_y$alpha[y - 22],report_hyp_y$beta[y-22])
+report_overall_init <- rbeta(1, 
+                        report_hyp_all[1],
+                        report_hyp_all[2])
+
+report_init <- rep(report_overall_init, n_year)
+for(y in 23:n_year) {
+    report_init[y] <- rbeta(1, report_hyp_y$alpha[y - 22],
+                               report_hyp_y$beta[y - 22])
 }
 
 #########################################################################
@@ -133,370 +431,60 @@ for(y in 23:28) {
 ###
 #########################################################################
 
-##########################################
-### moment matching functions
-##########################################
+###################################################################
+### Gamma prior for camera trap, poisson for earlier data
+###################################################################
 
-# lognormal_moments <- function(barx,s){
-# 	mu <- log(barx / sqrt((s^2) / (barx^2) + 1))
-# 	sigma <- sqrt(log((s^2) / (barx^2) + 1))
-# 	return(list(mu=mu,sigma=sigma))
-# }
-
-gamma_moments <- function(mu,sigma){
-	alpha <- (mu^2)/(sigma^2)
-	beta <- mu/(sigma^2)
-	return(list(alpha=alpha,beta=beta))
-}
-##########################################
-### calculate moments 
-##########################################
-
-##########################
-### Option 3: lognormal
-##########################
-
-# fdr_ct_moments_2002_2016 <- lognormal_moments(fawndoe_df$overall_fd,mean(df_camtrap_fd$fdr_sd)*2)
-# fdr_ct_moments_2017_2021 <- lognormal_moments(df_camtrap_fd$fdr_mean,df_camtrap_fd$fdr_sd)
-
-# #how to set the sd for the years without uncertainty?
-# #approximate using the mean of the estimates from Jen's method and doubling it?
-# # mean(df_camtrap_fd$fdr_sd)*2
-
-# obs_ct_fd_mu  <- c(fdr_ct_moments_2002_2016$mu,fdr_ct_moments_2017_2021$mu)
-# obs_ct_fd_sd <- c(fdr_ct_moments_2002_2016$sigma,fdr_ct_moments_2017_2021$sigma)
-
-
-##########################
-### Option 4: gamma 
-##########################
-
-# fdr_ct_gam_moments_2002_2016 <- gamma_moments(fawndoe_df$overall_fd,mean(df_camtrap_fd$fdr_sd)*2)
-# fdr_ct_gam_moments_2017_2021 <- gamma_moments(df_camtrap_fd$fdr_mean,df_camtrap_fd$fdr_sd)
-
-# fdr_ct_gam_moments_2002_2016 <- gamma_moments(fawndoe_df$overall_fd,mean(df_camtrap_fd$fdr_sd)*2)
-fdr_ct_gam_moments_1992_2016 <- gamma_moments(fawndoe_df$overall_fd,mean(df_camtrap_fd$fdr_sd)*2)
-fdr_ct_gam_moments_2017_2021 <- gamma_moments(df_camtrap_fd$fdr_mean,df_camtrap_fd$fdr_sd)
-
-# obs_ct_fd_alpha  <- c(fdr_ct_gam_moments_2002_2016$alpha,fdr_ct_gam_moments_2017_2021$alpha)
-# obs_ct_fd_beta <- c(fdr_ct_gam_moments_2002_2016$beta,fdr_ct_gam_moments_2017_2021$beta)
-
-obs_ct_fd_alpha  <- c(fdr_ct_gam_moments_1992_2016$alpha,fdr_ct_gam_moments_2017_2021$alpha)
-obs_ct_fd_beta <- c(fdr_ct_gam_moments_1992_2016$beta,fdr_ct_gam_moments_2017_2021$beta)
-
-fec_init <- c(fawndoe_df$overall_fd,df_camtrap_fd$fdr_mean)
- 
+fdr_ct_gam_moments_1992_2016 <- gamma.moments(fawndoe_df$overall_fd,
+                                  mean(df_camtrap_fd$fdr_sd) * 2)
+fdr_ct_gam_moments_2017_2021 <- gamma.moments(df_camtrap_fd$fdr_mean,
+                                  df_camtrap_fd$fdr_sd)
+obs_ct_fd_alpha  <- c(fdr_ct_gam_moments_1992_2016$alpha,
+                      fdr_ct_gam_moments_2017_2021$alpha)
+obs_ct_fd_beta <- c(fdr_ct_gam_moments_1992_2016$beta,
+                    fdr_ct_gam_moments_2017_2021$beta)
+fec_init <- c(fawndoe_df$overall_fd,
+              df_camtrap_fd$fdr_mean)
+mu_fec_init <-  mean(log(fec_init))
+fec_eps_init <- log(fec_init) - mean(log(fec_init))
 n_year_fec_early <- nrow(fawndoe_df)
 
-################################################################################
+############################################################
 ###
-### read in DMU shapefiles
+### EAB prior allocation
 ###
-###############################################################################
+############################################################
 
-# #these are the DMUs that roughly align with our study area
-# units <-c("70C-CWD","70D-CWD","70A-CWD","73E-CWD")
+eab_antlerless_alpha <- gamma.moments(1.49, .1225^2)$alpha
+eab_antlerless_beta <- gamma.moments(1.49, .1225^2)$beta
+eab_antlered_alpha <- gamma.moments(.71, .1015^2)$alpha
+eab_antlered_beta <- gamma.moments(.71, .1015^2)$beta
 
-# dmu_2002 <- st_read("/home/aketz/Documents/Data/DMU_shapefiles_2002_2013/dmu_2002.shp")
- 
-# # st_crs(dmu_2013) <- 4326
-# # st_transform(dmu_2013,"+proj=tmerc +lat_0=0 +lon_0=-90 +k=0.9996 +x_0=520000+y_0=-4480000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs" )
-
-# dmu_2002$study<-ifelse(dmu_2002$UNIT_ID %in% units,1,0)
-
-# dmu_2013 <- st_read("/home/aketz/Documents/Data/DMU_shapefiles_2002_2013/dmu_2013.shp")
-# dmu_2013$study<-ifelse(dmu_2013$UNIT_ID %in% units,1,0)
-
-# dmu_2013 <- st_read("/home/aketz/Documents/Data/DMU_shapefiles_2002_2013/dmu_2013.shp")
-# dmu_2013$study<-ifelse(dmu_2013$UNIT_ID %in% units,1,0)
-
-
-# study_area <- st_read("/home/aketz/Documents/Data/Study_Area/secrdtrsWGS84selection.shp")
-# study_bound <-st_union(study_area)
-# plot(study_bound)
-# head(study_bound)
-
-# ggplot()+
-#   geom_sf(data=dmu_2002,color="black",aes(fill=study))+
-#   geom_sf(data=study_bound,alpha=0,color="white")+ggtitle("2002")
-
-# dmu_vs_study <- ggplot()+
-#   geom_sf(data=dmu_2013,color="black",aes(fill=study))+
-#   geom_sf(data=study_bound,alpha=0,color="white")+ggtitle("2013")
-# dmu_vs_study
-# ggsave(dmu_vs_study,file="figures/dmu_vs_study_2013.png")
-
-
-# ####################################
-# ###
-# ### county vs study 
-# ###
-# ####################################
-
-# counties_study = c("Dane","Iowa","Grant")
-# county <- st_read("/home/aketz/Documents/Data/counties/dmu_2018_2020.shp")
-# county$study<-ifelse(county$CTY_NAME %in% counties_study,1,0)
-
-# county_vs_study <- ggplot()+
-#   geom_sf(data = county, color = "black",aes(fill = study)) +
-#   geom_sf(data = study_bound, alpha = 0, color = "white") + ggtitle("2018-2020")
-
-# county_vs_study
-
-# ggsave(county_vs_study,file="figures/county_vs_study_2018_2020.png")
-
-
-# ####################################
-# ###
-# ### county vs dmu 
-# ###
-# ####################################
-
-# county_dmu_plot <- ggplot()+
-#   geom_sf(data=dmu_2013,color="grey")+
-#   geom_sf(data=county,color="darkgrey",aes(fill=study),alpha=.2)+
-#   geom_sf(data=study_bound,alpha=0,color="white")+ggtitle("County lines and deer DMU 2013")
-
-# county_dmu_plot
-# ggsave(county_dmu_plot,file="figures/county_dmu_plot.png")
-
-
-
-# ####################################
-# ###
-# ### dane county proportion harvest 
-# ###
-# ####################################
-
-# county_dmu_plot <- ggplot()+
-#   geom_sf(data=dmu_2013,color="grey")+
-#   geom_sf(data=county,color="darkgrey",aes(fill=study),alpha=.2)+
-#   geom_sf(data=study_bound,alpha=0,color="white")+ggtitle("County lines and deer DMU 2013")
-
-# county_dmu_plot
-# ggsave(county_dmu_plot,file="figures/county_dmu_plot.png")
-
-
-# #extracting dane from county shapefile
-# st_crs(county)
-# st_transform(study_bound,st_crs(county))
-# st_intersection(county[county$dmu=="Dane",],study_bound)
-
-# ######################################################################################
-
-
-# df_dmu_totharvest <-df_dmu_harvest %>% group_by(yr) %>% summarise(antlered_gun = sum(antleredgun),
-#                                               antlerlessgun = sum(antlerlessgun),
-#                                               unknowngun = sum(unknowngun),
-#                                               totalgun = sum(totalgun),
-#                                               antleredbow = sum(antleredbow),
-#                                               antlered = sum(antleredgun)+sum(antleredbow),
-#                                               antlerless = sum(antlerlessgun),
-#                                               unknown = sum(unknowngun)
-#                                                ) #%>% pivot_longer(cols=-yr)
-
-
-
-# df_dmu_totharvest$antlered/df_harvest$antlered[df_harvest$year %in% (2002:2013)]
-
-
-# plot(2002:2013,df_dmu_totharvest$antlered/df_harvest$antlered[df_harvest$year %in% (2002:2013)])
-
-# png("figures/dmu_county_harvest_num.png")
-# plot(df_dmu_totharvest$antlered,df_harvest$antlered[df_harvest$year %in% (2002:2013)])
+# pdf("figures/eab_prior_plot.pdf")
+# hist(rgamma(10000,eab_antlerless_alpha,eab_antlerless_beta))
+# hist(rgamma(10000,eab_antlered_alpha,eab_antlered_beta))
 # dev.off()
 
+# df_temp <- data.frame(year=1994:2021,
+#              tot = Ototal$antlerless,
+#              totant = Ototal$antlered,
+#              eab = df_eab$EAB)
+# df_temp$eab <- as.factor(df_temp$eab)
+# eab_indicator_plot <- ggplot(data = df_temp) + 
+#       geom_point(aes(x = year,
+#                         y = tot,
+#                         color = eab),
+#                   size = 8) +
+#       geom_point(aes(x = year,
+#                      y = totant,
+#                      color = eab),
+#                   size = 8) +
+#       geom_line(aes(x = year,y = tot), size = 1) + 
+#       geom_line(aes(x = year, y = totant),
+#                     size = 1,color = "green4") +
+#       theme_bw()
 
-# png("figures/dmu_county_harvest_prop.png")
-# plot(2002:2013,df_dmu_totharvest$antlered/df_harvest$antlered[df_harvest$year %in% (2002:2013)])
-# dev.off()
+# ggsave("eab_indicator_plot.png", 
+#        eab_indicator_plot, height = 6, width = 6)
 
-###
-### calculate proportion area of county that is in study area for each county. 
-###
-
-#https://gis.stackexchange.com/questions/287602/how-to-calculate-the-polygon-area-and-create-a-column-of-results-in-r
-
-
-
-###########################
-###
-###
-###
-###########################
-
-
-# Ototal_long <- pivot_longer(Ototal[,1:3],2:3)
-# names(Ototal_long) <- c("Year","Harvest_Type","Harvest_Total")
-# Ototal_long$Harvest_Type <- factor(Ototal_long$Harvest_Type,labels=c("Antlered","Antlerless"))
-# ototal_plot <- ggplot(Ototal_long,aes(x=Year, y=Harvest_Total, color = Harvest_Type)) +
-#     geom_line(size=1.1) + 
-#     geom_point(size=1.4) +
-#     theme_bw() + 
-#     scale_color_manual(values=met.brewer("Troy",2),name="Harvest Type") +
-#     ylab("Harvest Total")+
-#     theme(axis.text=element_text(size=14),
-#             axis.title=element_text(size=16),
-#             legend.text=element_text(size=14),
-#             legend.title=element_text(size=16))
-# ggsave("figures/total_harvest_plot.png",ototal_plot,height=7,width=9)
-
-
-# Cage_antlerless  <- data.frame(Cage_less[,1:7])
-# Cage_antlerless <- Cage_antlerless/apply(Cage_antlerless,1,sum)
-# names(Cage_antlerless)=c("Fawn","1.5","2.5","3.5","4.5-5.5","6.5-8.5","9.5+")
-# Cage_antlerless$Year <- 2002:2021
-
-
-# Cage_less_long <- pivot_longer(Cage_antlerless,cols=1:7)
-# Cage_less_long$name <- factor(as.factor(Cage_less_long$name),levels=c("Fawn","1.5","2.5","3.5","4.5-5.5","6.5-8.5","9.5+"))
-# plotless_legend <- ggplot(Cage_less_long,aes(x=Year,y=value))+
-#     geom_col(aes(fill=name))+theme_bw()+
-#     scale_fill_manual(name="Age Class",values=rev(met.brewer("Veronese",7)))+
-#     ylab("Proportion")+ggtitle("Female")
-# ggsave("figures/plotless_legend.png",plotless_legend,height=6,width=10)
-
-
-# Cage_less_long$name <- factor(as.factor(Cage_less_long$name),levels=rev(c("Fawn","1.5","2.5","3.5","4.5-5.5","6.5-8.5","9.5+")))
-# plotless <- ggplot(Cage_less_long,aes(x=Year,y=value))+
-#     geom_col(aes(fill=name))+theme_bw()+
-#     scale_fill_manual(name="Age Class",values=met.brewer("Veronese",7))+
-#     ylab("Proportion")+ggtitle("Female")+theme(legend.position="bottom")+
-#     guides(color = guide_legend(nrow = 1))
-
-
-# Cage_antler <- cbind(Cage_less[,8],Cage_ant)
-# Cage_antler  <- data.frame(Cage_antler)
-# Cage_antler <- Cage_antler/apply(Cage_antler,1,sum)
-# names(Cage_antler)=c("Fawn","1.5","2.5","3.5","4.5-5.5","6.5+")
-# Cage_antler$Year <- 2002:2021
-# Cage_ant_long <- pivot_longer(Cage_antler,cols=1:6)
-# Cage_ant_long$name <- factor(as.factor(Cage_ant_long$name),levels=rev(c("Fawn","1.5","2.5","3.5","4.5-5.5","6.5+")))
-
-# plotant <- ggplot(Cage_ant_long,aes(x=Year,y=value))+
-# geom_point()+
-# facet_wrap(.~name,ncol=1)+
-# theme_bw()+
-# ylab("Number Deer")+ylim(0,1000)
-
-# plotant <- ggplot(Cage_ant_long,aes(x=Year,y=value))+
-#     geom_col(aes(fill=name))+theme_bw()+
-#     scale_fill_manual(name="Age Class",values=met.brewer("Veronese",7)[2:7])+
-#     ylab("Proportion")+ggtitle("Male")
-# # plotant
-
-# ggsave("figures/plotant.png",plotant,height=6,width=10)
-# ggsave("figures/plotless.png",plotless,height=6,width=10)
-
-
-# combo_ant_less <- grid.arrange(plotant + theme(legend.position="none"),
-#                          plotless + theme(legend.position="none"),
-#                          nrow=1)
-
-# ggsave("figures/combo_ant_less.png",combo_ant_less,height=6,width=10)
-
-
-# fd_df <- data.frame(year=2002:2021,fd_ratio=c(fawndoe_df$overall_fd[1:15],
-# df_camtrap_fd$fdr_mean),fd_low=c(rep(NA,15),df_camtrap_fd$fdr_lower95),
-# fd_up=c(rep(NA,15),df_camtrap_fd$fdr_upper95)
-# )
-
-# fec_plot <- ggplot(fd_df,aes(x=year,y=fd_ratio))+
-#     geom_line(size=2)+
-#     geom_point(size=2)+theme_bw()+ylab("Fawn:Doe Ratio")+
-#     geom_errorbar(aes(ymin=fd_low, ymax=fd_up), width=.5,
-#                  position=position_dodge(.9))+
-#     theme(axis.text=element_text(size=14),
-#             axis.title=element_text(size=16),
-#             legend.text=element_text(size=14),
-#             legend.title=element_text(size=16))+xlab("Year")
-
-
-# ggsave("figures/fec_plot.png",fec_plot,width=8,height=6)
-
-
-
-# report_plot <- ggplot(report_df,aes(x=year,y=compliance_rate)) +
-#     geom_point() +
-#     geom_line() +
-#     geom_errorbar(aes(ymin=compliance_rate - 2*se,ymax = compliance_rate + 2*se),width=.2)+
-#     geom_hline(yintercept =report_hyp_sum[1],linetype="dashed",color=met.brewer("Veronese",1))+
-#     theme_bw()+
-#     ggtitle("Compliance Rate of 1st Harvested Deer")+
-#     ylab("Compliance Rate") +
-#     xlab("Year")+
-#     theme(axis.text=element_text(size=14),
-#             axis.title=element_text(size=16),
-#             legend.text=element_text(size=14),
-#             legend.title=element_text(size=16),
-#             title = element_text(size=16))
-
-# ggsave("figures/report_plot.png",report_plot,height = 6, width = 8)
-
-
-
-
-
-
-######################################
-###
-### checking for initial values and reasonable priors
-###
-#######################################
-
-# mu_sn_inf <-  rnorm(1,cloglog(.2),2)
-
-# cll_sn_inf <- c()
-# sn_inf <- c()
-#     for (t in 1:n_year) {
-#       cll_sn_inf[t] = rnorm(1,mu_sn_inf, .2)
-      
-#       #change in variable to probability scale
-#       sn_inf[t] <- exp(-exp(cll_sn_inf[t]))
-#     }
-# cll_sn_inf
-# plot(sn_inf)
-# round(sn_inf,2)  
-
-##########################################################################
-# preliminaries for survival model using AAH data
-###########################################################################
-# n_year_precollar <- length(1992:2016)
-n_year_precollar <- length(1994:2016)
-n_year_collar <- length(2017:2021)
-
-which(1992:2021 == 2017)
-
-period_indx <- cumsum(c(18,rep(52,4)))
-age_indx_fawn <- 52
-age_indx_yearling <- 104
-age_indx_2 <- 3*52
-age_indx_3 <- 4*52
-#question: how to pull the indexes for age effects since we have age classes in the m
-age_indx_4_5 
-
-
-period_aah_lookup <- matrix(NA, nrow = n_year, ncol = 2)
-#may-sep2022, non-harvest period
-
-##########################################################################
-#loading age and period effects from imputation version of S/FOI model
-###########################################################################
-
-load("~/Documents/integrate_s_foi/s_foi_v3/mcmcout.Rdata")
-
-age_effect <- mcmcout$summary$all.chains[grep("sus_age_effect",rownames(mcmcout$summary$all.chains)), 1]
-period_effect <- mcmcout$summary$all.chains[grep("sus_period_effect",rownames(mcmcout$summary$all.chains)),1]
-sus_beta0 <- mcmcout$summary$all.chains[grep("sus_beta0",rownames(mcmcout$summary$all.chains)),1]
-sus_beta_sex <- mcmcout$summary$all.chains[grep("sus_beta_sex",rownames(mcmcout$summary$all.chains)),1]
-inf_beta0 <- mcmcout$summary$all.chains[grep("inf_beta0",rownames(mcmcout$summary$all.chains)),1]
-inf_beta_sex <- mcmcout$summary$all.chains[grep("inf_beta_sex",rownames(mcmcout$summary$all.chains)),1]
-age_effect <- unname(age_effect)
-period_effect <- unname(period_effect)
-sus_beta0 <- unname(sus_beta0)
-sus_beta_sex <- unname(sus_beta_sex)
-inf_beta0 <- unname(inf_beta0)
-inf_beta_sex <- unname(inf_beta_sex)
-nT_age <- length(age_effect)
-nT_period <- length(period_effect)
-
+# eab_indicator_plot
