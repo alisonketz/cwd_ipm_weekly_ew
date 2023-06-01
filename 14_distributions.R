@@ -9,7 +9,7 @@
 # d_fit_sus_cens_posttest
 # d_fit_sus_cens_postno
 # d_fit_sus_mort_posttest
-# d_fit_sus_mort_postno 
+# d_fit_sus_mort_postno
 # d_fit_icap_cens
 # d_fit_icap_mort
 # d_fit_rec_neg_mort
@@ -31,191 +31,197 @@
 #######################################################################
 
 dInfHarvest <- nimble::nimbleFunction( # nolint
-	run = function( # nolint
-		### argument type declarations
-		x = integer(0),
-		n_cases = double(1),
-		n_samples = integer(0), # number of samples in dataset
-		a = double(1), #age (weeks) at harvest
-		sex = double(1),
-		age2date = double(1),
-		beta_male = double(0),
-		beta0_sus = double(0),
-		beta0_inf = double(0),
-		age_effect_surv = double(1),
-		period_effect_surv = double(1),
-		f_age_foi = double(1),
-		m_age_foi = double(1),
-		age_lookup_f = double(1),
-		age_lookup_m = double(1),
-		period_lookup = double(1),
-		f_period_foi = double(1),
-		m_period_foi = double(1),
-		space = double(1),
-		sect = double(1),
-		log = double(0)
-		) {
+    run = function( # nolint
+                   ### argument type declarations
+                   x = integer(0),
+                   n_cases = double(1),
+                   n_samples = integer(0), # number of samples in dataset
+                   a = double(1), # age (weeks) at harvest
+                   sex = double(1),
+                   age2date = double(1),
+                   beta_male = double(0),
+                   beta0_sus = double(0),
+                   beta0_inf = double(0),
+                   age_effect_surv = double(1),
+                   period_effect_surv = double(1),
+                   f_age_foi = double(1),
+                   m_age_foi = double(1),
+                   age_lookup_f = double(1),
+                   age_lookup_m = double(1),
+                   period_lookup = double(1),
+                   f_period_foi = double(1),
+                   m_period_foi = double(1),
+                   space = double(1),
+                   sect = double(1),
+                   log = double(0)) {
 
-	# start the loop through individuals
-	sumllik <- 0
-	for(i in 1:n_samples) {
+        # start the loop through individuals
+        sumllik <- 0
+        for (i in 1:n_samples) {
 
-		#intitialize scalars
-		lam_foi <- 0
-		lam_sus <- 0
-		lam_inf <- 0
-		lik_temp <- 0
+            # intitialize scalars
+            lam_foi <- 0
+            lam_sus <- 0
+            lam_inf <- 0
+            lik_temp <- 0
 
-		#################################################
-		### loop over ages and accumulate sums over 1:a-1
-		### have to loop separately for lam_inf
-		#################################################
+            #################################################
+            ### loop over ages and accumulate sums over 1:a-1
+            ### have to loop separately for lam_inf
+            #################################################
 
-		if(sex[i] == 1) { # age loops for females
-			for(j in 1:(a[i] - 1)) {
-			# sum up infected hazard from 1 to a-1
-			lam_inf <- lam_inf + 
-						exp(beta0_inf +
-							age_effect_surv[j] +
-							period_effect_surv[age2date[i] + j])
-			}
-			for(j in 1:a[i]) {
-				# sum up foi hazard from 1  to j
-				lam_foij <- exp(space[sect[i]] +
-								f_age_foi[age_lookup_f[j]] +
-								f_period_foi[period_lookup[age2date[i] + j]])
-				# sum up like_temp (no sus hazard when j=1)
-				lik_temp <- lik_temp +
-							lam_foij *
-							exp(-(lam_sus + lam_foi)) *
-							exp(-lam_inf)
-				# now increment the hazards (subtract for lam_inf)
-				lam_foi <- lam_foi + lam_foij
-				if(j < a[i]) {
-					lam_sus <- lam_sus +
-       						    exp(beta0_sus +
-						            age_effect_surv[j] +
-                                    period_effect_surv[age2date[i] + j])
-					lam_inf <- lam_inf -
-							   exp(beta0_inf +
-								   age_effect_surv[j] +
-								   period_effect_surv[age2date[i] + j])
-		} else { # now calculate infected hazard for final age
-			lam_inf <- exp(beta0_inf +
-						age_effect_surv[j] +
-						period_effect_surv[age2date[i] + j])
-		}
-		}
-		} else { # age loops for males
-		for(j in 1:(a[i] - 1)) {
-			# sum up infected hazard from 1 to a-1
-			lam_inf <- lam_inf +
-					   exp(beta0_inf +
-			 		       age_effect_surv[j] +
-					       period_effect_surv[age2date[i] + j] +
-				           beta_male)
-		}
-		for(j in 1:(a[i])) {
-			# sum up foi hazard from 1  to j
-			lam_foij <-  exp(space[sect[i]] +
-							 m_age_foi[age_lookup_f[j]] +
-							 m_period_foi[period_lookup[age2date[i] + j]])
-			# sum up like_temp (no sus hazard when j=1)
-			lik_temp <- lik_temp +
-					    lam_foij * exp(-(lam_sus + lam_foi)) *
-						exp(-lam_inf)
-			# now increment the hazards (subtract for lam_inf)
-			lam_foi <- lam_foi + lam_foij
-			if(j < a[i]) {
-				lam_sus <- lam_sus +
-						   exp(beta0_sus +
-				               age_effect_surv[j] +
-							   period_effect_surv[age2date[i] + j] +
-							   beta_male)
-				lam_inf <- lam_inf -
-						   exp(beta0_inf +
-							   age_effect_surv[j] +
-							   period_effect_surv[age2date[i] + j] +
-							   beta_male)
-			} else { 
-			# now calculate infected hazard for final age
-			lam_inf <- exp(beta0_inf +
-						   age_effect_surv[j] +
-						   period_effect_surv[age2date[i] + j] +
-						   beta_male)
-			}
-		}
-		} # end if(sex)
-		#######################################
-		### accumulate the joint likelihood
-		#######################################
-		sumllik <- sumllik +
-				   (log(lam_inf) + log(lik_temp)) * n_cases[i]
-	} # end the loop for individual i
-	returnType(double(0))
-	if(log) return(sumllik) else return(exp(sumllik))
-})
+            if (sex[i] == 1) { # age loops for females
+                for (j in 1:(a[i] - 1)) {
+                    # sum up infected hazard from 1 to a-1
+                    lam_inf <- lam_inf +
+                        exp(beta0_inf +
+                            age_effect_surv[j] +
+                            period_effect_surv[age2date[i] + j])
+                }
+                for (j in 1:a[i]) {
+                    # sum up foi hazard from 1  to j
+                    lam_foij <- exp(space[sect[i]] +
+                        f_age_foi[age_lookup_f[j]] +
+                        f_period_foi[period_lookup[age2date[i] + j]])
+                    # sum up like_temp (no sus hazard when j=1)
+                    lik_temp <- lik_temp +
+                        lam_foij *
+                            exp(-(lam_sus + lam_foi)) *
+                            exp(-lam_inf)
+                    # now increment the hazards (subtract for lam_inf)
+                    lam_foi <- lam_foi + lam_foij
+                    if (j < a[i]) {
+                        lam_sus <- lam_sus +
+                            exp(beta0_sus +
+                                age_effect_surv[j] +
+                                period_effect_surv[age2date[i] + j])
+                        lam_inf <- lam_inf -
+                            exp(beta0_inf +
+                                age_effect_surv[j] +
+                                period_effect_surv[age2date[i] + j])
+                    } else { # now calculate infected hazard for final age
+                        lam_inf <- exp(beta0_inf +
+                            age_effect_surv[j] +
+                            period_effect_surv[age2date[i] + j])
+                    }
+                }
+            } else { # age loops for males
+                for (j in 1:(a[i] - 1)) {
+                    # sum up infected hazard from 1 to a-1
+                    lam_inf <- lam_inf +
+                        exp(beta0_inf +
+                            age_effect_surv[j] +
+                            period_effect_surv[age2date[i] + j] +
+                            beta_male)
+                }
+                for (j in 1:(a[i])) {
+                    # sum up foi hazard from 1  to j
+                    lam_foij <- exp(space[sect[i]] +
+                        m_age_foi[age_lookup_f[j]] +
+                        m_period_foi[period_lookup[age2date[i] + j]])
+                    # sum up like_temp (no sus hazard when j=1)
+                    lik_temp <- lik_temp +
+                        lam_foij * exp(-(lam_sus + lam_foi)) *
+                            exp(-lam_inf)
+                    # now increment the hazards (subtract for lam_inf)
+                    lam_foi <- lam_foi + lam_foij
+                    if (j < a[i]) {
+                        lam_sus <- lam_sus +
+                            exp(beta0_sus +
+                                age_effect_surv[j] +
+                                period_effect_surv[age2date[i] + j] +
+                                beta_male)
+                        lam_inf <- lam_inf -
+                            exp(beta0_inf +
+                                age_effect_surv[j] +
+                                period_effect_surv[age2date[i] + j] +
+                                beta_male)
+                    } else {
+                        # now calculate infected hazard for final age
+                        lam_inf <- exp(beta0_inf +
+                            age_effect_surv[j] +
+                            period_effect_surv[age2date[i] + j] +
+                            beta_male)
+                    }
+                }
+            } # end if(sex)
+            #######################################
+            ### accumulate the joint likelihood
+            #######################################
+            sumllik <- sumllik +
+                (log(lam_inf) + log(lik_temp)) * n_cases[i]
+        } # end the loop for individual i
+        returnType(double(0))
+        if (log) {
+            return(sumllik)
+        } else {
+            return(exp(sumllik))
+        }
+    }
+)
 
 
 nimble::registerDistributions(list(
     dInfHarvest = list(
-        BUGSdist = 'dInfHarvest(n_cases,n_samples,a,sex,age2date,beta_male,beta0_sus,beta0_inf,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup,space,sect)',
-        types = c("value = integer(0)",
-					"n_cases = double(1)",
-					"n_samples = integer(0)",
-				    "a = double(1)",
-                    "sex = double(1)",
-                    "age2date = double(1)",
-                    "beta_male = double(0)",
-                    "beta0_sus = double(0)",
-                    "beta0_inf = double(0)",
-                    "age_effect_surv = double(1)",
-                    "period_effect_surv = double(1)",
-                    "f_age_foi = double(1)",
-                    "m_age_foi = double(1)",
-                    "age_lookup_f = double(1)",
-                    "age_lookup_m = double(1)",
-                    "f_period_foi = double(1)",
-                    "m_period_foi = double(1)",
-                    "period_lookup = double(1)",
-                    "space = double(1)",
-					"sect = double(1)",
-					"returnType = double(0)",
-                    "log = double(0)"
-                  ),
+        BUGSdist = "dInfHarvest(n_cases,n_samples,a,sex,age2date,beta_male,beta0_sus,beta0_inf,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup,space,sect)",
+        types = c(
+            "value = integer(0)",
+            "n_cases = double(1)",
+            "n_samples = integer(0)",
+            "a = double(1)",
+            "sex = double(1)",
+            "age2date = double(1)",
+            "beta_male = double(0)",
+            "beta0_sus = double(0)",
+            "beta0_inf = double(0)",
+            "age_effect_surv = double(1)",
+            "period_effect_surv = double(1)",
+            "f_age_foi = double(1)",
+            "m_age_foi = double(1)",
+            "age_lookup_f = double(1)",
+            "age_lookup_m = double(1)",
+            "f_period_foi = double(1)",
+            "m_period_foi = double(1)",
+            "period_lookup = double(1)",
+            "space = double(1)",
+            "sect = double(1)",
+            "returnType = double(0)",
+            "log = double(0)"
+        ),
         discrete = TRUE
     )
 ))
 
 # for a user-defined distribution
-assign('dInfHarvest',
-	    dInfHarvest,
-		envir = .GlobalEnv)
+assign("dInfHarvest",
+    dInfHarvest,
+    envir = .GlobalEnv
+)
 
 start <- Sys.time()
 test <- dInfHarvest(
-        x = 1,
-		n_cases = d_fit_hunt_pos$n_cases,
-		n_samples = nrow(d_fit_hunt_pos),
-        a = d_fit_hunt_pos$ageweeks, #age (weeks) at harvest
-        sex = d_fit_hunt_pos$sex,
-        age2date = d_fit_hunt_pos$birthweek-1,
-        beta_male = beta_male,
-        beta0_sus = beta0_sus,
-        beta0_inf = beta0_inf,
-        age_effect_surv = age_effect_survival_test,
-        period_effect_surv = period_effect_survival_test,
-        f_age_foi = f_age_foi,
-        m_age_foi = m_age_foi,
-        age_lookup_f = age_lookup_f,
-        age_lookup_m = age_lookup_m,
-        period_lookup = period_lookup,
-        f_period_foi = f_period_foi,
-        m_period_foi = m_period_foi,
-        space = c(0,-.55),
-		sect = d_fit_hunt_pos$ew,
-        log = TRUE
-        )
+    x = 1,
+    n_cases = d_fit_hunt_pos$n_cases,
+    n_samples = nrow(d_fit_hunt_pos),
+    a = d_fit_hunt_pos$ageweeks, # age (weeks) at harvest
+    sex = d_fit_hunt_pos$sex,
+    age2date = d_fit_hunt_pos$birthweek - 1,
+    beta_male = beta_male,
+    beta0_sus = beta0_sus,
+    beta0_inf = beta0_inf,
+    age_effect_surv = age_effect_survival_test,
+    period_effect_surv = period_effect_survival_test,
+    f_age_foi = f_age_foi,
+    m_age_foi = m_age_foi,
+    age_lookup_f = age_lookup_f,
+    age_lookup_m = age_lookup_m,
+    period_lookup = period_lookup,
+    f_period_foi = f_period_foi,
+    m_period_foi = m_period_foi,
+    space = c(0, -.55),
+    sect = d_fit_hunt_pos$ew,
+    log = TRUE
+)
 (end <- Sys.time() - start)
 test
 
@@ -230,152 +236,156 @@ test
 ###   Overleaf Equation (5)
 ###
 #######################################################################
- 
-dSusHarvest <- nimble::nimbleFunction(
-    run = function(
-        ### argument type declarations
-        x = double(0),
-        n_cases = double(1),
-        n_samples = integer(0), # number of samples in dataset
-        a = double(1), #age (weeks) at harvest
-        sex = double(1),
-        age2date = double(1),
-        beta_male = double(0),
-        beta0_sus = double(0),
-        age_effect_surv = double(1),
-        period_effect_surv = double(1),
-        f_age_foi = double(1),
-        m_age_foi = double(1),
-        age_lookup_f = double(1),
-        age_lookup_m = double(1),
-        period_lookup=double(1),
-        f_period_foi=double(1),
-        m_period_foi=double(1),
-        space = double(1),
-        sect = double(1),
-        log = double(0)
-        ) {
 
-	# start the loop through individuals
-	sumllik <- 0
-	for(i in 1:n_samples) {
-		#intitialize vectors
-		lam_foi <- 0
-		lam_sus <- 0
-		sum_haz <- 0
-		
-		#############################################
-		# preliminary hazards for the likelihood
-		#############################################
-		if(sex[i] == 1){ # age loops for females
-			for(j in 1:(a[i] - 1)) {
-				# sum up foi and sus hazards from 1  to a-1
-				sum_haz <- sum_haz + 
-					exp(space[sect[i]] +
-						f_age_foi[age_lookup_f[j]] +
-						f_period_foi[period_lookup[age2date[i] + j]]) +
-					exp(beta0_sus + 
-					    age_effect_surv[j] +
-						period_effect_surv[age2date[i] + j])
-			}
-			# now hazards for a
-			lam_sus <- exp(beta0_sus +
-						   age_effect_surv[a[i]] +
-						   period_effect_surv[age2date[i] + a[i]])
-			lam_foi <- exp(space[sect[i]] +
-			               f_age_foi[age_lookup_f[a[i]]] +
-						   f_period_foi[period_lookup[age2date[i] + a[i]]])
-		} else { # age loops for males
-			for(j in 1:(a[i] - 1)) {
-				# sum up foi and sus hazards from 1  to a-1
-				sum_haz <- sum_haz + 
-						   exp(space[sect[i]] +
-						       m_age_foi[age_lookup_f[j]] +
-							   m_period_foi[period_lookup[age2date[i] + j]]) +
-					       exp(beta0_sus +
-						       age_effect_surv[j] +
-							   period_effect_surv[age2date[i] + j] +
-							   beta_male)
-			}
-			# now hazards for a
-			lam_sus <- exp(beta0_sus +
-						   age_effect_surv[a[i]] +
-						   period_effect_surv[age2date[i] + a[i]] +
-						   beta_male)
-			lam_foi <- exp(space[sect[i]] +
-			               m_age_foi[age_lookup_f[a[i]]] +
-						   m_period_foi[period_lookup[age2date[i] + a[i]]])
-		}
-	
-		#######################################
-		###
-		### calculating the joint likelihood
-		###
-		#######################################
-		
-		sumllik <- sumllik +
-		           (- sum_haz + lam_foi + log(lam_sus)) * n_cases[i]
-	}
-	returnType(double(0))
-	if(log) return(sumllik) else return(exp(sumllik))    ## return log-likelihood
-  })
+dSusHarvest <- nimble::nimbleFunction(
+    run = function( ### argument type declarations
+                   x = double(0),
+                   n_cases = double(1),
+                   n_samples = integer(0), # number of samples in dataset
+                   a = double(1), # age (weeks) at harvest
+                   sex = double(1),
+                   age2date = double(1),
+                   beta_male = double(0),
+                   beta0_sus = double(0),
+                   age_effect_surv = double(1),
+                   period_effect_surv = double(1),
+                   f_age_foi = double(1),
+                   m_age_foi = double(1),
+                   age_lookup_f = double(1),
+                   age_lookup_m = double(1),
+                   period_lookup = double(1),
+                   f_period_foi = double(1),
+                   m_period_foi = double(1),
+                   space = double(1),
+                   sect = double(1),
+                   log = double(0)) {
+
+        # start the loop through individuals
+        sumllik <- 0
+        for (i in 1:n_samples) {
+            # intitialize vectors
+            lam_foi <- 0
+            lam_sus <- 0
+            sum_haz <- 0
+
+            #############################################
+            # preliminary hazards for the likelihood
+            #############################################
+            if (sex[i] == 1) { # age loops for females
+                for (j in 1:(a[i] - 1)) {
+                    # sum up foi and sus hazards from 1  to a-1
+                    sum_haz <- sum_haz +
+                        exp(space[sect[i]] +
+                            f_age_foi[age_lookup_f[j]] +
+                            f_period_foi[period_lookup[age2date[i] + j]]) +
+                        exp(beta0_sus +
+                            age_effect_surv[j] +
+                            period_effect_surv[age2date[i] + j])
+                }
+                # now hazards for a
+                lam_sus <- exp(beta0_sus +
+                    age_effect_surv[a[i]] +
+                    period_effect_surv[age2date[i] + a[i]])
+                lam_foi <- exp(space[sect[i]] +
+                    f_age_foi[age_lookup_f[a[i]]] +
+                    f_period_foi[period_lookup[age2date[i] + a[i]]])
+            } else { # age loops for males
+                for (j in 1:(a[i] - 1)) {
+                    # sum up foi and sus hazards from 1  to a-1
+                    sum_haz <- sum_haz +
+                        exp(space[sect[i]] +
+                            m_age_foi[age_lookup_f[j]] +
+                            m_period_foi[period_lookup[age2date[i] + j]]) +
+                        exp(beta0_sus +
+                            age_effect_surv[j] +
+                            period_effect_surv[age2date[i] + j] +
+                            beta_male)
+                }
+                # now hazards for a
+                lam_sus <- exp(beta0_sus +
+                    age_effect_surv[a[i]] +
+                    period_effect_surv[age2date[i] + a[i]] +
+                    beta_male)
+                lam_foi <- exp(space[sect[i]] +
+                    m_age_foi[age_lookup_f[a[i]]] +
+                    m_period_foi[period_lookup[age2date[i] + a[i]]])
+            }
+
+            #######################################
+            ###
+            ### calculating the joint likelihood
+            ###
+            #######################################
+
+            sumllik <- sumllik +
+                (-sum_haz + lam_foi + log(lam_sus)) * n_cases[i]
+        }
+        returnType(double(0))
+        if (log) {
+            return(sumllik)
+        } else {
+            return(exp(sumllik))
+        } ## return log-likelihood
+    }
+)
 
 
 nimble::registerDistributions(list(
     dSusHarvest = list(
-        BUGSdist = 'dSusHarvest(n_cases,n_samples,a,sex,age2date,beta_male,beta0_sus,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup,space,sect)',
-        types = c("value = double(0)",
-				  "n_cases = double(1)",
-				  "a = double(1)",
-				  "n_samples = integer(0)",
-                  "sex = double(1)",
-                  "age2date = double(1)",
-                  "beta_male = double(0)",
-                  "beta0_sus = double(0)",
-                  "age_effect_surv = double(1)",
-                  "period_effect_surv = double(1)",
-                  "f_age_foi = double(1)",
-                  "m_age_foi = double(1)",
-                  "age_lookup_f = double(1)",
-                  "age_lookup_m = double(1)",
-                  "period_lookup=double(1)",
-                  "f_period_foi=double(1)",
-                  "m_period_foi=double(1)",
-                  "space = double(1)",
- 				  "sect = double(1)",
-                  "log = double(0)"
-                  ),
+        BUGSdist = "dSusHarvest(n_cases,n_samples,a,sex,age2date,beta_male,beta0_sus,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup,space,sect)",
+        types = c(
+            "value = double(0)",
+            "n_cases = double(1)",
+            "a = double(1)",
+            "n_samples = integer(0)",
+            "sex = double(1)",
+            "age2date = double(1)",
+            "beta_male = double(0)",
+            "beta0_sus = double(0)",
+            "age_effect_surv = double(1)",
+            "period_effect_surv = double(1)",
+            "f_age_foi = double(1)",
+            "m_age_foi = double(1)",
+            "age_lookup_f = double(1)",
+            "age_lookup_m = double(1)",
+            "period_lookup=double(1)",
+            "f_period_foi=double(1)",
+            "m_period_foi=double(1)",
+            "space = double(1)",
+            "sect = double(1)",
+            "log = double(0)"
+        ),
         discrete = TRUE
     )
 ))
 
 # for a user-defined distribution
-assign('dSusHarvest', dSusHarvest, envir = .GlobalEnv)
+assign("dSusHarvest", dSusHarvest, envir = .GlobalEnv)
 
 start <- Sys.time()
 test <- dSusHarvest(
-        x = 1,
-		n_cases = d_fit_hunt_neg$n_cases,
-		n_samples = nrow(d_fit_hunt_neg),
-        a = d_fit_hunt_neg$ageweeks, #age (weeks) at harvest
-        sex = d_fit_hunt_neg$sex,
-        age2date = d_fit_hunt_neg$birthweek-1,
-        beta_male = beta_male,
-        beta0_sus = beta0_sus,
-        age_effect_surv = age_effect_survival_test,
-        period_effect_surv = period_effect_survival_test,
-        f_age_foi = f_age_foi,
-        m_age_foi = m_age_foi,
-        age_lookup_f = age_lookup_f,
-        age_lookup_m = age_lookup_m,
-        period_lookup = period_lookup,
-        f_period_foi = f_period_foi,
-        m_period_foi = m_period_foi,
-        space = c(0,-.55),
-		sect = d_fit_hunt_neg$ew,
-        log = TRUE
-        )
-(end<- Sys.time()-start)
+    x = 1,
+    n_cases = d_fit_hunt_neg$n_cases,
+    n_samples = nrow(d_fit_hunt_neg),
+    a = d_fit_hunt_neg$ageweeks, # age (weeks) at harvest
+    sex = d_fit_hunt_neg$sex,
+    age2date = d_fit_hunt_neg$birthweek - 1,
+    beta_male = beta_male,
+    beta0_sus = beta0_sus,
+    age_effect_surv = age_effect_survival_test,
+    period_effect_surv = period_effect_survival_test,
+    f_age_foi = f_age_foi,
+    m_age_foi = m_age_foi,
+    age_lookup_f = age_lookup_f,
+    age_lookup_m = age_lookup_m,
+    period_lookup = period_lookup,
+    f_period_foi = f_period_foi,
+    m_period_foi = m_period_foi,
+    space = c(0, -.55),
+    sect = d_fit_hunt_neg$ew,
+    log = TRUE
+)
+(end <- Sys.time() - start)
 test
 
 
@@ -391,104 +401,117 @@ test
 #######################################################################
 
 dSusCensTest <- nimble::nimbleFunction(
-    run = function(
-       ### argument type declarations
-        x = integer(0),
-		n_samples = integer(0),
-        e = double(1), #e, age of entry
-        r = double(1), #r, age of last known alive
-        sex = double(1),
-        age2date = double(1),
-        beta_male = double(0),
-        beta0_sus = double(0),
-        age_effect_surv = double(1),
-        period_effect_surv = double(1),
-        f_age_foi = double(1),
-        m_age_foi = double(1),
-        age_lookup_f = double(1),
-        age_lookup_m = double(1),
-        period_lookup = double(1),
-        f_period_foi = double(1),
-        m_period_foi = double(1),
-		sect = double(1),
-        space = double(1),
-        log = double()
-        ) {
+    run = function( ### argument type declarations
+                   x = integer(0),
+                   n_samples = integer(0),
+                   e = double(1), # e, age of entry
+                   r = double(1), # r, age of last known alive
+                   sex = double(1),
+                   age2date = double(1),
+                   beta_male = double(0),
+                   beta0_sus = double(0),
+                   age_effect_surv = double(1),
+                   period_effect_surv = double(1),
+                   f_age_foi = double(1),
+                   m_age_foi = double(1),
+                   age_lookup_f = double(1),
+                   age_lookup_m = double(1),
+                   period_lookup = double(1),
+                   f_period_foi = double(1),
+                   m_period_foi = double(1),
+                   sect = double(1),
+                   space = double(1),
+                   log = double()) {
 
-	# start the loop through individuals
-	sumllik <- 0
-	for(i in 1:n_samples) {
-		#intitialize vectors
-		lam_foi <- 0
-		lam_sus <- 0
+        # start the loop through individuals
+        sumllik <- 0
+        for (i in 1:n_samples) {
+            # intitialize vectors
+            lam_foi <- 0
+            lam_sus <- 0
 
-		#############################################
-		# preliminary hazards for the likelihood
-		#############################################
-		if(sex[i] == 1){ # age loops for females
-			for(j in 1:(r[i] - 1)) {
-				# sum up foi
-				lam_foi <- lam_foi + 
-					exp(space[sect[i]] + f_age_foi[age_lookup_f[j]] + f_period_foi[period_lookup[age2date[i] + j]])
-				if(j > (e[i] - 1)){
-				lam_sus <- lam_sus + 
-					exp(beta0_sus + age_effect_surv[j] + period_effect_surv[age2date[i] + j])
-				}
-			}
-		}else{ # age loops for males
-			for(j in 1:(r[i] - 1)) {
-				# sum up foi
-				lam_foi <- lam_foi + 
-					exp(space[sect[i]] + m_age_foi[age_lookup_m[j]] + m_period_foi[period_lookup[age2date[i] + j]])
-				if(j > (e[i] - 1)){
-				lam_sus <- lam_sus + 
-					exp(beta0_sus + age_effect_surv[j] + period_effect_surv[age2date[i] + j] + beta_male)
-				}
-			}
-		}		
-		#######################################
-		### calculating the joint likelihood
-		#######################################
-	
-		sumllik <- sumllik - lam_sus - lam_foi 
-	} # end loop over individuals
-	
-		returnType(double(0))
-		if(log) return(sumllik) else return(exp(sumllik))    ## return log-likelihood
-  })
+            #############################################
+            # preliminary hazards for the likelihood
+            #############################################
+            if (sex[i] == 1) { # age loops for females
+                for (j in 1:(r[i] - 1)) {
+                    # sum up foi
+                    lam_foi <- lam_foi +
+                        exp(space[sect[i]] +
+                            f_age_foi[age_lookup_f[j]] +
+                            f_period_foi[period_lookup[age2date[i] + j]])
+                    if (j > (e[i] - 1)) {
+                        lam_sus <- lam_sus +
+                            exp(beta0_sus +
+                                age_effect_surv[j] +
+                                period_effect_surv[age2date[i] + j])
+                    }
+                }
+            } else { # age loops for males
+                for (j in 1:(r[i] - 1)) {
+                    # sum up foi
+                    lam_foi <- lam_foi +
+                        exp(space[sect[i]] +
+                            m_age_foi[age_lookup_m[j]] +
+                            m_period_foi[period_lookup[age2date[i] + j]])
+                    if (j > (e[i] - 1)) {
+                        lam_sus <- lam_sus +
+                            exp(beta0_sus +
+                                age_effect_surv[j] +
+                                period_effect_surv[age2date[i] + j] +
+                                beta_male)
+                    }
+                }
+            }
+            #######################################
+            ### calculating the joint likelihood
+            #######################################
+
+            sumllik <- sumllik - lam_sus - lam_foi
+        } # end loop over individuals
+
+        returnType(double(0))
+        if (log) {
+            return(sumllik)
+        } else {
+            return(exp(sumllik))
+        } ## return log-likelihood
+    }
+)
 
 
 nimble::registerDistributions(list(
     dSusCensTest = list(
-        BUGSdist = 'dSusCensTest(n_samples,e,r,sex,age2date,beta_male,beta0_sus,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup,sect,space)',
-        types = c("value = integer(0)",
-				  "n_samples = integer(0)",
-				  "e = double(1)",
-                  "r = double(1)",
-                  "sex = double(1)",
-                  "age2date = double(1)",
-                  "beta_male = double(0)",
-                  "beta0_sus = double(0)",
-                  "age_effect_surv = double(1)",
-                  "period_effect_surv = double(1)",
-                  "f_age_foi = double(1)",
-                  "m_age_foi = double(1)",
-                  "age_lookup_f = double(1)",
-                  "age_lookup_m = double(1)",
-                  "period_lookup = double(1)",
-                  "f_period_foi = double(1)",
-                  "m_period_foi = double(1)",
-				  "sect = double(1)",
-                  "space = double(1)",
-                  "log = double(0)"
-                  ),
+        BUGSdist = "dSusCensTest(n_samples,e,r,sex,age2date,beta_male,beta0_sus,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup,sect,space)",
+        types = c(
+            "value = integer(0)",
+            "n_samples = integer(0)",
+            "e = double(1)",
+            "r = double(1)",
+            "sex = double(1)",
+            "age2date = double(1)",
+            "beta_male = double(0)",
+            "beta0_sus = double(0)",
+            "age_effect_surv = double(1)",
+            "period_effect_surv = double(1)",
+            "f_age_foi = double(1)",
+            "m_age_foi = double(1)",
+            "age_lookup_f = double(1)",
+            "age_lookup_m = double(1)",
+            "period_lookup = double(1)",
+            "f_period_foi = double(1)",
+            "m_period_foi = double(1)",
+            "sect = double(1)",
+            "space = double(1)",
+            "log = double(0)"
+        ),
         discrete = TRUE
     )
 ))
 
 
-###for a user-defined distribution
-assign('dSusCensTest', dSusCensTest, envir = .GlobalEnv)
+### for a user-defined distribution
+assign("dSusCensTest", dSusCensTest, envir = .GlobalEnv)
 
 # start <- Sys.time()
 # test <- dSusCensTest(
@@ -531,162 +554,218 @@ assign('dSusCensTest', dSusCensTest, envir = .GlobalEnv)
 #######################################################################
 
 dSusCensNo <- nimble::nimbleFunction(
-    run = function(
-       ### argument type declarations
-        x = integer(0),
-        n_samples = integer(0), # number of samples in dataset
-        e = double(1), #e, age of entry
-        r = double(1), #r, age of last known alive
-        sex = double(1),
-		age2date = double(1),
-        beta_male = double(0),
-        beta0_sus = double(0),
-        beta0_inf = double(0),
-        age_effect_surv = double(1),
-        period_effect_surv = double(1),
-        f_age_foi = double(1),
-        m_age_foi = double(1),
-        age_lookup_f = double(1),
-        age_lookup_m = double(1),
-        period_lookup = double(1),
-        f_period_foi = double(1),
-        m_period_foi = double(1),
-        space = double(1),
-        sect = double(1),
-        log = double()
-        ) {
+    run = function( ### argument type declarations
+                   x = integer(0),
+                   n_samples = integer(0), # number of samples in dataset
+                   e = double(1), # e, age of entry
+                   r = double(1), # r, age of last known alive
+                   sex = double(1),
+                   age2date = double(1),
+                   beta_male = double(0),
+                   beta0_sus = double(0),
+                   beta0_inf = double(0),
+                   age_effect_surv = double(1),
+                   period_effect_surv = double(1),
+                   f_age_foi = double(1),
+                   m_age_foi = double(1),
+                   age_lookup_f = double(1),
+                   age_lookup_m = double(1),
+                   period_lookup = double(1),
+                   f_period_foi = double(1),
+                   m_period_foi = double(1),
+                   space = double(1),
+                   sect = double(1),
+                   log = double()) {
+        sumllik <- 0 # intialize log-likelihood
+        for (i in 1:n_samples) {
+            lam_foi <- 0
+            lam_sus <- 0
+            lam_inf <- 0
+            lik_temp <- 0
 
-    sumllik <- 0 #intialize log-likelihood
-	for(i in 1:n_samples){
-		lam_foi <- 0
-		lam_sus <- 0
-		lam_inf <- 0
-		lik_temp <- 0
-		
-		#############################################
-		# preliminary hazards for the likelihood
-		#############################################
-		if(sex[i] == 1){ # age loops for females
-			for(j in (e[i] + 1):(r[i] - 1)) {
-				# sum up infected hazard from e to r
-				lam_inf <- lam_inf + exp(beta0_inf + age_effect_surv[j] + period_effect_surv[age2date[i] + j] + beta_male)
-			}
-			for(j in 1:e[i]) {
-				# sum up infected hazard from 1 to e
-				lam_foi <- lam_foi + exp(space[sect[i]] + f_age_foi[age_lookup_f[j]] + f_period_foi[period_lookup[age2date[i] + j]])
-				if(j==e[i]){
-					lam_sus_e <- exp(beta0_sus + age_effect_surv[j] + period_effect_surv[age2date[i] + j] + beta_male)
-					lik_temp_e <- exp(-lam_sus_e) * exp(-lam_foi)
-				}
-			}
-			# for(j = (e[i]+1)) {
-				# sum up foi hazard from e to r
-				lam_foij <-  exp(space[sect[i]] + f_age_foi[age_lookup_f[e[i]+1]] + f_period_foi[period_lookup[age2date[i] + e[i]+1]])
-				# sum up like_temp 
-				lik_temp  <- lik_temp + lam_foij *
-									    exp(-lam_inf)
-				# now redefine hazards (subtract for lam_inf)
-				lam_sus <- exp(beta0_sus + age_effect_surv[e[i]+1] + period_effect_surv[age2date[i] + e[i]+1] + beta_male)
-				lam_foie <- lam_foij
-				lam_foi <- lam_foi + lam_foij
-				lam_inf <- lam_inf - exp(beta0_inf + age_effect_surv[e[i]+1] + period_effect_surv[age2date[i] + e[i]+1] + beta_male)
-
-			if((r[i] - e[i]) > 2) {
-    			for(j in (e[i] + 2):(r[i] - 1)) {
-	    			# sum up foi hazard from e to r
-		    		lam_foij <-  exp(space[sect[i]] + f_age_foi[age_lookup_f[j]] + f_period_foi[period_lookup[age2date[i] + j]])
-			    	# sum up like_temp 
-				    lik_temp <- lik_temp + lam_foij * 
-									exp(-(lam_sus + lam_foie)) *
-									exp(-lam_inf)
-				    # now increment the hazards (subtract for lam_inf)
-				    lam_foie <- lam_foie + lam_foij
-				    lam_foi <- lam_foi + lam_foij
-				    lam_sus <- lam_sus + exp(beta0_sus + age_effect_surv[j] + period_effect_surv[age2date[i] + j] + beta_male)
-				    lam_inf <- lam_inf - exp(beta0_inf + age_effect_surv[j] + period_effect_surv[age2date[i] + j] + beta_male)
-			    }
-			}
-		}else{ # age loops for males
-			for(j in (e[i]+1):(r[i]-1)) {
-				# sum up infected hazard from e to r
-				lam_inf <- lam_inf + exp(beta0_inf + age_effect_surv[j] + period_effect_surv[age2date[i] + j])
-			}			
-			for(j in 1:e[i]) {
-				# sum up infected hazard from 1 to e
-				lam_foi <- lam_foi + exp(space[sect[i]] + m_age_foi[age_lookup_m[j]] + m_period_foi[period_lookup[age2date[i] + j]])
-				if(j == e[i]){
-					lam_sus_e <- exp(beta0_sus + age_effect_surv[j] + period_effect_surv[age2date[i] + j])
-					lik_temp_e <- exp(-lam_sus_e) * exp(-lam_foi)
-				}
-			}			
-			# for(j = (e[i]+1)) {
-				# sum up foi hazard from e to r
-				lam_foij <-  exp(space[sect[i]] + m_age_foi[age_lookup_m[e[i]+1]] + m_period_foi[period_lookup[age2date[i] + e[i]+1]])
-				# sum up like_temp 
-				lik_temp  <- lik_temp + lam_foij * 
-									exp(-lam_inf)
-				# now redefine the hazards (subtract for lam_inf)
-				lam_sus <- exp(beta0_sus + age_effect_surv[e[i]+1] + period_effect_surv[age2date[i] + e[i]+1])
-				lam_foie <- lam_foij
-				lam_foi <- lam_foi + lam_foij
-				lam_inf <- lam_inf - exp(beta0_inf + age_effect_surv[e[i] + 1] + period_effect_surv[age2date[i] + e[i] + 1])
-
-			if((r[i] - e[i]) > 2){
-                for(j in (e[i] + 2):(r[i] - 1)) {
-                    # sum up foi hazard from e to r
-                    lam_foij <-  exp(space[sect[i]] + m_age_foi[age_lookup_m[j]] + m_period_foi[period_lookup[age2date[i] + j]])
-                    # sum up like_temp 
-                    lik_temp <- lik_temp + lam_foij * 
-                                        exp(-(lam_sus + lam_foie)) *
-                                        exp(-lam_inf)
-                    # now increment the hazards (subtract for lam_inf)
-                    lam_foie <- lam_foie + lam_foij
-                    lam_foi <- lam_foi + lam_foij
-                    lam_sus <- lam_sus + exp(beta0_sus + age_effect_surv[j] + period_effect_surv[age2date[i] + j])
-                    lam_inf <- lam_inf - exp(beta0_inf + age_effect_surv[j] + period_effect_surv[age2date[i] + j])
+            #############################################
+            # preliminary hazards for the likelihood
+            #############################################
+            if (sex[i] == 1) { # age loops for females
+                for (j in (e[i] + 1):(r[i] - 1)) {
+                    # sum up infected hazard from e to r
+                    lam_inf <- lam_inf +
+                        exp(beta0_inf +
+                            age_effect_surv[j] +
+                            period_effect_surv[age2date[i] + j])
                 }
-			}
-		}
-		#######################################
-		### calculating the joint likelihood
-		#######################################
-		sumllik <- sumllik + log(lik_temp*lik_temp_e + exp(-(lam_sus + lam_sus_e)) * exp(-lam_foi))
-	}
-    returnType(double(0))
-    if(log) return(sumllik) else return(exp(sumllik))    ## return log-likelihood
-  })
+                for (j in 1:e[i]) {
+                    # sum up infected hazard from 1 to e
+                    lam_foi <- lam_foi +
+                        exp(space[sect[i]] +
+                            f_age_foi[age_lookup_f[j]] +
+                            f_period_foi[period_lookup[age2date[i] + j]])
+                    if (j == e[i]) {
+                        lam_sus_e <- exp(beta0_sus +
+                            age_effect_surv[j] +
+                            period_effect_surv[age2date[i] + j])
+                        lik_temp_e <- exp(-lam_sus_e) * exp(-lam_foi)
+                    }
+                }
+                # for(j = (e[i]+1)) {
+                # sum up foi hazard from e to r
+                lam_foij <- exp(space[sect[i]] +
+                    f_age_foi[age_lookup_f[e[i] + 1]] +
+                    f_period_foi[period_lookup[age2date[i] + e[i] + 1]])
+                # sum up like_temp
+                lik_temp <- lik_temp + lam_foij *
+                    exp(-lam_inf)
+                # now redefine hazards (subtract for lam_inf)
+                lam_sus <- exp(beta0_sus +
+                    age_effect_surv[e[i] + 1] +
+                    period_effect_surv[age2date[i] + e[i] + 1])
+                lam_foie <- lam_foij
+                lam_foi <- lam_foi + lam_foij
+                lam_inf <- lam_inf -
+                    exp(beta0_inf +
+                        age_effect_surv[e[i] + 1] +
+                        period_effect_surv[age2date[i] + e[i] + 1])
+
+                if ((r[i] - e[i]) > 2) {
+                    for (j in (e[i] + 2):(r[i] - 1)) {
+                        # sum up foi hazard from e to r
+                        lam_foij <- exp(space[sect[i]] +
+                            f_age_foi[age_lookup_f[j]] +
+                            f_period_foi[period_lookup[age2date[i] + j]])
+                        # sum up like_temp
+                        lik_temp <- lik_temp + lam_foij *
+                            exp(-(lam_sus + lam_foie)) *
+                            exp(-lam_inf)
+                        # now increment the hazards (subtract for lam_inf)
+                        lam_foie <- lam_foie + lam_foij
+                        lam_foi <- lam_foi + lam_foij
+                        lam_sus <- lam_sus +
+                            exp(beta0_sus +
+                                age_effect_surv[j] +
+                                period_effect_surv[age2date[i] + j])
+                        lam_inf <- lam_inf -
+                            exp(beta0_inf +
+                                age_effect_surv[j] +
+                                period_effect_surv[age2date[i] + j])
+                    }
+                }
+            } else { # age loops for males
+                for (j in (e[i] + 1):(r[i] - 1)) {
+                    # sum up infected hazard from e to r
+                    lam_inf <- lam_inf +
+                        	   exp(beta0_inf +
+							       age_effect_surv[j] +
+								   period_effect_surv[age2date[i] + j] +
+								   beta_male)
+                }
+                for (j in 1:e[i]) {
+                    # sum up infected hazard from 1 to e
+                    lam_foi <- lam_foi + 
+					           exp(space[sect[i]] +
+							   m_age_foi[age_lookup_m[j]] +
+							   m_period_foi[period_lookup[age2date[i] + j]])
+                    if (j == e[i]) {
+                        lam_sus_e <- exp(beta0_sus +
+						                 age_effect_surv[j] +
+										 period_effect_surv[age2date[i] + j] +
+										 beta_male)
+                        lik_temp_e <- exp(-lam_sus_e) * exp(-lam_foi)
+                    }
+                }
+                # for(j = (e[i]+1)) {
+                # sum up foi hazard from e to r
+                lam_foij <- exp(space[sect[i]] +
+				                m_age_foi[age_lookup_m[e[i] + 1]] +
+								m_period_foi[period_lookup[age2date[i] + e[i] + 1]])
+                # sum up like_temp
+                lik_temp <- lik_temp + 
+				            lam_foij * exp(-lam_inf)
+                # now redefine the hazards (subtract for lam_inf)
+                lam_sus <- exp(beta0_sus +
+				               age_effect_surv[e[i] + 1] +
+							   period_effect_surv[age2date[i] + e[i] + 1] +
+							   beta_male)
+                lam_foie <- lam_foij
+                lam_foi <- lam_foi + lam_foij
+                lam_inf <- lam_inf -
+				           exp(beta0_inf +
+				               age_effect_surv[e[i] + 1] +
+							   period_effect_surv[age2date[i] + e[i] + 1] +
+							   beta_male)
+
+                if ((r[i] - e[i]) > 2) {
+                    for (j in (e[i] + 2):(r[i] - 1)) {
+                        # sum up foi hazard from e to r
+                        lam_foij <- exp(space[sect[i]] +
+						                m_age_foi[age_lookup_m[j]] +
+										m_period_foi[period_lookup[age2date[i] + j]])
+                        # sum up like_temp
+                        lik_temp <- lik_temp +
+						            lam_foij * exp(-(lam_sus + lam_foie)) * exp(-lam_inf)
+                        # now increment the hazards (subtract for lam_inf)
+                        lam_foie <- lam_foie + lam_foij
+                        lam_foi <- lam_foi + lam_foij
+                        lam_sus <- lam_sus + 
+						           exp(beta0_sus +
+								       age_effect_surv[j] +
+									   period_effect_surv[age2date[i] + j] +
+									   beta_male)
+                        lam_inf <- lam_inf - 
+						           exp(beta0_inf +
+								       age_effect_surv[j] +
+									   period_effect_surv[age2date[i] + j] +
+									   beta_male)
+                    }
+                }
+            }
+            #######################################
+            ### calculating the joint likelihood
+            #######################################
+            sumllik <- sumllik + 
+			           log(lik_temp * lik_temp_e +
+					       exp(-(lam_sus + lam_sus_e)) * exp(-lam_foi))
+        }
+        returnType(double(0))
+        if (log) {
+            return(sumllik)
+        } else {
+            return(exp(sumllik))
+        } ## return log-likelihood
+    }
+)
 
 nimble::registerDistributions(list(
     dSusCensNo = list(
-        BUGSdist = 'dSusCensNo(n_samples,e,r,sex,age2date,beta_male,beta0_sus,beta0_inf,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup,space,sect)',
-        types = c("value=integer(0)",
-				  "n_samples = integer(0)",
-                  "e = double(1)",
-                  "r = double(1)",
-                  "sex = double(1)",
-                  "age2date = double(1)",
-                  "beta_male = double(0)",
-                  "beta0_sus = double(0)",
-                  "beta0_inf = double(0)",
-                  "age_effect_surv = double(1)",
-                  "period_effect_surv = double(1)",
-                  "f_age_foi = double(1)",
-                  "m_age_foi = double(1)",
-                  "age_lookup_f = double(1)",
-                  "age_lookup_m = double(1)",
-                  "period_lookup=double(1)",
-                  "f_period_foi=double(1)",
-                  "m_period_foi=double(1)",
-                  "space = double(1)",
-                  "sect = double(1)",
-                  "log = double()"
-                  ),
+        BUGSdist = "dSusCensNo(n_samples,e,r,sex,age2date,beta_male,beta0_sus,beta0_inf,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup,space,sect)",
+        types = c(
+            "value=integer(0)",
+            "n_samples = integer(0)",
+            "e = double(1)",
+            "r = double(1)",
+            "sex = double(1)",
+            "age2date = double(1)",
+            "beta_male = double(0)",
+            "beta0_sus = double(0)",
+            "beta0_inf = double(0)",
+            "age_effect_surv = double(1)",
+            "period_effect_surv = double(1)",
+            "f_age_foi = double(1)",
+            "m_age_foi = double(1)",
+            "age_lookup_f = double(1)",
+            "age_lookup_m = double(1)",
+            "period_lookup=double(1)",
+            "f_period_foi=double(1)",
+            "m_period_foi=double(1)",
+            "space = double(1)",
+            "sect = double(1)",
+            "log = double()"
+        ),
         discrete = TRUE
     )
 ))
 
-###for a user-defined distribution
- assign('dSusCensNo', dSusCensNo, envir = .GlobalEnv)
+### for a user-defined distribution
+assign("dSusCensNo", dSusCensNo, envir = .GlobalEnv)
 
 # start <- Sys.time()
 # test <- dSusCensNo(
@@ -755,112 +834,135 @@ nimble::registerDistributions(list(
 #######################################################################
 
 dSusMortTest <- nimble::nimbleFunction(
-    run = function(
-       ### argument type declarations
-        x = double(0),
-        n_samples = integer(0), # number of samples in dataset
-        e = double(1), #e, age of entry
-        r = double(1), #r, age of last known alive
-        s = double(1), #s, age of known mortality
-        sex = double(1),
-		age2date = double(1),
-        beta_male = double(0),
-        beta0_sus = double(0),
-        age_effect_surv = double(1),
-        period_effect_surv = double(1),
-        f_age_foi = double(1),
-        m_age_foi = double(1),
-        age_lookup_f = double(1),
-        age_lookup_m = double(1),
-        period_lookup = double(1),
-        f_period_foi = double(1),
-        m_period_foi = double(1),
-        space = double(1),
-        sect = double(1),
-        log = double()
-        ) {
+    run = function( ### argument type declarations
+                   x = double(0),
+                   n_samples = integer(0), # number of samples in dataset
+                   e = double(1), # e, age of entry
+                   r = double(1), # r, age of last known alive
+                   s = double(1), # s, age of known mortality
+                   sex = double(1),
+                   age2date = double(1),
+                   beta_male = double(0),
+                   beta0_sus = double(0),
+                   age_effect_surv = double(1),
+                   period_effect_surv = double(1),
+                   f_age_foi = double(1),
+                   m_age_foi = double(1),
+                   age_lookup_f = double(1),
+                   age_lookup_m = double(1),
+                   period_lookup = double(1),
+                   f_period_foi = double(1),
+                   m_period_foi = double(1),
+                   space = double(1),
+                   sect = double(1),
+                   log = double()) {
+        sumllik <- 0 # intialize log-likelihood
+        for (i in 1:n_samples) {
+            lam_foi <- 0
+            lam_sus <- 0
+            lam_susD <- 0
 
-    sumllik <- 0 #intialize log-likelihood
-	for(i in 1:n_samples){
-		lam_foi <- 0
-		lam_sus <- 0
-		lam_susD <- 0
-		
-		#############################################
-		# preliminary hazards for the likelihood
-		#############################################
-		if(sex[i] ==1){
-			for(j in r[i]:(s[i]-1)) {
-			# sum up surv hazard from r to s-1
-			lam_susD <- lam_susD + exp(beta0_sus + age_effect_surv[j] + period_effect_surv[age2date[i] + j] + beta_male)
-			}			
-		
-			for(j in 1:(s[i] - 1)) {
-				#  up foi hazard from 1  to j
-				lam_foi <-  lam_foi + exp(space[i] + f_age_foi[age_lookup_f[j]] + f_period_foi[period_lookup[age2date[i] + j]])
-				if(j > (e[i] - 1) & j < r[i]){
-					lam_sus <- lam_sus + exp(beta0_sus + age_effect_surv[j] + period_effect_surv[age2date[i] + j] + beta_male)
-				}
-			}
-		} else {
-			for(j in r[i]:(s[i] - 1)) {
-			# sum up surv hazard from r to s-1
-			lam_susD <- lam_susD + exp(beta0_sus + age_effect_surv[j] + period_effect_surv[age2date[i] + j])
-			}
-		
-			for(j in 1:(s[i] - 1)) {
-				#  up foi hazard from 1  to j
-				lam_foi <-  lam_foi + exp(space[i] + m_age_foi[age_lookup_f[j]] + m_period_foi[period_lookup[age2date[i] + j]])
-				if(j > (e[i] - 1) & j < r[i]){
-					lam_sus <- lam_sus + exp(beta0_sus + age_effect_surv[j] + period_effect_surv[age2date[i] + j])
-				}
-			}			
-		}
-		
+            #############################################
+            # preliminary hazards for the likelihood
+            #############################################
+            if (sex[i] == 1) {
+                for (j in r[i]:(s[i] - 1)) {
+                    # sum up surv hazard from r to s-1
+                    lam_susD <- lam_susD +
+					            exp(beta0_sus +
+								    age_effect_surv[j] +
+									period_effect_surv[age2date[i] + j])
+                }
 
-		#######################################
-		### calculating the joint likelihood
-		#######################################
-		#sumllik <- sumllik + log((1-exp(-lam_susD))*exp(-lam_sus)*exp(-lam_foi))	
-		sumllik <- sumllik + log(1-exp(-lam_susD)) - lam_sus - lam_foi
-	
-	}
-	returnType(double(0))
-	if(log) return(sumllik) else return(exp(sumllik))    ## return log-likelihood
-  })
+                for (j in 1:(s[i] - 1)) {
+                    #  up foi hazard from 1  to j
+                    lam_foi <- lam_foi +
+					           exp(space[i] +
+							       f_age_foi[age_lookup_f[j]] +
+								   f_period_foi[period_lookup[age2date[i] + j]])
+                    if (j > (e[i] - 1) & j < r[i]) {
+                        lam_sus <- lam_sus +
+						           exp(beta0_sus +
+								       age_effect_surv[j] +
+									   period_effect_surv[age2date[i] + j])
+                    }
+                }
+            } else {
+                for (j in r[i]:(s[i] - 1)) {
+                    # sum up surv hazard from r to s-1
+                    lam_susD <- lam_susD +
+					            exp(beta0_sus +
+								    age_effect_surv[j] +
+									period_effect_surv[age2date[i] + j] +
+									beta_male)
+                }
+
+                for (j in 1:(s[i] - 1)) {
+                    #  up foi hazard from 1  to j
+                    lam_foi <- lam_foi +
+					           exp(space[i] +
+							       m_age_foi[age_lookup_f[j]] +
+								   m_period_foi[period_lookup[age2date[i] + j]])
+                    if (j > (e[i] - 1) & j < r[i]) {
+                        lam_sus <- lam_sus +
+						           exp(beta0_sus +
+								       age_effect_surv[j] +
+									   period_effect_surv[age2date[i] + j] +
+									   beta_male)
+                    }
+                }
+            }
+            #######################################
+            ### calculating the joint likelihood
+            #######################################
+
+            sumllik <- sumllik +
+			           log(1 - exp(-lam_susD)) -
+					   lam_sus -
+					   lam_foi
+        }
+        returnType(double(0))
+        if (log) {
+            return(sumllik)
+        } else {
+            return(exp(sumllik))
+        } ## return log-likelihood
+    }
+)
 
 nimble::registerDistributions(list(
     dSusMortTest = list(
-        BUGSdist = 'dSusMortTest(n_samples,e,r,s,sex,age2date,beta_male,beta0_sus,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup,space,sect)',
-        types = c("value = double(0)",
-				  "n_samples = integer(0)",
-                  "e = double(1)",
-                  "r = double(1)",
-                  "s = double(1)",
-                  "sex = double(1)",
-                  "age2date = double(1)",
-                  "beta_male = double(0)",
-                  "beta0_sus = double(0)",
-                  "age_effect_surv = double(1)",
-                  "period_effect_surv = double(1)",
-                  "f_age_foi = double(1)",
-                  "m_age_foi = double(1)",
-                  "age_lookup_f = double(1)",
-                  "age_lookup_m = double(1)",
-                  "period_lookup=double(1)",
-                  "f_period_foi=double(1)",
-                  "m_period_foi=double(1)",
-                  "space = double(1)",
-                  "sect = double(1)",
-                  "log = double(0)"
-                  ),
+        BUGSdist = "dSusMortTest(n_samples,e,r,s,sex,age2date,beta_male,beta0_sus,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup,space,sect)",
+        types = c(
+            "value = double(0)",
+            "n_samples = integer(0)",
+            "e = double(1)",
+            "r = double(1)",
+            "s = double(1)",
+            "sex = double(1)",
+            "age2date = double(1)",
+            "beta_male = double(0)",
+            "beta0_sus = double(0)",
+            "age_effect_surv = double(1)",
+            "period_effect_surv = double(1)",
+            "f_age_foi = double(1)",
+            "m_age_foi = double(1)",
+            "age_lookup_f = double(1)",
+            "age_lookup_m = double(1)",
+            "period_lookup=double(1)",
+            "f_period_foi=double(1)",
+            "m_period_foi=double(1)",
+            "space = double(1)",
+            "sect = double(1)",
+            "log = double(0)"
+        ),
         discrete = TRUE
     )
 ))
 
 
 # ###for a user-defined distribution
-assign('dSusMortTest', dSusMortTest, envir = .GlobalEnv)
+assign("dSusMortTest", dSusMortTest, envir = .GlobalEnv)
 
 # start <- Sys.time()
 # test <- dSusMortTest(
@@ -904,150 +1006,153 @@ assign('dSusMortTest', dSusMortTest, envir = .GlobalEnv)
 #######################################################################
 
 dSusMortNoTest <- nimble::nimbleFunction(
-    run = function(
-        ### argument type declarations
-        x = integer(0),
-        n_samples = integer(0), # number of samples in dataset
-        e = double(1), #e, age of entry
-        r = double(1), #r, age of last known alive
-        s = double(1), #s, age of known mortality
-        dn1 = double(1), #right of last test negative
-        sex = double(1),
-        age2date = double(1),
-        beta_male = double(0),
-        beta0_sus = double(0),
-        beta0_inf = double(0),
-        age_effect_surv = double(1),
-        period_effect_surv = double(1),
-        f_age_foi = double(1),
-        m_age_foi = double(1),
-        age_lookup_f = double(1),
-        age_lookup_m = double(1),
-        period_lookup=double(1),
-        f_period_foi=double(1),
-        m_period_foi=double(1),
-        space = double(1),
-		sect = double(1),
-        log = double(0)
-        ) {
-    
-    sumllik <- 0 #intialize log-likelihood
-	for(i in 1:n_samples){
-		lam_foi <- nimNumeric(s[i] - 1,init=FALSE)
-		lam_sus <- nimNumeric(s[i] - 1,init=FALSE)
-		lam_inf <- nimNumeric(s[i] - 1,init=FALSE)
-		lik_temp <- 0
-	
-		#############################################
-		# preliminary hazards for the likelihood
-		#############################################
-		if(sex[i] ==1){ # age loops for females		
-			#survival hazard for susceptible deer
-			lam_sus[e[i]:(s[i] - 1)] <- exp(beta0_sus +
-							age_effect_surv[e[i]:(s[i] - 1)] + 
-							period_effect_surv[(e[i] + age2date[i]):(s[i] - 1 + age2date[i])] + 
-							beta_male)
-		
-			#survival hazard while infected
-			lam_inf[e[i]:(s[i] - 1)] <- exp(beta0_inf +
-				age_effect_surv[e[i]:(s[i] - 1)] +
-				period_effect_surv[(e[i] + age2date[i]):(s[i] - 1 + age2date[i])] +
-				beta_male)
-						
-			#force of infection infection hazard
-			lam_foi[1:(s[i]-1)] <- exp(space[sect[i]] +
-				f_age_foi[age_lookup_f[1:(s[i] - 1)]] +
-					f_period_foi[period_lookup[(1 + age2date[i]):(s[i] - 1 + age2date[i])]])
-		}else{ # males
-			#survival hazard for susceptible deer
-			lam_sus[e[i]:(s[i] - 1)] <- exp(beta0_sus +
-							age_effect_surv[e[i]:(s[i] - 1)] + 
-							period_effect_surv[(e[i] + age2date[i]):(s[i] - 1 + age2date[i])])
-		
-			#survival hazard while infected
-			lam_inf[e[i]:(s[i] - 1)] <- exp(beta0_inf +
-				age_effect_surv[e[i]:(s[i] - 1)] +
-				period_effect_surv[(e[i] + age2date[i]):(s[i] - 1 + age2date[i])])
-						
-			#force of infection infection hazard
-			lam_foi[1:(s[i]-1)] <- exp(space[sect[i]] +
-				m_age_foi[age_lookup_m[1:(s[i] - 1)]] +
-					m_period_foi[period_lookup[(1 + age2date[i]):(s[i] - 1 + age2date[i])]])
-		}
-		#######################################
-		### calculating the joint likelihood
-		#######################################
-		
-		#total probability of getting infected and dying before end of the study
-		lik_temp <- lik_temp + lam_foi[dn1[i] + 1] *
-						exp(-sum(lam_inf[(dn1[i] + 1):(r[i] - 1)])) *
-						(1 - exp(-sum(lam_inf[r[i]:(s[i] - 1)])))
-		if((r[i] - dn1[i])>3){
-			for (k in (dn1[i] + 2):(r[i] - 2)) {
-				lik_temp <- lik_temp + lam_foi[k] *
-						exp(-sum(lam_foi[(dn1[i] + 1):(k - 1)])) *
-						exp(-sum(lam_sus[(dn1[i] + 1):(k - 1)])) *
-						exp(-sum(lam_inf[k:(r[i] - 1)])) *
-						(1 - exp(-sum(lam_inf[r[i]:(s[i] - 1)])))
-			}
-		}
-		if((r[i] - dn1[i])>2){
-		for (k in (r[i] - 1):(s[i] - 2)) {
-			lik_temp <- lik_temp + lam_foi[k] *
-						exp(-sum(lam_foi[(dn1[i] + 1):(k - 1)])) *
-						exp(-sum(lam_sus[(dn1[i] + 1):(k - 1)])) *
-						(1 - exp(-sum(lam_inf[k:(s[i] - 1)])))
-		}
-		}
-		lik_temp <- lik_temp + lam_foi[(s[i] - 1)] *
-							exp(-sum(lam_foi[(dn1[i] + 1):((s[i] - 1) - 1)])) *
-							exp(-sum(lam_sus[(dn1[i] + 1):((s[i] - 1) - 1)])) *
-							(lam_inf[(s[i] - 1)])
-							
-		sumllik <- sumllik + log(exp(-sum(lam_sus[e[i]:dn1[i]])) *
-                                exp(-sum(lam_foi[1:dn1[i]])) *
-                                lik_temp +
-                                exp(-sum(lam_foi[1:(s[i] - 1)])) *
-                                exp(-sum(lam_sus[e[i]:(r[i] - 1)])) *
-                                (1 - exp(-sum(lam_sus[r[i]:(s[i] - 1)]))))
-	}
-    returnType(double(0))
-    if(log) return(sumllik) else return(exp(sumllik))
-  })
+    run = function( ### argument type declarations
+                   x = integer(0),
+                   n_samples = integer(0), # number of samples in dataset
+                   e = double(1), # e, age of entry
+                   r = double(1), # r, age of last known alive
+                   s = double(1), # s, age of known mortality
+                   dn1 = double(1), # right of last test negative
+                   sex = double(1),
+                   age2date = double(1),
+                   beta_male = double(0),
+                   beta0_sus = double(0),
+                   beta0_inf = double(0),
+                   age_effect_surv = double(1),
+                   period_effect_surv = double(1),
+                   f_age_foi = double(1),
+                   m_age_foi = double(1),
+                   age_lookup_f = double(1),
+                   age_lookup_m = double(1),
+                   period_lookup = double(1),
+                   f_period_foi = double(1),
+                   m_period_foi = double(1),
+                   space = double(1),
+                   sect = double(1),
+                   log = double(0)) {
+        sumllik <- 0 # intialize log-likelihood
+        for (i in 1:n_samples) {
+            lam_foi <- nimNumeric(s[i] - 1, init = FALSE)
+            lam_sus <- nimNumeric(s[i] - 1, init = FALSE)
+            lam_inf <- nimNumeric(s[i] - 1, init = FALSE)
+            lik_temp <- 0
+
+            #############################################
+            # preliminary hazards for the likelihood
+            #############################################
+            if (sex[i] == 1) { # age loops for females
+                # survival hazard for susceptible deer
+                lam_sus[e[i]:(s[i] - 1)] <- exp(beta0_sus +
+                    age_effect_surv[e[i]:(s[i] - 1)] +
+                    period_effect_surv[(e[i] + age2date[i]):(s[i] - 1 + age2date[i])])
+
+                # survival hazard while infected
+                lam_inf[e[i]:(s[i] - 1)] <- exp(beta0_inf +
+                    age_effect_surv[e[i]:(s[i] - 1)] +
+                    period_effect_surv[(e[i] + age2date[i]):(s[i] - 1 + age2date[i])])
+
+                # force of infection infection hazard
+                lam_foi[1:(s[i] - 1)] <- exp(space[sect[i]] +
+                    f_age_foi[age_lookup_f[1:(s[i] - 1)]] +
+                    f_period_foi[period_lookup[(1 + age2date[i]):(s[i] - 1 + age2date[i])]])
+            } else { # males
+                # survival hazard for susceptible deer
+                lam_sus[e[i]:(s[i] - 1)] <- exp(beta0_sus +
+                    age_effect_surv[e[i]:(s[i] - 1)] +
+                    period_effect_surv[(e[i] + age2date[i]):(s[i] - 1 + age2date[i])] +
+                    beta_male)
+
+                # survival hazard while infected
+                lam_inf[e[i]:(s[i] - 1)] <- exp(beta0_inf +
+                    age_effect_surv[e[i]:(s[i] - 1)] +
+                    period_effect_surv[(e[i] + age2date[i]):(s[i] - 1 + age2date[i])] +
+                    beta_male)
+
+                # force of infection infection hazard
+                lam_foi[1:(s[i] - 1)] <- exp(space[sect[i]] +
+                    m_age_foi[age_lookup_m[1:(s[i] - 1)]] +
+                    m_period_foi[period_lookup[(1 + age2date[i]):(s[i] - 1 + age2date[i])]])
+            }
+            #######################################
+            ### calculating the joint likelihood
+            #######################################
+
+            # total probability of getting infected and dying before end of the study
+            lik_temp <- lik_temp + lam_foi[dn1[i] + 1] *
+                exp(-sum(lam_inf[(dn1[i] + 1):(r[i] - 1)])) *
+                (1 - exp(-sum(lam_inf[r[i]:(s[i] - 1)])))
+            if ((r[i] - dn1[i]) > 3) {
+                for (k in (dn1[i] + 2):(r[i] - 2)) {
+                    lik_temp <- lik_temp + lam_foi[k] *
+                        exp(-sum(lam_foi[(dn1[i] + 1):(k - 1)])) *
+                        exp(-sum(lam_sus[(dn1[i] + 1):(k - 1)])) *
+                        exp(-sum(lam_inf[k:(r[i] - 1)])) *
+                        (1 - exp(-sum(lam_inf[r[i]:(s[i] - 1)])))
+                }
+            }
+            if ((r[i] - dn1[i]) > 2) {
+                for (k in (r[i] - 1):(s[i] - 2)) {
+                    lik_temp <- lik_temp + lam_foi[k] *
+                        exp(-sum(lam_foi[(dn1[i] + 1):(k - 1)])) *
+                        exp(-sum(lam_sus[(dn1[i] + 1):(k - 1)])) *
+                        (1 - exp(-sum(lam_inf[k:(s[i] - 1)])))
+                }
+            }
+            lik_temp <- lik_temp + lam_foi[(s[i] - 1)] *
+                exp(-sum(lam_foi[(dn1[i] + 1):((s[i] - 1) - 1)])) *
+                exp(-sum(lam_sus[(dn1[i] + 1):((s[i] - 1) - 1)])) *
+                (lam_inf[(s[i] - 1)])
+
+            sumllik <- sumllik + log(exp(-sum(lam_sus[e[i]:dn1[i]])) *
+                exp(-sum(lam_foi[1:dn1[i]])) *
+                lik_temp +
+                exp(-sum(lam_foi[1:(s[i] - 1)])) *
+                    exp(-sum(lam_sus[e[i]:(r[i] - 1)])) *
+                    (1 - exp(-sum(lam_sus[r[i]:(s[i] - 1)]))))
+        }
+        returnType(double(0))
+        if (log) {
+            return(sumllik)
+        } else {
+            return(exp(sumllik))
+        }
+    }
+)
 
 nimble::registerDistributions(list(
     dSusMortNoTest = list(
-        BUGSdist = 'dSusMortNoTest(n_samples,e,r,s,dn1,sex,age2date,beta_male,beta0_sus,beta0_inf,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup,space,sect)',
-        types = c("value = integer(0)",
-				  "n_samples = integer(0)",
-				  "e = double(1)",
-                  "r = double(1)",
-                  "s = double(1)",
-                  "dn1 = double(1)",
-                  "sex = double(1)",
-                  "age2date = double(1)",
-                  "beta_male = double(0)",
-                  "beta0_inf = double(0)",
-                  "beta0_sus = double(0)",
-                  "age_effect_surv = double(1)",
-                  "period_effect_surv = double(1)",
-                  "f_age_foi = double(1)",
-                  "m_age_foi = double(1)",
-                  "age_lookup_f = double(1)",
-                  "age_lookup_m = double(1)",
-                  "period_lookup=double(1)",
-                  "f_period_foi=double(1)",
-                  "m_period_foi=double(1)",
-                  "space = double(1)",
-				  "sect = double(1)",
-                  "log = double(0)"
-                  ),
+        BUGSdist = "dSusMortNoTest(n_samples,e,r,s,dn1,sex,age2date,beta_male,beta0_sus,beta0_inf,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup,space,sect)",
+        types = c(
+            "value = integer(0)",
+            "n_samples = integer(0)",
+            "e = double(1)",
+            "r = double(1)",
+            "s = double(1)",
+            "dn1 = double(1)",
+            "sex = double(1)",
+            "age2date = double(1)",
+            "beta_male = double(0)",
+            "beta0_inf = double(0)",
+            "beta0_sus = double(0)",
+            "age_effect_surv = double(1)",
+            "period_effect_surv = double(1)",
+            "f_age_foi = double(1)",
+            "m_age_foi = double(1)",
+            "age_lookup_f = double(1)",
+            "age_lookup_m = double(1)",
+            "period_lookup=double(1)",
+            "f_period_foi=double(1)",
+            "m_period_foi=double(1)",
+            "space = double(1)",
+            "sect = double(1)",
+            "log = double(0)"
+        ),
         discrete = TRUE
     )
 ))
 
-###for a user-defined distribution
-assign('dSusMortNoTest', dSusMortNoTest, envir = .GlobalEnv)
+### for a user-defined distribution
+assign("dSusMortNoTest", dSusMortNoTest, envir = .GlobalEnv)
 
 # start <- Sys.time()
 # test <-  dSusMortNoTest(
@@ -1092,117 +1197,160 @@ assign('dSusMortNoTest', dSusMortNoTest, envir = .GlobalEnv)
 #######################################################################
 
 dIcapCens <- nimble::nimbleFunction(
-    run = function(
-        ### argument type declarations
-        x = integer(0),
-        n_samples = integer(0), # number of samples in dataset
-        e = double(1), #e, age of entry
-        r = double(1), #r, age of last known alive
-        sex = double(1),
-		age2date = double(1),
-        beta_male = double(0),
-        beta0_sus = double(0),
-        beta0_inf = double(0),
-        age_effect_surv = double(1),
-        period_effect_surv = double(1),
-        f_age_foi = double(1),
-        m_age_foi = double(1),
-        age_lookup_f = double(1),
-        age_lookup_m = double(1),
-        period_lookup=double(1),
-        f_period_foi=double(1),
-        m_period_foi=double(1),
-        space = double(1),
-        sect = double(1),
-        log = double()
-        ) {
+    run = function( ### argument type declarations
+                   x = integer(0),
+                   n_samples = integer(0), # number of samples in dataset
+                   e = double(1), # e, age of entry
+                   r = double(1), # r, age of last known alive
+                   sex = double(1),
+                   age2date = double(1),
+                   beta_male = double(0),
+                   beta0_sus = double(0),
+                   beta0_inf = double(0),
+                   age_effect_surv = double(1),
+                   period_effect_surv = double(1),
+                   f_age_foi = double(1),
+                   m_age_foi = double(1),
+                   age_lookup_f = double(1),
+                   age_lookup_m = double(1),
+                   period_lookup = double(1),
+                   f_period_foi = double(1),
+                   m_period_foi = double(1),
+                   space = double(1),
+                   sect = double(1),
+                   log = double()) {
+        sumllik <- 0 # intialize log-likelihood
+        for (i in 1:n_samples) {
+            lam_foi <- 0
+            lam_sus <- 0
+            lam_inf <- 0
+            lik_temp <- 0
 
-    sumllik <- 0 #intialize log-likelihood
-	for(i in 1:n_samples){
-		lam_foi <- 0
-		lam_sus <- 0
-		lam_inf <- 0
-		lik_temp <- 0
-    
-		#############################################
-		# preliminary hazards for the likelihood
-		#############################################
-		if(sex[i] ==1){ # age loops for females
-			# lam_inf from 1 to e-1
-			for(j in 1:(e[i]-1)){
-				lam_inf <- lam_inf + exp(beta0_inf + age_effect_surv[j] + period_effect_surv[age2date[i] + j] + beta_male)
-			}
-			for(j in 1:(e[i]-1)){ 
-				lam_foij <-  exp(space[sect[i]] + f_age_foi[age_lookup_f[j]] + f_period_foi[period_lookup[age2date[i] + j]])
-				lik_temp  <- lik_temp + lam_foij * exp(-lam_sus) * exp(-lam_inf) * exp(-lam_foi)
-				lam_foi <- lam_foi + lam_foij
-				lam_sus <- lam_sus + exp(beta0_sus + age_effect_surv[j] + period_effect_surv[age2date[i] + j] + beta_male)
-				lam_inf <- lam_inf - exp(beta0_inf + age_effect_surv[j] + period_effect_surv[age2date[i] + j] + beta_male)
-			}
-			# now recalculate lam_inf to sum over e to r-1
-			lam_inf <- 0
-			for(j in e[i]:(r[i]-1)){
-				lam_inf <- lam_inf + exp(beta0_inf + age_effect_surv[j] + period_effect_surv[age2date[i] + j] + beta_male)
-			}
-		}else{ # age loops for males
-			# lam_inf from 1 to e-1
-			for(j in 1:(e[i] - 1)){
-				lam_inf <- lam_inf + exp(beta0_inf + age_effect_surv[j] + period_effect_surv[age2date[i] + j])
-			}
-			for(j in 1:(e[i] - 1)){ 
-				lam_foij <-  exp(space[sect[i]] + m_age_foi[age_lookup_m[j]] + m_period_foi[period_lookup[age2date[i] + j]])
-				lik_temp  <- lik_temp + lam_foij * exp(-lam_sus) * exp(-lam_inf) * exp(-lam_foi)
-				lam_foi <- lam_foi + lam_foij
-				lam_sus <- lam_sus + exp(beta0_sus + age_effect_surv[j] + period_effect_surv[age2date[i] + j])
-				lam_inf <- lam_inf - exp(beta0_inf + age_effect_surv[j] + period_effect_surv[age2date[i] + j])
-			}
-			# now recalculate lam_inf to sum over e to r - 1
-			lam_inf <- 0
-			for(j in e[i]:(r[i] - 1)){
-				lam_inf <- lam_inf + exp(beta0_inf + age_effect_surv[j] + period_effect_surv[age2date[i] + j])
-			}
-		}
-		#######################################
-		### calculating the joint likelihood
-		#######################################
-		sumllik <- sumllik + log(lik_temp) - lam_inf
-	}
-    returnType(double(0))
-    if(log) return(sumllik) else return(exp(sumllik))    ## return log-likelihood
-  })
+            #############################################
+            # preliminary hazards for the likelihood
+            #############################################
+            if (sex[i] == 1) { # age loops for females
+                # lam_inf from 1 to e-1
+                for (j in 1:(e[i] - 1)) {
+                    lam_inf <- lam_inf +
+					           exp(beta0_inf +
+							       age_effect_surv[j] +
+								   period_effect_surv[age2date[i] + j])
+                }
+                for (j in 1:(e[i] - 1)) {
+                    lam_foij <- exp(space[sect[i]] +
+					                f_age_foi[age_lookup_f[j]] +
+									f_period_foi[period_lookup[age2date[i] + j]])
+                    lik_temp <- lik_temp +
+					            lam_foij *
+								  exp(-lam_sus) *
+								  exp(-lam_inf) *
+								  exp(-lam_foi)
+                    lam_foi <- lam_foi + lam_foij
+                    lam_sus <- lam_sus +
+					           exp(beta0_sus +
+							       age_effect_surv[j] +
+								   period_effect_surv[age2date[i] + j])
+                    lam_inf <- lam_inf -
+					           exp(beta0_inf +
+							       age_effect_surv[j] +
+								   period_effect_surv[age2date[i] + j])
+                }
+                # now recalculate lam_inf to sum over e to r-1
+                lam_inf <- 0
+                for (j in e[i]:(r[i] - 1)) {
+                    lam_inf <- lam_inf +
+					           exp(beta0_inf +
+							       age_effect_surv[j] +
+								   period_effect_surv[age2date[i] + j])
+                }
+            } else { # age loops for males
+                # lam_inf from 1 to e-1
+                for (j in 1:(e[i] - 1)) {
+                    lam_inf <- lam_inf +
+					           exp(beta0_inf +
+							       age_effect_surv[j] +
+								   period_effect_surv[age2date[i] + j] +
+								   beta_male)
+                }
+                for (j in 1:(e[i] - 1)) {
+                    lam_foij <- exp(space[sect[i]] +
+					                m_age_foi[age_lookup_m[j]] +
+									m_period_foi[period_lookup[age2date[i] + j]])
+                    lik_temp <- lik_temp +
+					            lam_foij *
+								    exp(-lam_sus) *
+								    exp(-lam_inf) *
+								    exp(-lam_foi)
+                    lam_foi <- lam_foi + lam_foij
+                    lam_sus <- lam_sus +
+					           exp(beta0_sus +
+							       age_effect_surv[j] +
+								   period_effect_surv[age2date[i] + j] +
+								   beta_male)
+                    lam_inf <- lam_inf -
+					           exp(beta0_inf +
+							       age_effect_surv[j] +
+								   period_effect_surv[age2date[i] + j] +
+								   beta_male)
+                }
+                # now recalculate lam_inf to sum over e to r - 1
+                lam_inf <- 0
+                for (j in e[i]:(r[i] - 1)) {
+                    lam_inf <- lam_inf +
+					           exp(beta0_inf +
+							       age_effect_surv[j] +
+								   period_effect_surv[age2date[i] + j] +
+								   beta_male)
+                }
+            }
+            #######################################
+            ### calculating the joint likelihood
+            #######################################
+            sumllik <- sumllik + log(lik_temp) - lam_inf
+        }
+        returnType(double(0))
+        if (log) {
+            return(sumllik)
+        } else {
+            return(exp(sumllik))
+        } ## return log-likelihood
+    }
+)
 
 
 nimble::registerDistributions(list(
     dIcapCens = list(
-        BUGSdist = 'dIcapCens(n_samples,e,r,sex,age2date,beta_male,beta0_inf,beta0_sus,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup,space,sect)',
-        types = c("value=integer(0)",
-				  "n_samples = integer(0)",
-                  "e = double(1)",
-                  "r = double(1)",
-                  "sex = double(1)",
-                  "age2date = double(1)",
-                  "beta_male = double(0)",
-                  "beta0_inf = double(0)",
-                  "beta0_sus = double(0)",
-                  "age_effect_surv = double(1)",
-                  "period_effect_surv = double(1)",
-                  "f_age_foi = double(1)",
-                  "m_age_foi = double(1)",
-                  "age_lookup_f = double(1)",
-                  "age_lookup_m = double(1)",
-                  "period_lookup=double(1)",
-                  "f_period_foi=double(1)",
-                  "m_period_foi=double(1)",
-                  "space = double(1)",
-                  "sect = double(1)",
-                  "log = double()"
-                  ),
+        BUGSdist = "dIcapCens(n_samples,e,r,sex,age2date,beta_male,beta0_inf,beta0_sus,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup,space,sect)",
+        types = c(
+            "value=integer(0)",
+            "n_samples = integer(0)",
+            "e = double(1)",
+            "r = double(1)",
+            "sex = double(1)",
+            "age2date = double(1)",
+            "beta_male = double(0)",
+            "beta0_inf = double(0)",
+            "beta0_sus = double(0)",
+            "age_effect_surv = double(1)",
+            "period_effect_surv = double(1)",
+            "f_age_foi = double(1)",
+            "m_age_foi = double(1)",
+            "age_lookup_f = double(1)",
+            "age_lookup_m = double(1)",
+            "period_lookup=double(1)",
+            "f_period_foi=double(1)",
+            "m_period_foi=double(1)",
+            "space = double(1)",
+            "sect = double(1)",
+            "log = double()"
+        ),
         discrete = TRUE
     )
 ))
 
 # for a user-defined distribution
-assign('dIcapCens', dIcapCens, envir = .GlobalEnv)
+assign("dIcapCens", dIcapCens, envir = .GlobalEnv)
 
 # test <-  dIcapCens(
 #         x = 1,
@@ -1243,135 +1391,178 @@ assign('dIcapCens', dIcapCens, envir = .GlobalEnv)
 #######################################################################
 
 dIcapMort <- nimble::nimbleFunction(
-    run = function(
-        ### argument type declarations
-        x = integer(0),
-        n_samples = integer(0), # number of samples in dataset
-        e = double(1), #e, age of entry
-        r = double(1), #r, age of last known alive
-        s = double(1), #s, age of known mortality
-        sex = double(1),
-        age2date = double(1),
-        beta_male = double(0),
-        beta0_sus = double(0),
-        beta0_inf = double(0),
-        age_effect_surv = double(1),
-        period_effect_surv = double(1),
-        f_age_foi = double(1),
-        m_age_foi = double(1),
-        age_lookup_f = double(1),
-        age_lookup_m = double(1),
-        period_lookup = double(1),
-        f_period_foi = double(1),
-        m_period_foi = double(1),
-        space = double(1),
-		sect = double(1),
-        log = double()
-        ) {
+    run = function( ### argument type declarations
+                   x = integer(0),
+                   n_samples = integer(0), # number of samples in dataset
+                   e = double(1), # e, age of entry
+                   r = double(1), # r, age of last known alive
+                   s = double(1), # s, age of known mortality
+                   sex = double(1),
+                   age2date = double(1),
+                   beta_male = double(0),
+                   beta0_sus = double(0),
+                   beta0_inf = double(0),
+                   age_effect_surv = double(1),
+                   period_effect_surv = double(1),
+                   f_age_foi = double(1),
+                   m_age_foi = double(1),
+                   age_lookup_f = double(1),
+                   age_lookup_m = double(1),
+                   period_lookup = double(1),
+                   f_period_foi = double(1),
+                   m_period_foi = double(1),
+                   space = double(1),
+                   sect = double(1),
+                   log = double()) {
 
-	# start the loop through individuals	
-	sumllik <- 0
-	for(i in 1:n_samples){
-		lam_inf <- 0
-		lam_foi <- 0
-		lam_sus <- 0
-		lik_temp <- 0
-	
-		#############################################
-		# preliminary hazards for the likelihood
-		#############################################
-		if(sex[i] == 1){ # females
-			# sum up infected hazard from 1 to e-1
-			for(j in 1:(e[i] - 1)) {
-				lam_inf <- lam_inf + exp(beta0_inf + age_effect_surv[j] + period_effect_surv[age2date[i] + j] + beta_male)
-			}
-			# now accumulate the other sums up to e-1
-			for(j in 1:(e[i] - 1)) {
-				# sum up foi hazard from 1  to j
-				lam_foij <-  exp(space[sect[i]] + f_age_foi[age_lookup_f[j]] + f_period_foi[period_lookup[age2date[i] + j]])
-				# sum up like_temp (no sus hazard when j=1)
-				lik_temp <- lik_temp + lam_foij * 
-									exp(-lam_sus) *
-									exp(-lam_foi) *
-									exp(-lam_inf)
-				# now increment the hazards (subtract for lam_inf)
-				if(j < (e[i] - 1)){
-					lam_foi <- lam_foi + lam_foij
-					lam_sus <- lam_sus + exp(beta0_sus + age_effect_surv[j] + period_effect_surv[age2date[i] + j] + beta_male)
-					lam_inf <- lam_inf - exp(beta0_inf + age_effect_surv[j] + period_effect_surv[age2date[i] + j] + beta_male)
-				}else{ # now calculate infected hazard for later
-					lam_inf <- sum(exp(beta0_inf + age_effect_surv[e[i]:(r[i]-1)] + period_effect_surv[age2date[i] + e[i]:(r[i]-1)] + beta_male))
-					lam_inf_s <- sum(exp(beta0_inf + age_effect_surv[(r[i]):(s[i]-1)] + period_effect_surv[age2date[i] + (r[i]):(s[i]-1)] + beta_male))
-				}
-			}			
-		}else{
-			# sum up infected hazard from 1 to e-1
-			for(j in 1:(e[i] - 1)) {
-				lam_inf <- lam_inf + exp(beta0_inf + age_effect_surv[j] + period_effect_surv[age2date[i] + j])
-			}
-			# now accumulate the other sums up to e-1
-			for(j in 1:(e[i] - 1)) {
-				# sum up foi hazard from 1  to j
-				lam_foij <-  exp(space[sect[i]] + m_age_foi[age_lookup_m[j]] + m_period_foi[period_lookup[age2date[i] + j]])
-				# sum up like_temp (no sus hazard when j=1)
-				lik_temp <- lik_temp + lam_foij * 
-									exp(-lam_sus) *
-									exp(-lam_foi) *
-									exp(-lam_inf)
-				# now increment the hazards (subtract for lam_inf)
-				if(j < (e[i] - 1)){
-					lam_foi <- lam_foi + lam_foij
-					lam_sus <- lam_sus + exp(beta0_sus + age_effect_surv[j] + period_effect_surv[age2date[i] + j])
-					lam_inf <- lam_inf - exp(beta0_inf + age_effect_surv[j] + period_effect_surv[age2date[i] + j])
-				}else{ # now calculate infected hazard for later
-					lam_inf <- sum(exp(beta0_inf + age_effect_surv[e[i]:(r[i] - 1)] + period_effect_surv[age2date[i] + e[i]:(r[i] - 1)]))
-					lam_inf_s <- sum(exp(beta0_inf + age_effect_surv[r[i]:(s[i] - 1)] + period_effect_surv[age2date[i] + r[i]:(s[i] - 1)]))
-				}
-			}			
-		}
-		#######################################
-		### calculating the joint likelihood
-		#######################################
-		
-		sumllik <- sumllik -lam_inf + log(1-exp(-lam_inf_s)) + log(lik_temp)
-	}
-    returnType(double(0))
-    if(log) return(sumllik) else return(exp(sumllik))    ## return log-likelihood
-  })
+        # start the loop through individuals
+        sumllik <- 0
+        for (i in 1:n_samples) {
+            lam_inf <- 0
+            lam_foi <- 0
+            lam_sus <- 0
+            lik_temp <- 0
+
+            #############################################
+            # preliminary hazards for the likelihood
+            #############################################
+            if (sex[i] == 1) { # females
+                # sum up infected hazard from 1 to e-1
+                for (j in 1:(e[i] - 1)) {
+                    lam_inf <- lam_inf +
+					           exp(beta0_inf +
+							       age_effect_surv[j] +
+								   period_effect_surv[age2date[i] + j])
+                }
+                # now accumulate the other sums up to e-1
+                for (j in 1:(e[i] - 1)) {
+                    # sum up foi hazard from 1  to j
+                    lam_foij <- exp(space[sect[i]] +
+					                f_age_foi[age_lookup_f[j]] +
+									f_period_foi[period_lookup[age2date[i] + j]])
+                    # sum up like_temp (no sus hazard when j=1)
+                    lik_temp <- lik_temp +
+					            lam_foij *
+                                    exp(-lam_sus) *
+                                    exp(-lam_foi) *
+                                    exp(-lam_inf)
+                    # now increment the hazards (subtract for lam_inf)
+                    if (j < (e[i] - 1)) {
+                        lam_foi <- lam_foi + lam_foij
+                        lam_sus <- lam_sus +
+						           exp(beta0_sus +
+								       age_effect_surv[j] +
+									   period_effect_surv[age2date[i] + j])
+                        lam_inf <- lam_inf -
+						           exp(beta0_inf +
+								       age_effect_surv[j] +
+									   period_effect_surv[age2date[i] + j])
+                    } else { # now calculate infected hazard for later
+                        lam_inf <- sum(exp(beta0_inf +
+						                   age_effect_surv[e[i]:(r[i] - 1)] +
+										   period_effect_surv[age2date[i] + e[i]:(r[i] - 1)]))
+                        lam_inf_s <- sum(exp(beta0_inf +
+						                     age_effect_surv[(r[i]):(s[i] - 1)] +
+											 period_effect_surv[age2date[i] + (r[i]):(s[i] - 1)]))
+                    }
+                }
+            } else {
+                # sum up infected hazard from 1 to e-1
+                for (j in 1:(e[i] - 1)) {
+                    lam_inf <- lam_inf +
+					           exp(beta0_inf +
+							   age_effect_surv[j] +
+							   period_effect_surv[age2date[i] + j] +
+							   beta_male)
+                }
+                # now accumulate the other sums up to e-1
+                for (j in 1:(e[i] - 1)) {
+                    # sum up foi hazard from 1  to j
+                    lam_foij <- exp(space[sect[i]] +
+					                m_age_foi[age_lookup_m[j]] +
+									m_period_foi[period_lookup[age2date[i] + j]])
+                    # sum up like_temp (no sus hazard when j=1)
+                    lik_temp <- lik_temp + lam_foij *
+                        exp(-lam_sus) *
+                        exp(-lam_foi) *
+                        exp(-lam_inf)
+                    # now increment the hazards (subtract for lam_inf)
+                    if (j < (e[i] - 1)) {
+                        lam_foi <- lam_foi + lam_foij
+                        lam_sus <- lam_sus +
+						           exp(beta0_sus +
+								       age_effect_surv[j] +
+									   period_effect_surv[age2date[i] + j] +
+									   beta_male)
+                        lam_inf <- lam_inf -
+						           exp(beta0_inf +
+								       age_effect_surv[j] +
+									   period_effect_surv[age2date[i] + j] +
+									   beta_male)
+                    } else { # now calculate infected hazard for later
+                        lam_inf <- sum(exp(beta0_inf +
+						                   age_effect_surv[e[i]:(r[i] - 1)] +
+										   period_effect_surv[age2date[i] + e[i]:(r[i] - 1)] +
+										   beta_male))
+                        lam_inf_s <- sum(exp(beta0_inf +
+						                     age_effect_surv[r[i]:(s[i] - 1)] +
+											 period_effect_surv[age2date[i] + r[i]:(s[i] - 1)] +
+											 beta_male))
+                    }
+                }
+            }
+            #######################################
+            ### calculating the joint likelihood
+            #######################################
+
+            sumllik <- sumllik -
+			           lam_inf +
+					   log(1 - exp(-lam_inf_s)) +
+					   log(lik_temp)
+        }
+        returnType(double(0))
+        if (log) {
+            return(sumllik)
+        } else {
+            return(exp(sumllik))
+        } ## return log-likelihood
+    }
+)
 
 
 nimble::registerDistributions(list(
     dIcapMort = list(
-        BUGSdist = 'dIcapMort(n_samples,e,r,s,sex,age2date,beta_male,beta0_sus,beta0_inf,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup,space,sect)',
-        types = c("value = integer(0)",
-					"n_samples = integer(0)",
-					"e = double(1)",
-                    "r = double(1)",
-                    "s = double(1)",
-                    "sex = double(1)",
-                    "age2date = double(1)",
-                    "beta_male = double(0)",
-                    "beta0_sus = double(0)",
-                    "beta0_inf = double(0)",
-                    "age_effect_surv = double(1)",
-                    "period_effect_surv = double(1)",
-                    "f_age_foi = double(1)",
-                    "m_age_foi = double(1)",
-                    "age_lookup_f = double(1)",
-                    "age_lookup_m = double(1)",
-                    "f_period_foi=double(1)",
-                    "m_period_foi=double(1)",
-                    "period_lookup=double(1)",
-                    "space = double(1)",
-					"sect = double(1)",
-                    "log = double()"
-                  ),
+        BUGSdist = "dIcapMort(n_samples,e,r,s,sex,age2date,beta_male,beta0_sus,beta0_inf,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup,space,sect)",
+        types = c(
+            "value = integer(0)",
+            "n_samples = integer(0)",
+            "e = double(1)",
+            "r = double(1)",
+            "s = double(1)",
+            "sex = double(1)",
+            "age2date = double(1)",
+            "beta_male = double(0)",
+            "beta0_sus = double(0)",
+            "beta0_inf = double(0)",
+            "age_effect_surv = double(1)",
+            "period_effect_surv = double(1)",
+            "f_age_foi = double(1)",
+            "m_age_foi = double(1)",
+            "age_lookup_f = double(1)",
+            "age_lookup_m = double(1)",
+            "f_period_foi=double(1)",
+            "m_period_foi=double(1)",
+            "period_lookup=double(1)",
+            "space = double(1)",
+            "sect = double(1)",
+            "log = double()"
+        ),
         discrete = TRUE
     )
 ))
 
 ### for a user-defined distribution
-assign('dIcapMort', dIcapMort, envir = .GlobalEnv)
+assign("dIcapMort", dIcapMort, envir = .GlobalEnv)
 
 # start <- Sys.time()
 # test <- dIcapMort(
@@ -1407,7 +1598,7 @@ assign('dIcapMort', dIcapMort, envir = .GlobalEnv)
 ###
 ###   User defined distribution for likelihood for
 ###   uninfected deer that were test neg at capture,
-###   then test negative at recap, that are right censored, 
+###   then test negative at recap, that are right censored,
 ###   and have been tested post censoring
 ###
 ###   d_fit_rec_neg_cens_posttest
@@ -1417,107 +1608,110 @@ assign('dIcapMort', dIcapMort, envir = .GlobalEnv)
 #######################################################################
 
 dRecNegCensTest <- nimble::nimbleFunction(
-    run = function(
-        ### argument type declarations
-        x = integer(0),
-        n_samples = integer(0), # number of samples in dataset
-        e = double(1), #e, age of entry
-        r = double(1), #r, age of last known alive
-        sex = double(1),
-        age2date = double(1),
-        beta_male = double(0),
-        beta0_sus = double(0),
-        age_effect_surv = double(1),
-        period_effect_surv = double(1),
-        f_age_foi = double(1),
-        m_age_foi = double(1),
-        age_lookup_f = double(1),
-        age_lookup_m = double(1),
-        period_lookup=double(1),
-        f_period_foi=double(1),
-        m_period_foi=double(1),
-		sect = double(1),
-        space = double(1),
-        log = double()
-        ) {
+    run = function( ### argument type declarations
+                   x = integer(0),
+                   n_samples = integer(0), # number of samples in dataset
+                   e = double(1), # e, age of entry
+                   r = double(1), # r, age of last known alive
+                   sex = double(1),
+                   age2date = double(1),
+                   beta_male = double(0),
+                   beta0_sus = double(0),
+                   age_effect_surv = double(1),
+                   period_effect_surv = double(1),
+                   f_age_foi = double(1),
+                   m_age_foi = double(1),
+                   age_lookup_f = double(1),
+                   age_lookup_m = double(1),
+                   period_lookup = double(1),
+                   f_period_foi = double(1),
+                   m_period_foi = double(1),
+                   sect = double(1),
+                   space = double(1),
+                   log = double()) {
+        sumllik <- 0 # intialize log-likelihood
+        for (i in 1:n_samples) {
+            lam_foi <- 0
+            lam_sus <- 0
+            # lam_inf <- 0
+            lik_temp <- 0
 
-    sumllik <- 0 #intialize log-likelihood
-	for(i in 1:n_samples){
-		lam_foi <- 0 
-		lam_sus <- 0 
-		#lam_inf <- 0 
-		lik_temp <- 0
-	
-		#############################################
-		# preliminary hazards for the likelihood
-		#############################################
-		if(sex[i] == 1){ # females
-			for(j in e[i]:(r[i]-1)){
-			#survival hazard for susceptible deer
-			lam_sus <- lam_sus + exp(beta0_sus +
-								age_effect_surv[j] +
-								period_effect_surv[j + age2date[i]] +
-								beta_male)
-			}
-			#force of infection infection hazard
-			for(j in 1:(r[i] - 1)){
-			lam_foi <- lam_foi + exp(space[sect[i]] +
-					f_age_foi[age_lookup_f[j]] +
-						f_period_foi[period_lookup[j + age2date[i]]])
-			}
-		}else{ # males
-			for(j in e[i]:(r[i]-1)){
-			#survival hazard for susceptible deer
-			lam_sus <- lam_sus + exp(beta0_sus +
-								age_effect_surv[j] +
-								period_effect_surv[j + age2date[i]])
-			}
-			#force of infection infection hazard
-			for(j in 1:(r[i] - 1)){
-			lam_foi <- lam_foi + exp(space[sect[i]] +
-					m_age_foi[age_lookup_m[j]] +
-						m_period_foi[period_lookup[j + age2date[i]]])
-			}
-		}
-		#######################################
-		### calculating the joint likelihood
-		#######################################
-		sumllik <- sumllik - lam_sus - lam_foi
-	}
-    returnType(double(0))
-    if(log) return(sumllik) else return(exp(sumllik))    ## return log-likelihood
-  })
+            #############################################
+            # preliminary hazards for the likelihood
+            #############################################
+            if (sex[i] == 1) { # females
+                for (j in e[i]:(r[i] - 1)) {
+                    # survival hazard for susceptible deer
+                    lam_sus <- lam_sus + exp(beta0_sus +
+                        age_effect_surv[j] +
+                        period_effect_surv[j + age2date[i]])
+                }
+                # force of infection infection hazard
+                for (j in 1:(r[i] - 1)) {
+                    lam_foi <- lam_foi + exp(space[sect[i]] +
+                        f_age_foi[age_lookup_f[j]] +
+                        f_period_foi[period_lookup[j + age2date[i]]])
+                }
+            } else { # males
+                for (j in e[i]:(r[i] - 1)) {
+                    # survival hazard for susceptible deer
+                    lam_sus <- lam_sus + exp(beta0_sus +
+                        age_effect_surv[j] +
+                        period_effect_surv[j + age2date[i]] +
+                        beta_male)
+                }
+                # force of infection infection hazard
+                for (j in 1:(r[i] - 1)) {
+                    lam_foi <- lam_foi + exp(space[sect[i]] +
+                        m_age_foi[age_lookup_m[j]] +
+                        m_period_foi[period_lookup[j + age2date[i]]])
+                }
+            }
+            #######################################
+            ### calculating the joint likelihood
+            #######################################
+            sumllik <- sumllik - lam_sus - lam_foi
+        }
+        returnType(double(0))
+        if (log) {
+            return(sumllik)
+        } else {
+            return(exp(sumllik))
+        } ## return log-likelihood
+    }
+)
 
 nimble::registerDistributions(list(
     dRecNegCensTest = list(
-        BUGSdist = 'dRecNegCensTest(n_samples,e,r,sex,age2date,beta_male,beta0_sus,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup,space,sect)',
-        types = c("value = integer(0)",
-					"n_samples = integer(0)",
-					"e = double(1)",
-                    "r = double(1)",
-                    "sex = double(1)",
-                    "age2date = double(1)",
-                    "beta_male = double(0)",
-                    "beta0_sus = double(0)",
-                    "age_effect_surv = double(1)",
-                    "period_effect_surv = double(1)",
-                    "f_age_foi = double(1)",
-                    "m_age_foi = double(1)",
-                    "age_lookup_f = double(1)",
-                    "age_lookup_m = double(1)",
-                    "f_period_foi=double(1)",
-                    "m_period_foi=double(1)",
-                    "period_lookup=double(1)",
-                    "space = double(1)",
-					"sect = double(1)",
-                    "log = double(0)"
-                  ),
+        BUGSdist = "dRecNegCensTest(n_samples,e,r,sex,age2date,beta_male,beta0_sus,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup,space,sect)",
+        types = c(
+            "value = integer(0)",
+            "n_samples = integer(0)",
+            "e = double(1)",
+            "r = double(1)",
+            "sex = double(1)",
+            "age2date = double(1)",
+            "beta_male = double(0)",
+            "beta0_sus = double(0)",
+            "age_effect_surv = double(1)",
+            "period_effect_surv = double(1)",
+            "f_age_foi = double(1)",
+            "m_age_foi = double(1)",
+            "age_lookup_f = double(1)",
+            "age_lookup_m = double(1)",
+            "f_period_foi=double(1)",
+            "m_period_foi=double(1)",
+            "period_lookup=double(1)",
+            "space = double(1)",
+            "sect = double(1)",
+            "log = double(0)"
+        ),
         discrete = TRUE
     )
 ))
 
-##for a user-defined distribution
-assign('dRecNegCensTest', dRecNegCensTest, envir = .GlobalEnv)
+## for a user-defined distribution
+assign("dRecNegCensTest", dRecNegCensTest, envir = .GlobalEnv)
 
 # start <- Sys.time()
 # test <- dRecNegCensTest(
@@ -1550,7 +1744,7 @@ assign('dRecNegCensTest', dRecNegCensTest, envir = .GlobalEnv)
 ###
 ###   User defined distribution for likelihood for
 ###   uninfected deer that were test neg at capture,
-###   then test negative at recap, that are right censored, 
+###   then test negative at recap, that are right censored,
 ###   and have not been tested post censoring
 ###
 ###   d_fit_rec_neg_cens_postno
@@ -1560,125 +1754,131 @@ assign('dRecNegCensTest', dRecNegCensTest, envir = .GlobalEnv)
 #######################################################################
 
 dRecNegCensPostNo <- nimble::nimbleFunction(
-    run = function(
-        ### argument type declarations
-        x = integer(0),
-		n_samples = integer(0), # number of samples in dataset
-        e = double(1), #e, age of entry
-        r = double(1), #r, age of last known alive
-        dn1 = double(1), #right of last test negative
-        sex = double(1),
-        age2date = double(1),
-        beta_male = double(0),
-        beta0_sus = double(0),
-        beta0_inf = double(0),
-        age_effect_surv = double(1),
-        period_effect_surv = double(1),
-        f_age_foi = double(1),
-        m_age_foi = double(1),
-        age_lookup_f = double(1),
-        age_lookup_m = double(1),
-        period_lookup=double(1),
-        f_period_foi=double(1),
-        m_period_foi=double(1),
-		sect = double(1),
-        space = double(1),
-        log = double()
-        ) {
+    run = function( ### argument type declarations
+                   x = integer(0),
+                   n_samples = integer(0), # number of samples in dataset
+                   e = double(1), # e, age of entry
+                   r = double(1), # r, age of last known alive
+                   dn1 = double(1), # right of last test negative
+                   sex = double(1),
+                   age2date = double(1),
+                   beta_male = double(0),
+                   beta0_sus = double(0),
+                   beta0_inf = double(0),
+                   age_effect_surv = double(1),
+                   period_effect_surv = double(1),
+                   f_age_foi = double(1),
+                   m_age_foi = double(1),
+                   age_lookup_f = double(1),
+                   age_lookup_m = double(1),
+                   period_lookup = double(1),
+                   f_period_foi = double(1),
+                   m_period_foi = double(1),
+                   sect = double(1),
+                   space = double(1),
+                   log = double()) {
+        sumllik <- 0 # intialize log-likelihood
+        for (i in 1:n_samples) {
+            lam_foi <- nimNumeric(r[i], init = FALSE)
+            lam_sus <- nimNumeric(r[i], init = FALSE)
+            lam_inf <- nimNumeric(r[i], init = FALSE)
+            # lik_temp <- 0
 
-    sumllik <- 0 #intialize log-likelihood
-	for(i in 1:n_samples){
-		lam_foi <- nimNumeric(r[i],init=FALSE)
-		lam_sus <- nimNumeric(r[i],init=FALSE)
-		lam_inf <- nimNumeric(r[i],init=FALSE)
-		#lik_temp <- 0
-	
-		#############################################
-		# preliminary hazards for the likelihood
-		#############################################
-		if(sex[i] == 1){ # females	
-			#survival hazard for susceptible deer
-			lam_sus[e[i]:(r[i] - 1)] <- exp(beta0_sus +
-					age_effect_surv[e[i]:(r[i] - 1)] +
-					period_effect_surv[(e[i] + age2date[i]):(r[i] - 1 + age2date[i])] +
-					beta_male)
-			#survival hazard while infected
-			lam_inf[(dn1[i]+1):(r[i] - 1)] <- exp(beta0_inf +
-				age_effect_surv[(dn1[i]+1):(r[i] - 1)] +
-				period_effect_surv[(dn1[i]+1 + age2date[i]):(r[i] - 1 + age2date[i])] +
-				beta_male)
-			#force of infection infection hazard
-			lam_foi[1:(r[i] - 1)] <- exp(space[sect[i]] +
-					f_age_foi[age_lookup_f[1:(r[i] - 1)]] +
-						f_period_foi[period_lookup[(1 + age2date[i]):(r[i] - 1 + age2date[i])]])
-		}else{
-			#survival hazard for susceptible deer
-			lam_sus[e[i]:(r[i] - 1)] <- exp(beta0_sus +
-					age_effect_surv[e[i]:(r[i] - 1)] +
-					period_effect_surv[(e[i] + age2date[i]):(r[i] - 1 + age2date[i])])
-			#survival hazard while infected
-			lam_inf[(dn1[i] + 1):(r[i] - 1)] <- exp(beta0_inf +
-				age_effect_surv[(dn1[i]+1):(r[i] - 1)] +
-				period_effect_surv[(dn1[i]+1 + age2date[i]):(r[i] - 1 + age2date[i])])
-			#force of infection infection hazard
-			lam_foi[1:(r[i] - 1)] <- exp(space[sect[i]] +
-					m_age_foi[age_lookup_m[1:(r[i] - 1)]] +
-						m_period_foi[period_lookup[(1 + age2date[i]):(r[i] - 1 + age2date[i])]])
-		}
-	
-		#######################################
-		### calculating the joint likelihood
-		#######################################
-	
-		lik_temp <- lam_foi[(dn1[i] + 1)] * exp(-sum(lam_inf[(dn1[i] + 1):(r[i] - 1)]))
-	
-		for(k in (dn1[i] + 2):(r[i] - 1)){
-			lik_temp <- lik_temp +  lam_foi[k] *
-						exp(-sum(lam_sus[dn1[i]:(k - 1)])) *
-						exp(-sum(lam_inf[k:(r[i] - 1)]))
-		}
-	
-		sumllik <- sumllik + log(exp(-sum(lam_sus[e[i]:dn1[i]])) *
-			exp(-sum(lam_foi[1:dn1[i]])) *
-			lik_temp +
-			exp(-sum(lam_foi[1:(r[i] - 1)])) *
-			exp(-sum(lam_sus[e[i]:(r[i] - 1)])))
-	}
-    returnType(double(0))
-    if(log) return(sumllik) else return(exp(sumllik))    ## return log-likelihood
-  })
+            #############################################
+            # preliminary hazards for the likelihood
+            #############################################
+            if (sex[i] == 1) { # females
+                # survival hazard for susceptible deer
+                lam_sus[e[i]:(r[i] - 1)] <- exp(beta0_sus +
+                    age_effect_surv[e[i]:(r[i] - 1)] +
+                    period_effect_surv[(e[i] + age2date[i]):(r[i] - 1 + age2date[i])])
+                # survival hazard while infected
+                lam_inf[(dn1[i] + 1):(r[i] - 1)] <- exp(beta0_inf +
+                    age_effect_surv[(dn1[i] + 1):(r[i] - 1)] +
+                    period_effect_surv[(dn1[i] + 1 + age2date[i]):(r[i] - 1 + age2date[i])])
+                # force of infection infection hazard
+                lam_foi[1:(r[i] - 1)] <- exp(space[sect[i]] +
+                    f_age_foi[age_lookup_f[1:(r[i] - 1)]] +
+                    f_period_foi[period_lookup[(1 + age2date[i]):(r[i] - 1 + age2date[i])]])
+            } else {
+                # survival hazard for susceptible deer
+                lam_sus[e[i]:(r[i] - 1)] <- exp(beta0_sus +
+                    age_effect_surv[e[i]:(r[i] - 1)] +
+                    period_effect_surv[(e[i] + age2date[i]):(r[i] - 1 + age2date[i])] +
+                    beta_male)
+                # survival hazard while infected
+                lam_inf[(dn1[i] + 1):(r[i] - 1)] <- exp(beta0_inf +
+                    age_effect_surv[(dn1[i] + 1):(r[i] - 1)] +
+                    period_effect_surv[(dn1[i] + 1 + age2date[i]):(r[i] - 1 + age2date[i])] +
+                    beta_male)
+                # force of infection infection hazard
+                lam_foi[1:(r[i] - 1)] <- exp(space[sect[i]] +
+                    m_age_foi[age_lookup_m[1:(r[i] - 1)]] +
+                    m_period_foi[period_lookup[(1 + age2date[i]):(r[i] - 1 + age2date[i])]])
+            }
+
+            #######################################
+            ### calculating the joint likelihood
+            #######################################
+
+            lik_temp <- lam_foi[(dn1[i] + 1)] *
+						exp(-sum(lam_inf[(dn1[i] + 1):(r[i] - 1)]))
+
+            for (k in (dn1[i] + 2):(r[i] - 1)) {
+                lik_temp <- lik_temp +
+				            lam_foi[k] *
+                            exp(-sum(lam_sus[dn1[i]:(k - 1)])) *
+                            exp(-sum(lam_inf[k:(r[i] - 1)]))
+            }
+
+            sumllik <- sumllik +
+			           log(exp(-sum(lam_sus[e[i]:dn1[i]])) *
+                           exp(-sum(lam_foi[1:dn1[i]])) *
+                           lik_temp +
+                       exp(-sum(lam_foi[1:(r[i] - 1)])) *
+                           exp(-sum(lam_sus[e[i]:(r[i] - 1)])))
+        }
+        returnType(double(0))
+        if (log) {
+            return(sumllik)
+        } else {
+            return(exp(sumllik))
+        } ## return log-likelihood
+    }
+)
 
 nimble::registerDistributions(list(
     dRecNegCensPostNo = list(
-        BUGSdist = 'dRecNegCensPostNo(n_samples,e,r,dn1,sex,age2date,beta_male,beta0_inf,beta0_sus,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup,sect,space)',
-        types = c("value = integer(0)",
-				  "n_samples = integer(0)",
-				  "e = double(1)",
-                  "r = double(1)",
-                  "dn1 = double(1)",
-                  "sex = double(1)",
-                  "age2date = double(1)",
-                  "beta_male = double(0)",
-                  "beta0_inf = double(0)",
-                  "beta0_sus = double(0)",
-                  "age_effect_surv = double(1)",
-                  "period_effect_surv = double(1)",
-                  "f_age_foi = double(1)",
-                  "m_age_foi = double(1)",
-                  "age_lookup_f = double(1)",
-                  "age_lookup_m = double(1)",
-                  "period_lookup=double(1)",
-                  "f_period_foi=double(1)",
-                  "m_period_foi=double(1)",
-                  "space = double(0)",
-                  "log = double(0)"
-                  ),
+        BUGSdist = "dRecNegCensPostNo(n_samples,e,r,dn1,sex,age2date,beta_male,beta0_inf,beta0_sus,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup,sect,space)",
+        types = c(
+            "value = integer(0)",
+            "n_samples = integer(0)",
+            "e = double(1)",
+            "r = double(1)",
+            "dn1 = double(1)",
+            "sex = double(1)",
+            "age2date = double(1)",
+            "beta_male = double(0)",
+            "beta0_inf = double(0)",
+            "beta0_sus = double(0)",
+            "age_effect_surv = double(1)",
+            "period_effect_surv = double(1)",
+            "f_age_foi = double(1)",
+            "m_age_foi = double(1)",
+            "age_lookup_f = double(1)",
+            "age_lookup_m = double(1)",
+            "period_lookup=double(1)",
+            "f_period_foi=double(1)",
+            "m_period_foi=double(1)",
+            "space = double(0)",
+            "log = double(0)"
+        ),
         discrete = TRUE
     )
 ))
 
-###for a user-defined distribution
-assign('dRecNegCensPostNo', dRecNegCensPostNo, envir = .GlobalEnv)
+### for a user-defined distribution
+assign("dRecNegCensPostNo", dRecNegCensPostNo, envir = .GlobalEnv)
 # start <- Sys.time()
 # test <-  dRecNegCensPostNo(
 #         x = 1,
@@ -1722,118 +1922,120 @@ assign('dRecNegCensPostNo', dRecNegCensPostNo, envir = .GlobalEnv)
 #######################################################################
 
 dRecNegMort <- nimble::nimbleFunction(
-    run = function(
-        ### argument type declarations
-        x = integer(0),
-        n_samples = integer(0), # number of samples in dataset
-        e = double(1), #e, age of entry
-        r = double(1), #r, age of last known alive
-        s = double(1), #s, age of known mortality
-        sex = double(1),
-        age2date = double(1),
-        beta_male = double(0),
-        beta0_sus = double(0),
-        age_effect_surv = double(1),
-        period_effect_surv = double(1),
-        f_age_foi = double(1),
-        m_age_foi = double(1),
-        age_lookup_f = double(1),
-        age_lookup_m = double(1),
-        period_lookup=double(1),
-        f_period_foi=double(1),
-        m_period_foi=double(1),
-		sect = double(1),
-        space = double(1),
-        log = double(0)
-        ) {
+    run = function( ### argument type declarations
+                   x = integer(0),
+                   n_samples = integer(0), # number of samples in dataset
+                   e = double(1), # e, age of entry
+                   r = double(1), # r, age of last known alive
+                   s = double(1), # s, age of known mortality
+                   sex = double(1),
+                   age2date = double(1),
+                   beta_male = double(0),
+                   beta0_sus = double(0),
+                   age_effect_surv = double(1),
+                   period_effect_surv = double(1),
+                   f_age_foi = double(1),
+                   m_age_foi = double(1),
+                   age_lookup_f = double(1),
+                   age_lookup_m = double(1),
+                   period_lookup = double(1),
+                   f_period_foi = double(1),
+                   m_period_foi = double(1),
+                   sect = double(1),
+                   space = double(1),
+                   log = double(0)) {
+        sumllik <- 0 # intialize log-likelihood
+        for (i in 1:n_samples) {
+            lam_foi <- 0
+            lam_sus <- 0
 
-    sumllik <- 0 #intialize log-likelihood
-	for(i in 1:n_samples){
-		lam_foi <- 0
-		lam_sus <- 0
-	
-		#############################################
-		# preliminary hazards for the likelihood
-		#############################################
-		if(sex[i] == 1){ # age loops for females		
-			#survival hazard for susceptible deer
-			for(j in e[i]:(r[i] - 1)){
-				lam_sus <- lam_sus + exp(beta0_sus +
-									age_effect_surv[j] +
-									period_effect_surv[(j + age2date[i])] +
-									beta_male)
-			}
-			lam_sus_s <- sum(exp(beta0_sus +
-								age_effect_surv[r[i]:(s[i]-1)] +
-								period_effect_surv[(r[i] + age2date[i]):(s[i]-1 + age2date[i])] +
-								beta_male))
-			#force of infection infection hazard
-			for(j in 1:(s[i]-1)){
-				lam_foi <- lam_foi + exp(space[sect[i]] +
-						f_age_foi[age_lookup_f[j]] +
-							f_period_foi[period_lookup[(j + age2date[i])]])
-			}
-		}else{ # males
-			#survival hazard for susceptible deer
-			for(j in e[i]:(r[i] - 1)){
-				lam_sus <- lam_sus + exp(beta0_sus +
-									age_effect_surv[j] +
-									period_effect_surv[(j + age2date[i])])
-			}
-			lam_sus_s <- sum(exp(beta0_sus +
-								age_effect_surv[r[i]:(s[i] - 1)] +
-								period_effect_surv[(r[i] + age2date[i]):(s[i] - 1 + age2date[i])]))
+            #############################################
+            # preliminary hazards for the likelihood
+            #############################################
+            if (sex[i] == 1) { # age loops for females
+                # survival hazard for susceptible deer
+                for (j in e[i]:(r[i] - 1)) {
+                    lam_sus <- lam_sus + exp(beta0_sus +
+                        age_effect_surv[j] +
+                        period_effect_surv[(j + age2date[i])])
+                }
+                lam_sus_s <- sum(exp(beta0_sus +
+                    age_effect_surv[r[i]:(s[i] - 1)] +
+                    period_effect_surv[(r[i] + age2date[i]):(s[i] - 1 + age2date[i])]))
+                # force of infection infection hazard
+                for (j in 1:(s[i] - 1)) {
+                    lam_foi <- lam_foi + exp(space[sect[i]] +
+                        f_age_foi[age_lookup_f[j]] +
+                        f_period_foi[period_lookup[(j + age2date[i])]])
+                }
+            } else { # males
+                # survival hazard for susceptible deer
+                for (j in e[i]:(r[i] - 1)) {
+                    lam_sus <- lam_sus + exp(beta0_sus +
+                        age_effect_surv[j] +
+                        period_effect_surv[(j + age2date[i])] +
+                        beta_male)
+                }
+                lam_sus_s <- sum(exp(beta0_sus +
+                    age_effect_surv[r[i]:(s[i] - 1)] +
+                    period_effect_surv[(r[i] + age2date[i]):(s[i] - 1 + age2date[i])] +
+                        beta_male))
 
-			#force of infection infection hazard
-			for(j in 1:(s[i] - 1)){
-				lam_foi <- lam_foi + exp(space[sect[i]] +
-						m_age_foi[age_lookup_m[j]] +
-							m_period_foi[period_lookup[(j + age2date[i])]])
-			}
-		}
-	
-		#######################################
-		### calculating the joint likelihood
-		#######################################
-	
-		sumllik <- sumllik - lam_sus + log(1-exp(-lam_sus_s)) - lam_foi
-		
-	}
-    returnType(double(0))
-    if(log) return(sumllik) else return(exp(sumllik))    ## return log-likelihood
-  })
+                # force of infection infection hazard
+                for (j in 1:(s[i] - 1)) {
+                    lam_foi <- lam_foi + exp(space[sect[i]] +
+                        m_age_foi[age_lookup_m[j]] +
+                        m_period_foi[period_lookup[(j + age2date[i])]])
+                }
+            }
+
+            #######################################
+            ### calculating the joint likelihood
+            #######################################
+
+            sumllik <- sumllik - lam_sus + log(1 - exp(-lam_sus_s)) - lam_foi
+        }
+        returnType(double(0))
+        if (log) {
+            return(sumllik)
+        } else {
+            return(exp(sumllik))
+        } ## return log-likelihood
+    }
+)
 
 nimble::registerDistributions(list(
     dRecNegMort = list(
-        BUGSdist = 'dRecNegMort(n_samples,e,r,s,sex,age2date,beta_male,beta0_sus,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup,space,sect)',
-        types = c("value = integer(0)",
-				  "n_samples = integer(0)",
-				  "e = double(1)",
-                  "r = double(1)",
-                  "s = double(1)",
-                  "sex =  double(1)",
-                  "age2date =  double(1)",
-                  "beta_male = double(0)",
-                  "beta0_sus = double(0)",
-                  "age_effect_surv = double(1)",
-                  "period_effect_surv = double(1)",
-                  "f_age_foi = double(1)",
-                  "m_age_foi = double(1)",
-                  "age_lookup_f = double(1)",
-                  "age_lookup_m = double(1)",
-                  "period_lookup = double(1)",
-                  "f_period_foi = double(1)",
-                  "m_period_foi = double(1)",
-                  "space = double(1)",
-				  "sect = double(1)",
-                  "log = double(0)"
-                  ),
+        BUGSdist = "dRecNegMort(n_samples,e,r,s,sex,age2date,beta_male,beta0_sus,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup,space,sect)",
+        types = c(
+            "value = integer(0)",
+            "n_samples = integer(0)",
+            "e = double(1)",
+            "r = double(1)",
+            "s = double(1)",
+            "sex =  double(1)",
+            "age2date =  double(1)",
+            "beta_male = double(0)",
+            "beta0_sus = double(0)",
+            "age_effect_surv = double(1)",
+            "period_effect_surv = double(1)",
+            "f_age_foi = double(1)",
+            "m_age_foi = double(1)",
+            "age_lookup_f = double(1)",
+            "age_lookup_m = double(1)",
+            "period_lookup = double(1)",
+            "f_period_foi = double(1)",
+            "m_period_foi = double(1)",
+            "space = double(1)",
+            "sect = double(1)",
+            "log = double(0)"
+        ),
         discrete = TRUE
     )
 ))
 
 # ###for a user-defined distribution
-assign('dRecNegMort', dRecNegMort, envir = .GlobalEnv)
+assign("dRecNegMort", dRecNegMort, envir = .GlobalEnv)
 
 # start <- Sys.time()
 # test <-  dRecNegMort(
@@ -1877,131 +2079,139 @@ assign('dRecNegMort', dRecNegMort, envir = .GlobalEnv)
 #######################################################################
 
 dRecPosMort <- nimble::nimbleFunction(
-    run = function(
-        ### argument type declarations
-        x = integer(0),
-        n_samples = integer(0), # number of samples in dataset
-        e = double(1), #e, age of entry
-        r = double(1), #r, age of last known alive
-        s = double(1), #s, age of known mortality
-        dn1 = double(1), #last interval of test negative
-        dn = double(1), #interval of test positive (could be interval of mortality)
-        sex = double(1),
-        age2date = double(1),
-        beta_male = double(0),
-        beta0_sus = double(0),
-        beta0_inf = double(0),
-        age_effect_surv = double(1),
-        period_effect_surv = double(1),
-        f_age_foi = double(1),
-        m_age_foi = double(1),
-        age_lookup_f = double(1),
-        age_lookup_m = double(1),
-        period_lookup=double(1),
-        f_period_foi=double(1),
-        m_period_foi=double(1),
-        space = double(1),
-		sect = double(1),
-        log = double()
-        ) {
+    run = function( ### argument type declarations
+                   x = integer(0),
+                   n_samples = integer(0), # number of samples in dataset
+                   e = double(1), # e, age of entry
+                   r = double(1), # r, age of last known alive
+                   s = double(1), # s, age of known mortality
+                   dn1 = double(1), # last interval of test negative
+                   dn = double(1), # interval of test positive (could be interval of mortality)
+                   sex = double(1),
+                   age2date = double(1),
+                   beta_male = double(0),
+                   beta0_sus = double(0),
+                   beta0_inf = double(0),
+                   age_effect_surv = double(1),
+                   period_effect_surv = double(1),
+                   f_age_foi = double(1),
+                   m_age_foi = double(1),
+                   age_lookup_f = double(1),
+                   age_lookup_m = double(1),
+                   period_lookup = double(1),
+                   f_period_foi = double(1),
+                   m_period_foi = double(1),
+                   space = double(1),
+                   sect = double(1),
+                   log = double()) {
+        sumllik <- 0 # intialize log-likelihood
+        for (i in 1:n_samples) {
+            lam_foi <- nimNumeric(s[i] - 1, init = FALSE)
+            lam_sus <- nimNumeric(s[i] - 1, init = FALSE)
+            lam_inf <- nimNumeric(s[i] - 1, init = FALSE)
+            lik_temp <- 0
 
-    sumllik <- 0 #intialize log-likelihood
-	for(i in 1:n_samples){
-		lam_foi <- nimNumeric(s[i] - 1,init=FALSE)
-		lam_sus <- nimNumeric(s[i] - 1,init=FALSE)
-		lam_inf <- nimNumeric(s[i] - 1,init=FALSE)
-		lik_temp  <- 0
-	
-		#############################################
-		# preliminary hazards for the likelihood
-		#############################################
-		if(sex[i] ==1){ # females		
-			#survival hazard for susceptible deer
-			lam_sus[e[i]:(dn[i] - 1)] <- exp(beta0_sus  +
-							age_effect_surv[e[i]:(dn[i] - 1)] +
-							period_effect_surv[(e[i] + age2date[i]):(dn[i] - 1 + age2date[i])] +
-							beta_male)
-			#survival hazard while infected
-			lam_inf[dn1[i]:(s[i] - 1)] <- exp(beta0_inf +
-										age_effect_surv[dn1[i]:(s[i] - 1)] +
-										period_effect_surv[(dn1[i] + age2date[i]):
-														(s[i] - 1 + age2date[i])] +
-										beta_male)
-			#force of infection infection hazard
-			lam_foi[1:(dn[i] - 1)] <- exp(space[sect[i]] +
-						f_age_foi[age_lookup_f[1:(dn[i] - 1)]] +
-									f_period_foi[period_lookup[(1 + age2date[i]):((dn[i] - 1) + age2date[i])]])
-		}else{ # males
-			#survival hazard for susceptible deer
-			lam_sus[e[i]:(dn[i] - 1)] <- exp(beta0_sus  +
-							age_effect_surv[e[i]:(dn[i] - 1)] +
-							period_effect_surv[(e[i] + age2date[i]):(dn[i] - 1 + age2date[i])])
-			#survival hazard while infected
-			lam_inf[dn1[i]:(s[i] - 1)] <- exp(beta0_inf +
-										age_effect_surv[dn1[i]:(s[i] - 1)] +
-										period_effect_surv[(dn1[i] + age2date[i]):
-														(s[i] - 1 + age2date[i])])
-			#force of infection infection hazard
-			lam_foi[1:(dn[i] - 1)] <- exp(space[sect[i]] +
-						m_age_foi[age_lookup_m[1:(dn[i] - 1)]] +
-									m_period_foi[period_lookup[(1 + age2date[i]):((dn[i] - 1) + age2date[i])]])
-		}
-	
-		#######################################
-		### calculating the joint likelihood
-		#######################################
-		lik_temp <- lik_temp + lam_foi[(dn1[i] + 1)] * 
-				exp(-sum(lam_foi[1:dn1[i]])) * 
-				exp(-sum(lam_inf[(dn1[i] + 1):(r[i] - 1)]))
-	
-		for(k in (dn1[i]+2):(dn[i]-1)) {
-		lik_temp <- lik_temp + lam_foi[k] * 
-				exp(-sum(lam_sus[e[i]:(k - 1)])) *
-				exp(-sum(lam_foi[1:(k - 1)])) *
-				exp(-sum(lam_inf[k:(r[i] - 1)]))
-		}
-	
-		sumllik <- sumllik + log(1 - exp(-sum(lam_inf[r[i]:(s[i] - 1)]))) +
-								log(lik_temp)
-	}
-    returnType(double(0))
-    if(log) return(sumllik) else return(exp(sumllik))    ## return log-likelihood
-  })
+            #############################################
+            # preliminary hazards for the likelihood
+            #############################################
+            if (sex[i] == 1) { # females
+                # survival hazard for susceptible deer
+                lam_sus[e[i]:(dn[i] - 1)] <- exp(beta0_sus +
+                    age_effect_surv[e[i]:(dn[i] - 1)] +
+                    period_effect_surv[(e[i] + age2date[i]):
+									   (dn[i] - 1 + age2date[i])])
+                # survival hazard while infected
+                lam_inf[dn1[i]:(s[i] - 1)] <- exp(beta0_inf +
+                    age_effect_surv[dn1[i]:(s[i] - 1)] +
+                    period_effect_surv[(dn1[i] + age2date[i]):
+                    (s[i] - 1 + age2date[i])] +
+                    beta_male)
+                # force of infection infection hazard
+                lam_foi[1:(dn[i] - 1)] <- exp(space[sect[i]] +
+                    f_age_foi[age_lookup_f[1:(dn[i] - 1)]] +
+                    f_period_foi[period_lookup[(1 + age2date[i]):
+					                           ((dn[i] - 1) + age2date[i])]])
+            } else { # males
+                # survival hazard for susceptible deer
+                lam_sus[e[i]:(dn[i] - 1)] <- exp(beta0_sus +
+                    age_effect_surv[e[i]:(dn[i] - 1)] +
+                    period_effect_surv[(e[i] + age2date[i]):
+					                   (dn[i] - 1 + age2date[i])] +
+                    beta_male)
+                # survival hazard while infected
+                lam_inf[dn1[i]:(s[i] - 1)] <- exp(beta0_inf +
+                    age_effect_surv[dn1[i]:(s[i] - 1)] +
+                    period_effect_surv[(dn1[i] + age2date[i]):
+                    				   (s[i] - 1 + age2date[i])] +
+                    beta_male)
+                # force of infection infection hazard
+                lam_foi[1:(dn[i] - 1)] <- exp(space[sect[i]] +
+                    m_age_foi[age_lookup_m[1:(dn[i] - 1)]] +
+                    m_period_foi[period_lookup[(1 + age2date[i]):
+					                           ((dn[i] - 1) + age2date[i])]])
+            }
+
+            #######################################
+            ### calculating the joint likelihood
+            #######################################
+            lik_temp <- lik_temp + lam_foi[(dn1[i] + 1)] *
+                exp(-sum(lam_foi[1:dn1[i]])) *
+                exp(-sum(lam_inf[(dn1[i] + 1):(r[i] - 1)]))
+
+            for (k in (dn1[i] + 2):(dn[i] - 1)) {
+                lik_temp <- lik_temp + lam_foi[k] *
+                    exp(-sum(lam_sus[e[i]:(k - 1)])) *
+                    exp(-sum(lam_foi[1:(k - 1)])) *
+                    exp(-sum(lam_inf[k:(r[i] - 1)]))
+            }
+
+            sumllik <- sumllik + log(1 - exp(-sum(lam_inf[r[i]:(s[i] - 1)]))) +
+                log(lik_temp)
+        }
+        returnType(double(0))
+        if (log) {
+            return(sumllik)
+        } else {
+            return(exp(sumllik))
+        } ## return log-likelihood
+    }
+)
 
 nimble::registerDistributions(list(
     dRecPosMort = list(
-        BUGSdist = 'dRecPosMort(n_samples,e,r,s,dn1,dn,sex,age2date,beta_male,beta0_sus,beta0_inf,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup,space,sect)',
-        types = c("value = integer(0)",
-				  "n_samples = integer(0)",
-				  "e = double(1)",
-                  "r = double(1)",
-                  "s = double(1)",
-                  "dn1 = double(1)",
-				  "dn = double(1)",
-                  "sex = double(1)",
-                  "age2date = double(1)",
-                  "beta_male = double(0)",
-                  "beta0_sus = double(0)",
-                  "beta0_inf = double(0)",
-                  "age_effect_surv = double(1)",
-                  "period_effect_surv = double(1)",
-                  "f_age_foi = double(1)",
-                  "m_age_foi = double(1)",
-                  "age_lookup_f = double(1)",
-                  "age_lookup_m = double(1)",
-                  "period_lookup=double(1)",
-                  "f_period_foi=double(1)",
-                  "m_period_foi=double(1)",
-                  "space = double(1)",
-				  "sect = double(1)",
-                  "log = double(0)"
-                  ),
+        BUGSdist = "dRecPosMort(n_samples,e,r,s,dn1,dn,sex,age2date,beta_male,beta0_sus,beta0_inf,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup,space,sect)",
+        types = c(
+            "value = integer(0)",
+            "n_samples = integer(0)",
+            "e = double(1)",
+            "r = double(1)",
+            "s = double(1)",
+            "dn1 = double(1)",
+            "dn = double(1)",
+            "sex = double(1)",
+            "age2date = double(1)",
+            "beta_male = double(0)",
+            "beta0_sus = double(0)",
+            "beta0_inf = double(0)",
+            "age_effect_surv = double(1)",
+            "period_effect_surv = double(1)",
+            "f_age_foi = double(1)",
+            "m_age_foi = double(1)",
+            "age_lookup_f = double(1)",
+            "age_lookup_m = double(1)",
+            "period_lookup=double(1)",
+            "f_period_foi=double(1)",
+            "m_period_foi=double(1)",
+            "space = double(1)",
+            "sect = double(1)",
+            "log = double(0)"
+        ),
         discrete = TRUE
     )
 ))
 
-###Global Declaration so Nimble can access
-assign('dRecPosMort', dRecPosMort, envir = .GlobalEnv)
+### Global Declaration so Nimble can access
+assign("dRecPosMort", dRecPosMort, envir = .GlobalEnv)
 
 # start <- Sys.time()
 # test <-  dRecPosMort(
@@ -2048,129 +2258,134 @@ assign('dRecPosMort', dRecPosMort, envir = .GlobalEnv)
 #######################################################################
 
 dRecPosCens <- nimble::nimbleFunction(
-    run = function(
-        ### argument type declarations
-        x = integer(0),
-        # n_samples = integer(0), # number of samples in dataset
-        e = double(0), #e, age of entry
-        r = double(0), #r, age of last known alive
-        dn1 = double(0), #date of last test negative
-        dn = double(0), #date of positive test
-        sex = double(0),
-        age2date = double(0),
-        beta_male = double(0),
-        beta0_sus = double(0),
-        beta0_inf = double(0),
-        age_effect_surv = double(1),
-        period_effect_surv = double(1),
-        f_age_foi = double(1),
-        m_age_foi = double(1),
-        age_lookup_f = double(1),
-        age_lookup_m = double(1),
-        period_lookup=double(1),
-        f_period_foi=double(1),
-        m_period_foi=double(1),
-        space = double(0),
-		# sect = double(0),
-        log = double()
-        ) {
+    run = function( ### argument type declarations
+                   x = integer(0),
+                   # n_samples = integer(0), # number of samples in dataset
+                   e = double(0), # e, age of entry
+                   r = double(0), # r, age of last known alive
+                   dn1 = double(0), # date of last test negative
+                   dn = double(0), # date of positive test
+                   sex = double(0),
+                   age2date = double(0),
+                   beta_male = double(0),
+                   beta0_sus = double(0),
+                   beta0_inf = double(0),
+                   age_effect_surv = double(1),
+                   period_effect_surv = double(1),
+                   f_age_foi = double(1),
+                   m_age_foi = double(1),
+                   age_lookup_f = double(1),
+                   age_lookup_m = double(1),
+                   period_lookup = double(1),
+                   f_period_foi = double(1),
+                   m_period_foi = double(1),
+                   space = double(0),
+                   # sect = double(0),
+                   log = double()) {
+        sumllik <- 0 # intialize log-likelihood
+        lam_foi <- nimNumeric(r - 1, init = FALSE)
+        lam_sus <- nimNumeric(r - 1, init = FALSE)
+        lam_inf <- nimNumeric(r - 1, init = FALSE)
+        lik_temp <- 0
 
-    sumllik <- 0 #intialize log-likelihood
-	lam_foi <- nimNumeric(r - 1,init=FALSE)
-	lam_sus <- nimNumeric(r - 1,init=FALSE)
-	lam_inf <- nimNumeric(r - 1,init=FALSE)
-	lik_temp  <- 0
+        #############################################
+        # preliminary hazards for the likelihood
+        #############################################
+        if (sex == 1) { # females
+            # survival hazard for susceptible deer
+            lam_sus[e:(dn - 1)] <- exp(beta0_sus +
+                age_effect_surv[e:(dn - 1)] +
+                period_effect_surv[(e + age2date):(dn - 1 + age2date)])
 
-		#############################################
-		# preliminary hazards for the likelihood
-		#############################################
-		if(sex ==1){ # females		
-			#survival hazard for susceptible deer
-			lam_sus[e:(dn - 1)] <- exp(beta0_sus  +
-							age_effect_surv[e:(dn - 1)] +
-							period_effect_surv[(e + age2date):(dn - 1 + age2date)] +
-							beta_male)
-			
-			#survival hazard while infected
-			lam_inf[dn1:(r - 1)] <- exp(beta0_inf +
-										age_effect_surv[dn1:(r - 1)] +
-										period_effect_surv[(dn1 + age2date):
-														(r - 1 + age2date)] +
-										beta_male)
-			#force of infection infection hazard
-			lam_foi[1:(dn - 1)] <- exp(space +
-						f_age_foi[age_lookup_f[1:(dn - 1)]] +
-									f_period_foi[period_lookup[(1 + age2date):((dn - 1) + age2date)]])
-		}else{ # males
-			#survival hazard for susceptible deer
-			lam_sus[e:(dn - 1)] <- exp(beta0_sus  +
-							age_effect_surv[e:(dn - 1)] +
-							period_effect_surv[(e + age2date):(dn - 1 + age2date)])
-			#survival hazard while infected
-			lam_inf[dn1:(r - 1)] <- exp(beta0_inf +
-										age_effect_surv[dn1:(r - 1)] +
-										period_effect_surv[(dn1 + age2date):
-														(r - 1 + age2date)])
-			#force of infection infection hazard
-			lam_foi[1:(dn - 1)] <- exp(space +
-						m_age_foi[age_lookup_m[1:(dn - 1)]] +
-									m_period_foi[period_lookup[(1 + age2date):((dn - 1) + age2date)]])
-		}
+            # survival hazard while infected
+            lam_inf[dn1:(r - 1)] <- exp(beta0_inf +
+                age_effect_surv[dn1:(r - 1)] +
+                period_effect_surv[(dn1 + age2date):
+                				   (r - 1 + age2date)])
+            # force of infection infection hazard
+            lam_foi[1:(dn - 1)] <- exp(space +
+                f_age_foi[age_lookup_f[1:(dn - 1)]] +
+                f_period_foi[period_lookup[(1 + age2date):
+				                           ((dn - 1) + age2date)]])
+        } else { # males
+            # survival hazard for susceptible deer
+            lam_sus[e:(dn - 1)] <- exp(beta0_sus +
+                age_effect_surv[e:(dn - 1)] +
+                period_effect_surv[(e + age2date):(dn - 1 + age2date)] +
+                beta_male)
+            # survival hazard while infected
+            lam_inf[dn1:(r - 1)] <- exp(beta0_inf +
+                age_effect_surv[dn1:(r - 1)] +
+                period_effect_surv[(dn1 + age2date):
+                (r - 1 + age2date)] +
+                beta_male)
+            # force of infection infection hazard
+            lam_foi[1:(dn - 1)] <- exp(space +
+                m_age_foi[age_lookup_m[1:(dn - 1)]] +
+                m_period_foi[period_lookup[(1 + age2date):
+				                           ((dn - 1) + age2date)]])
+        }
 
-		#######################################
-		### calculating the joint likelihood
-		#######################################
-	
-		lik_temp <- lik_temp + lam_foi[(dn1 + 1)] *
-						exp(-sum(lam_foi[1:dn1])) *
-						exp(-sum(lam_inf[(dn1 + 1):(r - 1)]))
-	
-		for(k in (dn1 + 2):(dn - 1)) {
-		lik_temp <- lik_temp + lam_foi[k] *
-						exp(-sum(lam_sus[(dn1 + 1):(k - 1)])) *
-						exp(-sum(lam_foi[1:(k-1)])) *
-						exp(-sum(lam_inf[k:(r-1)]))
-		}
-		sumllik <- sumllik + log(lik_temp) - 
-					         sum(lam_sus[e:dn1]) -
-			                 sum(lam_foi[1:dn1])
-			
-    returnType(double(0))
-    if(log) return(sumllik) else return(exp(sumllik))    ## return log-likelihood
-  })
+        #######################################
+        ### calculating the joint likelihood
+        #######################################
+
+        lik_temp <- lik_temp + lam_foi[(dn1 + 1)] *
+            exp(-sum(lam_foi[1:dn1])) *
+            exp(-sum(lam_inf[(dn1 + 1):(r - 1)]))
+
+        for (k in (dn1 + 2):(dn - 1)) {
+            lik_temp <- lik_temp + lam_foi[k] *
+                exp(-sum(lam_sus[(dn1 + 1):(k - 1)])) *
+                exp(-sum(lam_foi[1:(k - 1)])) *
+                exp(-sum(lam_inf[k:(r - 1)]))
+        }
+        sumllik <- sumllik + log(lik_temp) -
+            sum(lam_sus[e:dn1]) -
+            sum(lam_foi[1:dn1])
+
+        returnType(double(0))
+        if (log) {
+            return(sumllik)
+        } else {
+            return(exp(sumllik))
+        } ## return log-likelihood
+    }
+)
 
 nimble::registerDistributions(list(
     dRecPosCens = list(
-        BUGSdist = 'dRecPosCens(e,r,dn1,dn,sex,age2date,beta_male,beta0_sus,beta0_inf,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup,space)',
-        types = c("value = integer(0)",
-				  "e = double(0)",
-                  "r = double(0)",
-                  "dn1 = double(0)",
-				  "dn = double(0)",
-                  "sex = double(0)",
-                  "age2date = double(0)",
-                  "beta_male = double(0)",
-                  "beta0_inf = double(0)",
-                  "beta0_sus = double(0)",
-                  "age_effect_surv = double(1)",
-                  "period_effect_surv = double(1)",
-                  "f_age_foi = double(1)",
-                  "m_age_foi = double(1)",
-                  "age_lookup_f = double(1)",
-                  "age_lookup_m = double(1)",
-                  "period_lookup=double(1)",
-                  "f_period_foi=double(1)",
-                  "m_period_foi=double(1)",
-                  "space = double(0)",
-				#   "sect = double(0)",
-                  "log = double(0)"
-                  ),
+        BUGSdist = "dRecPosCens(e,r,dn1,dn,sex,age2date,beta_male,beta0_sus,beta0_inf,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup,space)",
+        types = c(
+            "value = integer(0)",
+            "e = double(0)",
+            "r = double(0)",
+            "dn1 = double(0)",
+            "dn = double(0)",
+            "sex = double(0)",
+            "age2date = double(0)",
+            "beta_male = double(0)",
+            "beta0_inf = double(0)",
+            "beta0_sus = double(0)",
+            "age_effect_surv = double(1)",
+            "period_effect_surv = double(1)",
+            "f_age_foi = double(1)",
+            "m_age_foi = double(1)",
+            "age_lookup_f = double(1)",
+            "age_lookup_m = double(1)",
+            "period_lookup=double(1)",
+            "f_period_foi=double(1)",
+            "m_period_foi=double(1)",
+            "space = double(0)",
+            #   "sect = double(0)",
+            "log = double(0)"
+        ),
         discrete = TRUE
     )
 ))
 
-###for a user-defined distribution
-assign('dRecPosCens', dRecPosCens, envir = .GlobalEnv)
+### for a user-defined distribution
+assign("dRecPosCens", dRecPosCens, envir = .GlobalEnv)
 
 # start <- Sys.time()
 # test <-  dRecPosCens(
@@ -2214,158 +2429,163 @@ assign('dRecPosCens', dRecPosCens, envir = .GlobalEnv)
 #######################################################################
 
 dNegCapPosMort <- nimble::nimbleFunction(
-    run = function(
-        ### argument type declarations
-        x = integer(0),
-        n_samples = integer(0), # number of samples in dataset
-        e = double(1), #e, age of entry
-        r = double(1), #r, age of last known alive
-        s = double(1), #s, age of known mortality
-        dn1 = double(1), #last interval of test negative
-        dn = double(1), #interval of test positive (could be interval of mortality)
-        sex = double(1),
-        age2date = double(1),
-        beta_male = double(0),
-        beta0_sus = double(0),
-        beta0_inf = double(0),
-        age_effect_surv = double(1),
-        period_effect_surv = double(1),
-        f_age_foi = double(1),
-        m_age_foi = double(1),
-        age_lookup_f = double(1),
-        age_lookup_m = double(1),
-        period_lookup=double(1),
-        f_period_foi=double(1),
-        m_period_foi=double(1),
-        space = double(1),
-		sect = double(1),
-        log = double()
-        ) {
+    run = function( ### argument type declarations
+                   x = integer(0),
+                   n_samples = integer(0), # number of samples in dataset
+                   e = double(1), # e, age of entry
+                   r = double(1), # r, age of last known alive
+                   s = double(1), # s, age of known mortality
+                   dn1 = double(1), # last interval of test negative
+                   dn = double(1), # interval of test positive (could be interval of mortality)
+                   sex = double(1),
+                   age2date = double(1),
+                   beta_male = double(0),
+                   beta0_sus = double(0),
+                   beta0_inf = double(0),
+                   age_effect_surv = double(1),
+                   period_effect_surv = double(1),
+                   f_age_foi = double(1),
+                   m_age_foi = double(1),
+                   age_lookup_f = double(1),
+                   age_lookup_m = double(1),
+                   period_lookup = double(1),
+                   f_period_foi = double(1),
+                   m_period_foi = double(1),
+                   space = double(1),
+                   sect = double(1),
+                   log = double()) {
+        sumllik <- 0 # intialize log-likelihood
+        for (i in 1:n_samples) {
+            lam_foi <- nimNumeric(s[i] - 1, init = FALSE)
+            lam_sus <- nimNumeric(s[i] - 1, init = FALSE)
+            lam_inf <- nimNumeric(s[i] - 1, init = FALSE)
+            lik_temp <- 0
 
-    sumllik <- 0 #intialize log-likelihood
-	for(i in 1:n_samples){
-		lam_foi <- nimNumeric(s[i] - 1,init=FALSE)
-		lam_sus <- nimNumeric(s[i] - 1,init=FALSE)
-		lam_inf <- nimNumeric(s[i] - 1,init=FALSE)
-		lik_temp  <- 0
-	
-		#############################################
-		# preliminary hazards for the likelihood
-		#############################################
-		if(sex[i] ==1){ # females
-			#survival hazard for susceptible deer
-			lam_sus[e[i]:(dn[i] - 1)] <- exp(beta0_sus  + 
-					age_effect_surv[e[i]:(dn[i] - 1)] +
-					period_effect_surv[(e[i] + age2date[i]):(dn[i] - 1 + age2date[i])] +
-					beta_male)
-			#survival hazard while infected
-			lam_inf[dn1[i]:(s[i] - 1)] <- exp(beta0_inf +
-					age_effect_surv[dn1[i]:(s[i] - 1)] +
-					period_effect_surv[(dn1[i] + age2date[i]):(s[i] - 1 + age2date[i])] +
-					beta_male)
-			#force of infection infection hazard
-			lam_foi[1:(dn[i] - 1)] <- exp(space[sect[i]] +
-					f_age_foi[age_lookup_f[1:(dn[i] - 1)]] +
-					f_period_foi[period_lookup[(1 + age2date[i]):(dn[i] - 1 + age2date[i])]])
-		}else{ # males
-			#survival hazard for susceptible deer
-			lam_sus[e[i]:(dn[i] - 1)] <- exp(beta0_sus  + 
-					age_effect_surv[e[i]:(dn[i] - 1)] +
-					period_effect_surv[(e[i] + age2date[i]):(dn[i] - 1 + age2date[i])])
-			#survival hazard while infected
-			lam_inf[dn1[i]:(s[i] - 1)] <- exp(beta0_inf +
-					age_effect_surv[dn1[i]:(s[i] - 1)] +
-					period_effect_surv[(dn1[i] + age2date[i]):(s[i] - 1 + age2date[i])])
-			#force of infection infection hazard
-			lam_foi[1:(dn[i] - 1)] <- exp(space[sect[i]] +
-					m_age_foi[age_lookup_m[1:(dn[i] - 1)]] +
-					m_period_foi[period_lookup[(1 + age2date[i]):(dn[i] - 1 + age2date[i])]])
-		}
+            #############################################
+            # preliminary hazards for the likelihood
+            #############################################
+            if (sex[i] == 1) { # females
+                # survival hazard for susceptible deer
+                lam_sus[e[i]:(dn[i] - 1)] <- exp(beta0_sus +
+                    age_effect_surv[e[i]:(dn[i] - 1)] +
+                    period_effect_surv[(e[i] + age2date[i]):
+					                   (dn[i] - 1 + age2date[i])])
+                # survival hazard while infected
+                lam_inf[dn1[i]:(s[i] - 1)] <- exp(beta0_inf +
+                    age_effect_surv[dn1[i]:(s[i] - 1)] +
+                    period_effect_surv[(dn1[i] + age2date[i]):
+					                   (s[i] - 1 + age2date[i])])
+                # force of infection infection hazard
+                lam_foi[1:(dn[i] - 1)] <- exp(space[sect[i]] +
+                    f_age_foi[age_lookup_f[1:(dn[i] - 1)]] +
+                    f_period_foi[period_lookup[(1 + age2date[i]):
+					                           (dn[i] - 1 + age2date[i])]])
+            } else { # males
+                # survival hazard for susceptible deer
+                lam_sus[e[i]:(dn[i] - 1)] <- exp(beta0_sus +
+                    age_effect_surv[e[i]:(dn[i] - 1)] +
+                    period_effect_surv[(e[i] + age2date[i]):
+					                   (dn[i] - 1 + age2date[i])] +
+                    beta_male)
+                # survival hazard while infected
+                lam_inf[dn1[i]:(s[i] - 1)] <- exp(beta0_inf +
+                    age_effect_surv[dn1[i]:(s[i] - 1)] +
+                    period_effect_surv[(dn1[i] + age2date[i]):
+					                   (s[i] - 1 + age2date[i])] +
+                    beta_male)
+                # force of infection infection hazard
+                lam_foi[1:(dn[i] - 1)] <- exp(space[sect[i]] +
+                    m_age_foi[age_lookup_m[1:(dn[i] - 1)]] +
+                    m_period_foi[period_lookup[(1 + age2date[i]):
+					                           (dn[i] - 1 + age2date[i])]])
+            }
 
-		#######################################
-		### calculating the joint likelihood
-		#######################################
-	
-		if(r[i] - dn1[i] > 1){
-			lik_temp <- lik_temp + lam_foi[dn1[i] + 1] *
-						exp(-sum(lam_inf[(dn1[i] + 1):(r[i] - 1)])) *
-						(1 - exp(-sum(lam_inf[r[i]:(s[i] - 1)])))
-			lik_temp <- lik_temp + lam_foi[(s[i] - 1)] *
-							exp(-sum(lam_foi[(dn1[i] + 1):((s[i] - 1) - 1)])) *
-							#exp(-sum(lam_foi[(dn1[i] + 1):(s[i] - 1)])) *
-							exp(-sum(lam_sus[(dn1[i] + 1):((s[i] - 1) - 1)])) *
-							lam_inf[(s[i] - 1)]
-		}
-	
-		if(r[i] - dn1[i] == 1){
-			lik_temp <- lik_temp + lam_foi[(s[i] - 1)] *
-							lam_inf[(s[i] - 1)]
-		}
-		
-		if(r[i] - dn1[i] > 3){
-		for (k in (dn1[i] + 2):(r[i] - 2)) {
-			lik_temp <- lik_temp + lam_foi[k] *
-						exp(-sum(lam_foi[(dn1[i] + 1):(k - 1)])) *
-						#exp(-sum(lam_foi[(dn1[i] + 1):k])) *
-						exp(-sum(lam_sus[(dn1[i] + 1):(k - 1)])) *
-						exp(-sum(lam_inf[k:(r[i] - 1)])) *
-						(1 - exp(-sum(lam_inf[r[i]:(s[i] - 1)])))
-		}
-		}
-		if(r[i] - dn1[i] > 2){
-		for (k in (r[i] - 1):(s[i] - 2)) {
-			lik_temp <- lik_temp + lam_foi[k] *
-						exp(-sum(lam_foi[(dn1[i] + 1):(k - 1)])) *
-						#exp(-sum(lam_foi[(dn1[i] + 1):k])) *
-						exp(-sum(lam_sus[(dn1[i] + 1):(k - 1)])) *
-						(1 - exp(-sum(lam_inf[k:(s[i] - 1)])))
-		}
-		}
-							
-		sumllik <- sumllik -sum(lam_sus[e[i]:dn1[i]]) -
-			sum(lam_foi[1:dn1[i]]) +
-			log(lik_temp)
-	
-	}
-    returnType(double(0))
-    if(log) return(sumllik) else return(exp(sumllik))    ## return log-likelihood
-  })
+            #######################################
+            ### calculating the joint likelihood
+            #######################################
+
+            if (r[i] - dn1[i] > 1) {
+                lik_temp <- lik_temp + lam_foi[dn1[i] + 1] *
+                    exp(-sum(lam_inf[(dn1[i] + 1):(r[i] - 1)])) *
+                    (1 - exp(-sum(lam_inf[r[i]:(s[i] - 1)])))
+                lik_temp <- lik_temp + lam_foi[(s[i] - 1)] *
+                    exp(-sum(lam_foi[(dn1[i] + 1):((s[i] - 1) - 1)])) *
+                    exp(-sum(lam_sus[(dn1[i] + 1):((s[i] - 1) - 1)])) *
+                    lam_inf[(s[i] - 1)]
+            }
+
+            if (r[i] - dn1[i] == 1) {
+                lik_temp <- lik_temp + lam_foi[(s[i] - 1)] *
+                    lam_inf[(s[i] - 1)]
+            }
+
+            if (r[i] - dn1[i] > 3) {
+                for (k in (dn1[i] + 2):(r[i] - 2)) {
+                    lik_temp <- lik_temp + lam_foi[k] *
+                        exp(-sum(lam_foi[(dn1[i] + 1):(k - 1)])) *
+                        exp(-sum(lam_sus[(dn1[i] + 1):(k - 1)])) *
+                        exp(-sum(lam_inf[k:(r[i] - 1)])) *
+                        (1 - exp(-sum(lam_inf[r[i]:(s[i] - 1)])))
+                }
+            }
+            if (r[i] - dn1[i] > 2) {
+                for (k in (r[i] - 1):(s[i] - 2)) {
+                    lik_temp <- lik_temp + lam_foi[k] *
+                        exp(-sum(lam_foi[(dn1[i] + 1):(k - 1)])) *
+                        exp(-sum(lam_sus[(dn1[i] + 1):(k - 1)])) *
+                        (1 - exp(-sum(lam_inf[k:(s[i] - 1)])))
+                }
+            }
+
+            sumllik <- sumllik - sum(lam_sus[e[i]:dn1[i]]) -
+                sum(lam_foi[1:dn1[i]]) +
+                log(lik_temp)
+        }
+        returnType(double(0))
+        if (log) {
+            return(sumllik)
+        } else {
+            return(exp(sumllik))
+        } ## return log-likelihood
+    }
+)
 
 
 nimble::registerDistributions(list(
     dNegCapPosMort = list(
-        BUGSdist = 'dNegCapPosMort(n_samples,e,r,s,dn1,dn,sex,age2date,beta_male,beta0_sus,beta0_inf,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup,space,sect)',
-        types = c("value = integer(0)",
-				  "n_samples = integer(0)",
-				  "e = double(1)",
-                  "r = double(1)",
-                  "s = double(1)",
-                  "dn1 = double(1)",
-				  "dn = double(1)",
-                  "sex = double(1)",
-                  "age2date = double(1)",
-                  "beta_male = double(0)",
-                  "beta0_sus = double(0)",
-                  "beta0_inf = double(0)",
-                  "age_effect_surv = double(1)",
-                  "period_effect_surv = double(1)",
-                  "f_age_foi = double(1)",
-                  "m_age_foi = double(1)",
-                  "age_lookup_f = double(1)",
-                  "age_lookup_m = double(1)",
-                  "period_lookup = double(1)",
-                  "f_period_foi = double(1)",
-                  "m_period_foi = double(1)",
-                  "space = double(1)",
- 				  "sect = double(1)",
-                  "log = double()"
-                  ),
+        BUGSdist = "dNegCapPosMort(n_samples,e,r,s,dn1,dn,sex,age2date,beta_male,beta0_sus,beta0_inf,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup,space,sect)",
+        types = c(
+            "value = integer(0)",
+            "n_samples = integer(0)",
+            "e = double(1)",
+            "r = double(1)",
+            "s = double(1)",
+            "dn1 = double(1)",
+            "dn = double(1)",
+            "sex = double(1)",
+            "age2date = double(1)",
+            "beta_male = double(0)",
+            "beta0_sus = double(0)",
+            "beta0_inf = double(0)",
+            "age_effect_surv = double(1)",
+            "period_effect_surv = double(1)",
+            "f_age_foi = double(1)",
+            "m_age_foi = double(1)",
+            "age_lookup_f = double(1)",
+            "age_lookup_m = double(1)",
+            "period_lookup = double(1)",
+            "f_period_foi = double(1)",
+            "m_period_foi = double(1)",
+            "space = double(1)",
+            "sect = double(1)",
+            "log = double()"
+        ),
         discrete = TRUE
     )
 ))
 
 ### for a user-defined distribution
-assign('dNegCapPosMort', dNegCapPosMort, envir = .GlobalEnv)
+assign("dNegCapPosMort", dNegCapPosMort, envir = .GlobalEnv)
 
 # start <- Sys.time()
 # test <-  dNegCapPosMort(
@@ -2403,122 +2623,123 @@ assign('dNegCapPosMort', dNegCapPosMort, envir = .GlobalEnv)
 ###   Age-At-Harvest based period effects
 ###
 ###  What to do about when we know CWD status vs. not knowing
-###   Overleaf Equation 
+###   Overleaf Equation
 ###
 #######################################################################
 
 dAAH <- nimble::nimbleFunction(
-    run = function(
-        ### argument type declarations
-        x = integer(),
-        a = integer(0), #e, age of harvest
-        sex = integer(0),
-        age2date = integer(0),
-        n_ind = integer(0),
-        beta_male = double(0),
-        beta0_sus = double(0),
-        beta0_inf = double(0),
-        age_effect_surv = double(1),
-        period_effect_surv = double(1),
-        f_age_foi = double(1),
-        m_age_foi = double(1),
-        age_lookup_f = double(1),
-        age_lookup_m = double(1),
-        period_lookup=double(1),
-        f_period_foi=double(1),
-        m_period_foi=double(1),
-        log = double()
-        ) {
+    run = function( ### argument type declarations
+                   x = integer(),
+                   a = integer(0), # e, age of harvest
+                   sex = integer(0),
+                   age2date = integer(0),
+                   n_ind = integer(0),
+                   beta_male = double(0),
+                   beta0_sus = double(0),
+                   beta0_inf = double(0),
+                   age_effect_surv = double(1),
+                   period_effect_surv = double(1),
+                   f_age_foi = double(1),
+                   m_age_foi = double(1),
+                   age_lookup_f = double(1),
+                   age_lookup_m = double(1),
+                   period_lookup = double(1),
+                   f_period_foi = double(1),
+                   m_period_foi = double(1),
+                   log = double()) {
+        llik <- 0 # intialize log-likelihood
+        lam_inf <- nimNumeric(a)
+        lam_foi <- nimNumeric(a)
+        lam_sus <- nimNumeric(a)
+        lik_temp <- nimNumeric(a)
 
-    llik <- 0 #intialize log-likelihood
-    lam_inf <- nimNumeric(a)
-    lam_foi <- nimNumeric(a)
-    lam_sus <- nimNumeric(a)
-    lik_temp <- nimNumeric(a)
+        #############################################
+        # preliminary hazards for the likelihood
+        #############################################
 
-    #############################################
-    # preliminary hazards for the likelihood
-    #############################################
-    
-    #survival hazard for susceptible deer
-    n_indx_sus <- length(1:a)
-    lam_sus[1:a] <- exp(rep(beta0_sus, n_indx_sus)  +
-                    age_effect_surv[1:a] +
-                    period_effect_surv[(1 + age2date):(a + age2date)] +
-                    rep(beta_male * sex, n_indx_sus))
-    
-    #survival hazard while infected
-    n_indx_inf <- length(1:a)
-    lam_inf[1:a] <- exp(rep(beta0_inf, n_indx_inf) +
-        age_effect_surv[1:a] +
-        period_effect_surv[(1 + age2date):(a + age2date)] +
-        rep(beta_male * sex, n_indx_inf)
-        )
+        # survival hazard for susceptible deer
+        n_indx_sus <- length(1:a)
+        lam_sus[1:a] <- exp(rep(beta0_sus, n_indx_sus) +
+            age_effect_surv[1:a] +
+            period_effect_surv[(1 + age2date):(a + age2date)] +
+            rep(beta_male * sex, n_indx_sus))
 
-    #force of infection infection hazard
-    lam_foi[1:a] <- exp(sex * (f_age_foi[age_lookup_f[1:a]] +
+        # survival hazard while infected
+        n_indx_inf <- length(1:a)
+        lam_inf[1:a] <- exp(rep(beta0_inf, n_indx_inf) +
+            age_effect_surv[1:a] +
+            period_effect_surv[(1 + age2date):(a + age2date)] +
+            rep(beta_male * sex, n_indx_inf))
+
+        # force of infection infection hazard
+        lam_foi[1:a] <- exp(sex * (f_age_foi[age_lookup_f[1:a]] +
             f_period_foi[period_lookup[(1 + age2date):(a + age2date)]]) +
-        (1 - sex) * (m_age_foi[age_lookup_m[1:a]] +
-            m_period_foi[period_lookup[(1 + age2date):(a + age2date)]])
-                        )
-    #######################################
-    ### calculating the joint likelihood
-    #######################################
+            (1 - sex) * (m_age_foi[age_lookup_m[1:a]] +
+                m_period_foi[period_lookup[(1 + age2date):(a + age2date)]]))
+        #######################################
+        ### calculating the joint likelihood
+        #######################################
 
-    lik_temp[1] <- lam_foi[1] *
-                   exp(-sum(lam_inf[1:(a - 1)])) *
-                   lam_inf[a]
+        lik_temp[1] <- lam_foi[1] *
+            exp(-sum(lam_inf[1:(a - 1)])) *
+            lam_inf[a]
 
-    for (k in (2):(a - 1)) {
-        lik_temp[k] <- lam_foi[k] *
-                      exp(-sum(lam_foi[1:(k - 1)])) *
-                      exp(-sum(lam_sus[1:(k - 1)])) *
-                      exp(-sum(lam_inf[k:(a - 1)])) *
-                      lam_inf[a]
+        for (k in (2):(a - 1)) {
+            lik_temp[k] <- lam_foi[k] *
+                exp(-sum(lam_foi[1:(k - 1)])) *
+                exp(-sum(lam_sus[1:(k - 1)])) *
+                exp(-sum(lam_inf[k:(a - 1)])) *
+                lam_inf[a]
+        }
+        lik_temp[(a)] <- lam_foi[a] *
+            exp(-sum(lam_foi[1:(a - 1)])) *
+            exp(-sum(lam_sus[1:(a - 1)])) *
+            lam_inf[a]
+
+        lik <- lam_sus[a] *
+            exp(-sum(lam_sus[1:(a - 1)])) *
+            exp(-sum(lam_foi[1:(a - 1)])) *
+            sum(lik_temp[1:a])
+
+        llik <- n_ind * log(lik)
+        returnType(double(0))
+        if (log) {
+            return(llik)
+        } else {
+            return(exp(llik))
+        } ## return log-likelihood
     }
-    lik_temp[(a)] <- lam_foi[a] *
-                    exp(-sum(lam_foi[1:(a - 1)])) *
-                    exp(-sum(lam_sus[1:(a - 1)])) *
-                    lam_inf[a]
-
-    lik <- lam_sus[a] *
-           exp(-sum(lam_sus[1:(a - 1)])) *
-           exp(-sum(lam_foi[1:(a - 1)])) *
-           sum(lik_temp[1:a])
-
-    llik <- n_ind * log(lik)
-    returnType(double(0))
-    if(log) return(llik) else return(exp(llik))    ## return log-likelihood
-  })
+)
 
 
 nimble::registerDistributions(list(
     dAAH = list(
-        BUGSdist = 'dAAH(a,sex,age2date,n_ind,beta_male,beta0_sus,beta0_inf,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup)',
-        types = c("a = integer(0)",
-                  "sex = integer(0)",
-                  "age2date = integer(0)",
-                  "n_ind = integer(0)",
-                  "beta_male = double(0)",
-                  "beta0_sus = double(0)",
-                  "beta0_inf = double(0)",
-                  "age_effect_surv = double(1)",
-                  "period_effect_surv = double(1)",
-                  "f_age_foi = double(1)",
-                  "m_age_foi = double(1)",
-                  "age_lookup_f = double(1)",
-                  "age_lookup_m = double(1)",
-                  "period_lookup = double(1)",
-                  "f_period_foi = double(1)",
-                  "m_period_foi = double(1)",
-                  "log = double()"
-                  ),
+        BUGSdist = "dAAH(a,sex,age2date,n_ind,beta_male,beta0_sus,beta0_inf,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup)",
+        types = c(
+            "a = integer(0)",
+            "sex = integer(0)",
+            "age2date = integer(0)",
+            "n_ind = integer(0)",
+            "beta_male = double(0)",
+            "beta0_sus = double(0)",
+            "beta0_inf = double(0)",
+            "age_effect_surv = double(1)",
+            "period_effect_surv = double(1)",
+            "f_age_foi = double(1)",
+            "m_age_foi = double(1)",
+            "age_lookup_f = double(1)",
+            "age_lookup_m = double(1)",
+            "period_lookup = double(1)",
+            "f_period_foi = double(1)",
+            "m_period_foi = double(1)",
+            "log = double()"
+        ),
         discrete = TRUE
     )
 ))
 
 ### for a user-defined distribution
-assign('dAAH', dAAH, envir = .GlobalEnv)
+assign("dAAH", dAAH, envir = .GlobalEnv)
 # i=73
 # dAAH(x = 1,
 #       a = d_fit_age_nocwd$ageweeks[i],
@@ -2563,4 +2784,3 @@ assign('dAAH', dAAH, envir = .GlobalEnv)
 #                 )
 #  }
 # test
-
