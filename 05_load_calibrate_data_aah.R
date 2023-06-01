@@ -1479,3 +1479,48 @@ df_age_sus <- rbind(df_age_early,df_age_sus)
 
 
 
+###################################################################################
+###
+### setting up aah harvest data for estimating period effects
+###
+#####################################################################################
+
+df_age_nocwd <- df_aah_notest
+df_age_nocwd$agemonths <- df_age_nocwd$age
+df_age_nocwd$ageweeks <- df_age_nocwd$age
+
+
+levels(df_age_nocwd$ageweeks) <- c(floor(as.duration(ymd("2014-05-15") %--% ymd("2015-11-30"))/dweeks(1)),#1
+                                    floor(as.duration(ymd("2014-05-15") %--% ymd("2016-11-30"))/dweeks(1)),#2
+                                    floor(as.duration(ymd("2014-05-15") %--% ymd("2017-11-30"))/dweeks(1)),#3
+                                    floor(as.duration(ymd("2014-05-15") %--% ymd("2018-11-30"))/dweeks(1)),#4
+                                    floor(as.duration(ymd("2014-05-15") %--% ymd("2020-11-30"))/dweeks(1)),#6
+                                    floor(as.duration(ymd("2014-05-15") %--% ymd("2023-11-30"))/dweeks(1)),#9
+                                    floor(as.duration(ymd("2014-05-15") %--% ymd("2014-11-30"))/dweeks(1)))#0
+
+levels(df_age_nocwd$agemonths) <- c(floor(as.duration(ymd("2014-05-15") %--% ymd("2015-11-30"))/dmonths(1)),#1
+                                    floor(as.duration(ymd("2014-05-15") %--% ymd("2016-11-30"))/dmonths(1)),#2
+                                    floor(as.duration(ymd("2014-05-15") %--% ymd("2017-11-30"))/dmonths(1)),#3
+                                    floor(as.duration(ymd("2014-05-15") %--% ymd("2018-11-30"))/dmonths(1)),#4
+                                    floor(as.duration(ymd("2014-05-15") %--% ymd("2020-11-30"))/dmonths(1)),#6
+                                    floor(as.duration(ymd("2014-05-15") %--% ymd("2023-11-30"))/dmonths(1)),#9
+                                    floor(as.duration(ymd("2014-05-15") %--% ymd("2014-11-30"))/dmonths(1)))#0
+
+df_age_nocwd$ageweeks <- as.numeric(as.character(df_age_nocwd$ageweeks))
+df_age_nocwd$agemonths <- as.numeric(as.character(df_age_nocwd$agemonths))
+# sex=0=females, sex=1=males
+df_age_nocwd$sexnum <- as.factor(df_age_nocwd$sex)
+levels(df_age_nocwd$sexnum) <- c(0,1)
+df_age_nocwd$sexnum <- as.numeric(as.character(df_age_nocwd$sexnum))
+
+#age2date - period effects
+#calculating the birth weeks in period notation
+df_age_nocwd$agenum <- as.numeric(as.character(df_age_nocwd$age))
+
+df_age_nocwd$birth_date <- NA
+for(j in 1:dim(df_age_nocwd)[1]) {
+    df_age_nocwd$birth_date[j] <- paste0(df_age_nocwd$year[j] -
+                                        df_age_nocwd$agenum[j],
+                                        "-05-15")
+}
+df_age_nocwd$birth_date <- as.Date(df_age_nocwd$birth_date)
