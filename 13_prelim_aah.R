@@ -396,19 +396,12 @@ m_logpop_inf <- rbind(m_logpop_inf_east,
 ###
 ################################################
 
-
-Cage_ant <- Cage[,2,2:6]
-
-sizeCage_f <- apply(Cage_less,1,sum)
-sizeCage_m <- apply(Cage_ant,1,sum)
-
-
-
 #adding antlerless male fawns to the antlerless aging data
 Cage_less <- array(NA, c(n_study_area, n_ageclassf + 1, n_year))
 Cage_less[1,,] <- rbind(Cage[1,1,,], Cage[1,2,1,])
 Cage_less[2,,] <- rbind(Cage[2,1,,], Cage[2,2,1,])
 
+#removing antlered male fawns from the male aging data
 Cage_ant <- Cage[,2,2:n_ageclassm,]
 
 sizeCage_f <- apply(Cage_less, c(1,3), sum)
