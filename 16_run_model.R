@@ -79,22 +79,22 @@ modelcode <- nimbleCode({
   #Priors for Age and Period effects
   #Age effects
   for (k in 1:nknots_age) {
-    b_age_surv[k] ~ dnorm(0, tau_age_survival)
+    b_age_survival[k] ~ dnorm(0, tau_age_survival)
   }
   tau_age_survival ~ dgamma(1, 1)
 
   for (t in 1:nT_age_surv) {
-    age_effect_survival[t] <- inprod(b_age_surv[1:nknots_age],
+    age_effect_survival[t] <- inprod(b_age_survival[1:nknots_age],
                                      Z_age[t, 1:nknots_age])
   }
 
   #Period effects from collar data
   for (k in 1:nknots_period) {
-    b_period[k] ~ dnorm(0, tau_period_survival)
+    b_period_survival[k] ~ dnorm(0, tau_period_survival)
   }
   tau_period_survival ~ dgamma(1, 1)
   for (t in 1:nT_period_collar) {
-    period_effect_surv[t] <- inprod(b_period[1:nknots_period],
+    period_effect_surv[t] <- inprod(b_period_survival[1:nknots_period],
                                     Z_period[t, 1:nknots_period])
   }
 
@@ -112,7 +112,7 @@ modelcode <- nimbleCode({
         yr_start = yr_start[1:n_year],
         yr_end = yr_end[1:n_year],
         period_effect_surv = period_effect_surv[1:nT_period_collar],
-        period_annual_survival = period_annual_survival[1:n_year_precollar]
+        period_annual_survival = period_annual_survival[1:(n_year_precollar + 1)]
   )
   ##################################
   ## Infected survival intercept
@@ -618,9 +618,12 @@ modelcode <- nimbleCode({
   }
 
   #######################################################
+  #######################################################
+  #######################################################
   ### Cause-specific mortality model
   #######################################################
-
+  #######################################################
+  #######################################################
   #priors
   #sex-specific hunt probability
   beta0_cause ~ dnorm(0, .01)
@@ -745,8 +748,8 @@ modelcode <- nimbleCode({
   sn_sus[1:n_sex, 1:n_agef, 1:n_year] <- calc_surv_aah(
           nT_age = nT_age_surv,
           nT_period = nT_period_overall,
-          beta0 = sus_beta0_survival,
-          beta_male = sus_beta_male_survival,
+          beta0 = beta0_survival_sus,
+          beta_male = beta_male,
           age_effect = age_effect_survival[1:nT_age_surv_aah],
           period_effect = period_effect_survival[1:nT_period_overall],
           yr_start = yr_start[1:n_year],
@@ -763,8 +766,8 @@ modelcode <- nimbleCode({
   sn_inf[1:n_sex,1:n_agef,1:n_year] <- calc_surv_aah(
           nT_age = nT_age_surv,
           nT_period = nT_period_overall,
-          beta0 = inf_beta0_survival,
-          beta_male = inf_beta_male_survival,
+          beta0 = beta0_survival_inf,
+          beta_male = beta_male,
           age_effect = age_effect_survival[1:nT_age_surv],
           period_effect = period_effect_survival[1:nT_period_overall],
           yr_start = yr_start[1:n_year],
@@ -781,8 +784,8 @@ modelcode <- nimbleCode({
   sh_sus[1:n_sex,1:n_agef,1:n_year] <- calc_surv_harvest(
           nT_age = nT_age_surv, 
           nT_period = nT_period_overall,
-          beta0 = sus_beta0_survival,
-          beta_male = sus_beta_male_survival,
+          beta0 = beta0_survival_sus,
+          beta_male = beta_male,
           age_effect = age_effect_survival[1:nT_age_surv],
           period_effect = period_effect_survival[1:nT_period_overall],
           intvl_step_yr = intvl_step_yr,
@@ -795,8 +798,8 @@ modelcode <- nimbleCode({
           ng_end = ng_end[1:n_year],
           yr_start = yr_start[1:n_year],
           yr_end = yr_end[1:n_year],
-          p_nogun_f = p_ng_f,
-          p_nogun_m = p_ng_m,
+          p_nogun_f = p_nogun_f,
+          p_nogun_m = p_nogun_m,
           p_gun_f = p_gun_f,
           p_gun_m = p_gun_m
           )
@@ -808,8 +811,8 @@ modelcode <- nimbleCode({
   sh_inf[1:n_sex,1:n_agef,1:n_year] <- calc_surv_harvest(
           nT_age = nT_age_surv,
           nT_period = nT_period_overall,
-          beta0 = inf_beta0_survival,
-          beta_male = inf_beta_male_survival,
+          beta0 = beta0_survival_inf,
+          beta_male = beta_male,
           age_effect = age_effect_survival[1:nT_age_surv],
           period_effect = period_effect_survival[1:nT_period_overall],
           intvl_step_yr = intvl_step_yr,
@@ -822,8 +825,8 @@ modelcode <- nimbleCode({
           ng_end = ng_end[1:n_year],
           yr_start = yr_start[1:n_year],
           yr_end = yr_end[1:n_year],
-          p_nogun_f = p_ng_f,
-          p_nogun_m = p_ng_m,
+          p_nogun_f = p_nogun_f,
+          p_nogun_m = p_nogun_m,
           p_gun_f = p_gun_f,
           p_gun_m = p_gun_m
           )
@@ -835,10 +838,10 @@ modelcode <- nimbleCode({
 
   psi[1:n_study_area, 1:n_sex, 1:n_agef, 1:n_year] <- 
       calc_infect_prob(
-            age_lookup_f = age_lookup_f_conv[1:n_age_lookup_conv],
-            age_lookup_m = age_lookup_m_conv[1:n_age_lookup_conv],
-            Nage_lookup_f = n_age_lookup_conv,
-            Nage_lookup_m = n_age_lookup_conv,
+            age_lookup_f = age_lookup_f_conv[1:n_age_lookup_f_conv],
+            age_lookup_m = age_lookup_m_conv[1:n_age_lookup_m_conv],
+            Nage_lookup_f = n_age_lookup_f_conv,
+            Nage_lookup_m = n_age_lookup_m_conv,
             n_agef = n_agef,
             n_agem = n_agem,
             yr_end = yr_end[1:n_year],
@@ -849,7 +852,7 @@ modelcode <- nimbleCode({
             n_year = n_year,
             n_sex = n_sex,
             n_study_area = n_study_area, 
-            space = space_foi
+            space = space[n_study_area]
             )
 
 
@@ -1149,16 +1152,26 @@ nimData <- list(Z_period = Z_period,
                 idead_dn = d_fit_idead$right_age_s,
                 idead_sex = d_fit_idead$sex,
                 idead_age2date = idead_age2date,
-                y_aah = 1,
+                y_aah = rep(1,nrow(d_fit_aah)),
                 aah_ageweeks = d_fit_aah$ageweeks,
                 aah_sex = d_fit_aah$sexnum,
                 aah_age2date = d_fit_aah$age2date_weeks,
                 aah_n = d_fit_aah$n,
                 mort_hh = d_fit_hh$mort_h,
-                ageclassmort = d_fit_hh$ageclassmort,
                 sex_cause = d_fit_hh$sex,
                 Z_cause_gun = Z_cause_gun,
-                Z_cause_ng = Z_cause_ng
+                Z_cause_ng = Z_cause_ng,
+                Cage_less = Cage_less,
+                Cage_ant = Cage_ant,
+                O = Ototal,
+                f_logpop_sus = f_logpop_sus,
+                f_logpop_inf = f_logpop_inf,
+                m_logpop_sus = m_logpop_sus,
+                m_logpop_inf = m_logpop_inf,
+                obs_ct_fd_alpha = obs_ct_fd_alpha,
+                obs_ct_fd_beta = obs_ct_fd_beta,
+                Nfawn = fawndoe_df$overall_fawn,
+                Ndoe = fawndoe_df$overall_doe
                 )
 
 #######################################
@@ -1191,8 +1204,11 @@ nimConsts <- list(n_year = n_year,
     n_adj_period = n_adj_period,
     n_age_lookup_f = length(age_lookup_f),
     n_age_lookup_m = length(age_lookup_m),
-    n_age_lookup_conv = n_age_lookup_conv,
+    n_age_lookup_f_conv = n_age_lookup_f_conv,
+    n_age_lookup_m_conv = n_age_lookup_m_conv,
     period_lookup = period_lookup,
+    age_lookup_f_conv = age_lookup_f_conv,
+    age_lookup_m_conv = age_lookup_m_conv,
     ng_start = d_fit_season$ng_start,
     gun_start = d_fit_season$gun_start,
     gun_end = d_fit_season$gun_end,
@@ -1228,9 +1244,9 @@ nimConsts <- list(n_year = n_year,
     sect_rec_pos_cens = d_fit_rec_pos_cens$study_area,
     sect_idead = d_fit_idead$study_area,
     records_cause = records_cause,
-    sex_cause = 1 - d_fit_hh$sex,
     interval = d_fit_hh$right_period_s - 1,
-    intvl_step_yr = intvl_step_yr_weekly
+    intvl_step_yr = intvl_step_yr_weekly,
+    lookup_pe_surv = lookup_pe_surv
     )
 
 
@@ -1257,18 +1273,19 @@ initsFun <- function()list(
                           m_age_foi = seq(-6, -4, length = n_agem),
                           f_age_foi = seq(-7, -5, length = n_agef),
                           tau_period_precollar = rgamma(1,1,1),
-                          period_harv = rnorm(nT_period_precollar),
-                          period_nonharv = rnorm(nT_period_precollar),
+                          period_annual_survival = rnorm(n_year_precollar + 1),
                           beta0_cause = rnorm(1,0,1),
+                          beta_cause_male = rnorm(1,0,1),
                           beta_cause_gun = rnorm(1,0,1),
                           beta_cause_ng = rnorm(1,0,1),
-                          beta_cause_maleage = rnorm(1,0),
                           tau_obs = matrix(runif(4, 1, 3),2,2),
                           tau_pop = matrix(runif(4, .5, 1),2,2),
                           report_overall = report_overall_init,
-                          report = report_init,  fec_epsilon = fec_eps_init,#rnorm(n_year_fec_early, 0, sd = .01),
+                          report = report_init,
+                          fec_epsilon = fec_eps_init,
                           mu_fec = rnorm(1, mu_fec_init, .01),
-                          fec_prec_eps = runif(1, 5, 10)
+                          fec_prec_eps = runif(1, 5, 10),
+                          space_temp = rnorm(1,-.55,.01)
                           )
 nimInits <- initsFun()
 
@@ -1290,30 +1307,52 @@ for(i in 1:10){beepr::beep(1)}
 
 parameters <- c(
               "beta_male",
-              "beta0_survival_sus",
-              "beta0_survival_inf",
-              "age_effect_survival",
-              "period_effect_surv",
-              "tau_period",
-              "tau_age",
-              # "hprec",
-              # "sprec",
-             "f_age_foi",
-              "m_age_foi",
               "tau_age_foi_male",
               "tau_age_foi_female",
-              # "m_age_mu",
-              # "f_age_mu",
+              "tau1_age_foi_male",
+              "tau1_age_foi_female",
+              "m_age_foi",
+              "f_age_foi",
+              "m_age_foi_mu",
+              "f_age_foi_mu",
+              "tau_period_foi_male",
+              "tau_period_foi_female",
               "f_period_foi",
               "m_period_foi",
-              "tau_period_foi_male",
-              # "tmsd",
-              "tau_period_foi_female"
-              # "tfsd",
-              # "space",
-              # "hetero",
-              # "phi",
-              # "rho"
+              "space",
+              "space_temp",
+              "space_alpha",
+              "beta0_sus_temp",
+              "sus_mix",
+              "beta0_survival_sus",
+              "tau_age_survival",
+              "age_effect_survival",
+              "tau_period_survival",
+              "tau_period_precollar",
+              "period_effect_survival",
+              "beta0_inf_temp",
+              "inf_mix",
+              "beta0_survival_inf",
+              "beta0_cause",
+              "beta_cause_gun",
+              "beta_cause_ng",
+              "beta_cause_male",
+              "p_nogun_f",
+              "p_gun_f",
+              "p_nogun_m",
+              "p_gun_m",
+              "report",
+              "fec",
+              "mu_fec",
+              "fec_prec_eps",
+              "fec_epsilon",
+              "sn_inf",
+              "sn_sus",
+              "sh_inf",
+              "sh_sus",
+              "mu_obs",
+              "tau_obs",
+              "tau_pop"
                )
 
 confMCMC <- configureMCMC(Rmodel,
