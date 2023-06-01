@@ -100,22 +100,19 @@ modelcode <- nimbleCode({
 
   #Period effects from aah data
   tau_period_precollar ~ dgamma(1,1)
-  period_nonharv ~ dnorm(0, tau_period_precollar)
-  for (k in 1:n_year_precollar) {
-    period_harv[k] ~ dnorm(0, tau_period_precollar)
-    ### year-specific nonharvest survival
-    # period_nonharv[k] ~ dnorm(0, tau_period_precollar)
+  for (k in 1:(n_year_precollar + 1) {
+    period_annual_survival[k] ~ dnorm(0, tau_period_precollar)
   }
 
-  period_effect_survival[1:nT_period_overall] <- set_period_effects_scalar(
-        period_aah_lookup = period_aah_lookup[1:n_year_precollar,1:8],
+  period_effect_survival[1:nT_period_overall] <- set_period_effects_constant(
         n_year_precollar = n_year_precollar,
         nT_period_precollar = nT_period_precollar,
         nT_period_collar = nT_period_collar,
         nT_period_overall = nT_period_overall,
+        yr_start = yr_start[1:n_year],
+        yr_end = yr_end[1:n_year],
         period_effect_surv = period_effect_surv[1:nT_period_collar],
-        period_harv = period_harv[1:n_year_precollar],
-        period_nonharv = period_nonharv
+        period_annual_survival = period_annual_survival[1:n_year_precollar]
   )
   ##################################
   ## Infected survival intercept
@@ -451,7 +448,7 @@ modelcode <- nimbleCode({
 
 
     y_rec_neg_mort ~ dRecNegMort(
-      n_samples = nRecNegMort
+      n_samples = nRecNegMort,
       e = rec_neg_mort_left_age_e[1:nRecNegMort],
       r = rec_neg_mort_right_age_r[1:nRecNegMort],
       s = rec_neg_mort_right_age_s[1:nRecNegMort],
@@ -1181,7 +1178,6 @@ nimConsts <- list(n_year = n_year,
                   nknots_age = nknots_age,
                   nknots_period = nknots_period,
                   n_period_lookup = n_period_lookup,
-                  period_aah_lookup = d_fit_season[1:n_year_precollar,],
                   n_adj_period = n_adj_period,
                   n_age_lookup_f = length(age_lookup_f),
                   n_age_lookup_m = length(age_lookup_m),
