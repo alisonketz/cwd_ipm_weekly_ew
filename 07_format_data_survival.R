@@ -105,7 +105,7 @@ d_surv$agemonth_recap <- df_cap$recap_disagemth
 d_surv$periodweek_recap <- df_cap$recap_disweek
 d_surv$periodmonth_recap <- df_cap$recap_dismonth
 d_surv$dsection <- df_cap$home_section
-d_surv$study_area <- df_cap$ew
+d_surv$study_area <- ifelse(df_cap$ew=="east",1,2)
 
 for(i in 1:n_cap) {
   for(j in 1:n_mort) {
