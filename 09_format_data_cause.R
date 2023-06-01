@@ -159,22 +159,22 @@ save(d_fit_season, file = paste0(filepath, "d_fit_season.Rdata"))
 d_fit_season$year <- 1994:2021
 
 ###
-### Preliminaries gun season (not used)
+### Preliminaries gun season
 ###
-# Z_cause_ng <- rep(0,nT_period_collar)
-# Z_cause_gun <- rep(0,nT_period_collar)
-# for(i in 1:5){
-#     Z_cause_ng[startng[i]:endng[i]] <- 1
-#     Z_cause_gun[startgun[i]:endgun[i]] <- 1
-# }
+Z_cause_ng <- rep(0,nT_period_collar)
+Z_cause_gun <- rep(0,nT_period_collar)
+for(i in 1:5){
+    Z_cause_ng[startng[i]:endng[i]] <- 1
+    Z_cause_gun[startgun[i]:endgun[i]] <- 1
+}
 
 
-# Z_overall_ng <- rep(0,nT_period_overall)
-# Z_overall_gun <- rep(0,nT_period_overall)
-# for(i in 1:n_year){
-#     Z_overall_ng[d_fit_season$ng_start[i]:d_fit_season$ng_end[i]] <- 1
-#     Z_overall_gun[d_fit_season$gun_start[i]:d_fit_season$gun_end[i]] <- 1
-# }
+Z_overall_ng <- rep(0,nT_period_overall)
+Z_overall_gun <- rep(0,nT_period_overall)
+for(i in 1:n_year){
+    Z_overall_ng[d_fit_season$ng_start[i]:d_fit_season$ng_end[i]] <- 1
+    Z_overall_gun[d_fit_season$gun_start[i]:d_fit_season$gun_end[i]] <- 1
+}
 
 
 ################################################################
