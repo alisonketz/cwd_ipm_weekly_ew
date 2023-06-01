@@ -100,7 +100,7 @@ modelcode <- nimbleCode({
 
   #Period effects from aah data
   tau_period_precollar ~ dgamma(1,1)
-  for (k in 1:(n_year_precollar + 1) {
+  for (k in 1:(n_year_precollar + 1)) {
     period_annual_survival[k] ~ dnorm(0, tau_period_precollar)
   }
 
@@ -1061,8 +1061,7 @@ nimData <- list(Z_period = Z_period,
                 weights_period = weights_period,
                 age_lookup_f = age_lookup_col_f,
                 age_lookup_m = age_lookup_col_m,
-                period_effect_survival = rep(NA,nT_period_overall),
-                # period_effect_survival = period_effect_survival,
+                # period_effect_survival = rep(NA,nT_period_overall),
                 y_hunt_pos = 1,
                 hunt_pos_ageweeks = d_fit_hunt_pos$ageweeks,
                 hunt_pos_sex = d_fit_hunt_pos$sex,
