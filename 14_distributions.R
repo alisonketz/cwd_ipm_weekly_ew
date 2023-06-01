@@ -30,110 +30,138 @@
 ###
 #######################################################################
 
-dInfHarvest <- nimble::nimbleFunction(
-    run = function(
-        ### argument type declarations
-        x = integer(0),
-        n_samples = integer(0), # number of samples in dataset
+dInfHarvest <- nimble::nimbleFunction( # nolint
+	run = function( # nolint
+		### argument type declarations
+		x = integer(0),
+		n_cases = double(1),
+		n_samples = integer(0), # number of samples in dataset
 		a = double(1), #age (weeks) at harvest
-        sex = double(1),
-        age2date = double(1),
-        beta_male = double(0),
-        beta0_sus = double(0),
-        beta0_inf = double(0),
-        age_effect_surv = double(1),
-        period_effect_surv = double(1),
-        f_age_foi = double(1),
-        m_age_foi = double(1),
-        age_lookup_f = double(1),
-        age_lookup_m = double(1),
-        period_lookup = double(1),
-        f_period_foi = double(1),
-        m_period_foi = double(1),
-        space = double(1),
+		sex = double(1),
+		age2date = double(1),
+		beta_male = double(0),
+		beta0_sus = double(0),
+		beta0_inf = double(0),
+		age_effect_surv = double(1),
+		period_effect_surv = double(1),
+		f_age_foi = double(1),
+		m_age_foi = double(1),
+		age_lookup_f = double(1),
+		age_lookup_m = double(1),
+		period_lookup = double(1),
+		f_period_foi = double(1),
+		m_period_foi = double(1),
+		space = double(1),
 		sect = double(1),
-        log = double(0)
-        ) {
+		log = double(0)
+		) {
 
-	# start the loop through individuals	
+	# start the loop through individuals
 	sumllik <- 0
-	for(i in 1:n_samples){
+	for(i in 1:n_samples) {
+
 		#intitialize scalars
 		lam_foi <- 0
 		lam_sus <- 0
 		lam_inf <- 0
 		lik_temp <- 0
-		#lam_foi <- nimNumeric(a[i],init=FALSE)
-		#lam_sus <- nimNumeric(a[i] - 1,init=FALSE)
-		#lam_inf <- nimNumeric(a[i],init=FALSE)
-		#lik_temp <- nimNumeric(a[i],init=FALSE)
-		#indx_foi_age_f <- nimNumeric(a[i])
-		#indx_foi_age_m <- nimNumeric(a[i])
-		#indx_foi_period <- nimNumeric(a[i])
-		
-		#############################################
-		# loop over ages and accumulate sums over 1:a-1
-		# have to loop separately for lam_inf
-		#############################################
-		if(sex[i] == 1){ # age loops for females
+
+		#################################################
+		### loop over ages and accumulate sums over 1:a-1
+		### have to loop separately for lam_inf
+		#################################################
+
+		if(sex[i] == 1) { # age loops for females
 			for(j in 1:(a[i] - 1)) {
-				# sum up infected hazard from 1 to a-1
-				lam_inf <- lam_inf + exp(beta0_inf + age_effect_surv[j] + period_effect_surv[age2date[i] + j] + beta_male)
+			# sum up infected hazard from 1 to a-1
+			lam_inf <- lam_inf + 
+						exp(beta0_inf +
+							age_effect_surv[j] +
+							period_effect_surv[age2date[i] + j])
 			}
 			for(j in 1:a[i]) {
 				# sum up foi hazard from 1  to j
-				lam_foij <-  exp(space[sect[i]] + f_age_foi[age_lookup_f[j]] + f_period_foi[period_lookup[age2date[i] + j]])
+				lam_foij <- exp(space[sect[i]] +
+								f_age_foi[age_lookup_f[j]] +
+								f_period_foi[period_lookup[age2date[i] + j]])
 				# sum up like_temp (no sus hazard when j=1)
-				lik_temp <- lik_temp + lam_foij *
-									exp(-(lam_sus + lam_foi)) *
-									exp(-lam_inf)
+				lik_temp <- lik_temp +
+							lam_foij *
+							exp(-(lam_sus + lam_foi)) *
+							exp(-lam_inf)
 				# now increment the hazards (subtract for lam_inf)
 				lam_foi <- lam_foi + lam_foij
-				if(j < a[i]){
-					lam_sus <- lam_sus + exp(beta0_sus + age_effect_surv[j] + period_effect_surv[age2date[i] + j] + beta_male)
-					lam_inf <- lam_inf - exp(beta0_inf + age_effect_surv[j] + period_effect_surv[age2date[i] + j] + beta_male)
-				} else { # now calculate infected hazard for final age
-					lam_inf <- exp(beta0_inf + age_effect_surv[j] + period_effect_surv[age2date[i] + j] + beta_male)
-				}
-			}			
-		} else { # age loops for males
-			for(j in 1:(a[i]-1)) {
-				# sum up infected hazard from 1 to a-1
-				lam_inf <- lam_inf + exp(beta0_inf + age_effect_surv[j] + period_effect_surv[age2date[i] + j])
-			}			
-			
-			for(j in 1:(a[i])) {
-				# sum up foi hazard from 1  to j
-				lam_foij <-  exp(space[sect[i]] + m_age_foi[age_lookup_f[j]] + m_period_foi[period_lookup[age2date[i] + j]])
-				# sum up like_temp (no sus hazard when j=1)
-				lik_temp <- lik_temp + lam_foij * 
-									exp(-(lam_sus + lam_foi)) *
-									exp(-lam_inf)
-				# now increment the hazards (subtract for lam_inf)
-				lam_foi <- lam_foi + lam_foij
-				if(j<a[i]){
-					lam_sus <- lam_sus + exp(beta0_sus + age_effect_surv[j] + period_effect_surv[age2date[i] + j])
-					lam_inf <- lam_inf - exp(beta0_inf + age_effect_surv[j] + period_effect_surv[age2date[i] + j])
-				}else{ # now calculate infected hazard for final age
-				lam_inf <- exp(beta0_inf + age_effect_surv[j] + period_effect_surv[age2date[i] + j])
-				}
-			}			
-		
+				if(j < a[i]) {
+					lam_sus <- lam_sus +
+       						    exp(beta0_sus +
+						            age_effect_surv[j] +
+                                    period_effect_surv[age2date[i] + j])
+					lam_inf <- lam_inf -
+							   exp(beta0_inf +
+								   age_effect_surv[j] +
+								   period_effect_surv[age2date[i] + j])
+		} else { # now calculate infected hazard for final age
+			lam_inf <- exp(beta0_inf +
+						age_effect_surv[j] +
+						period_effect_surv[age2date[i] + j])
 		}
+		}
+		} else { # age loops for males
+		for(j in 1:(a[i] - 1)) {
+			# sum up infected hazard from 1 to a-1
+			lam_inf <- lam_inf +
+					   exp(beta0_inf +
+			 		       age_effect_surv[j] +
+					       period_effect_surv[age2date[i] + j] +
+				           beta_male)
+		}
+		for(j in 1:(a[i])) {
+			# sum up foi hazard from 1  to j
+			lam_foij <-  exp(space[sect[i]] +
+							 m_age_foi[age_lookup_f[j]] +
+							 m_period_foi[period_lookup[age2date[i] + j]])
+			# sum up like_temp (no sus hazard when j=1)
+			lik_temp <- lik_temp +
+					    lam_foij * exp(-(lam_sus + lam_foi)) *
+						exp(-lam_inf)
+			# now increment the hazards (subtract for lam_inf)
+			lam_foi <- lam_foi + lam_foij
+			if(j < a[i]) {
+				lam_sus <- lam_sus +
+						   exp(beta0_sus +
+				               age_effect_surv[j] +
+							   period_effect_surv[age2date[i] + j] +
+							   beta_male)
+				lam_inf <- lam_inf -
+						   exp(beta0_inf +
+							   age_effect_surv[j] +
+							   period_effect_surv[age2date[i] + j] +
+							   beta_male)
+			} else { 
+			# now calculate infected hazard for final age
+			lam_inf <- exp(beta0_inf +
+						   age_effect_surv[j] +
+						   period_effect_surv[age2date[i] + j] +
+						   beta_male)
+			}
+		}
+		} # end if(sex)
 		#######################################
 		### accumulate the joint likelihood
 		#######################################
-		sumllik <- sumllik + log(lam_inf) + log(lik_temp)
-	} # End the loop for individual i
-    returnType(double(0))
-    if(log) return(sumllik) else return(exp(sumllik))    ## return log-likelihood
-  })
+		sumllik <- sumllik +
+				   (log(lam_inf) + log(lik_temp)) * n_cases[i]
+	} # end the loop for individual i
+	returnType(double(0))
+	if(log) return(sumllik) else return(exp(sumllik))
+})
 
 
 nimble::registerDistributions(list(
     dInfHarvest = list(
-        BUGSdist = 'dInfHarvest(n_samples,a,sex,age2date,beta_male,beta0_sus,beta0_inf,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup,space,sect)',
+        BUGSdist = 'dInfHarvest(n_cases,n_samples,a,sex,age2date,beta_male,beta0_sus,beta0_inf,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup,space,sect)',
         types = c("value = integer(0)",
+					"n_cases = double(1)",
 					"n_samples = integer(0)",
 				    "a = double(1)",
                     "sex = double(1)",
@@ -160,33 +188,36 @@ nimble::registerDistributions(list(
 ))
 
 # for a user-defined distribution
-assign('dInfHarvest', dInfHarvest, envir = .GlobalEnv)
+assign('dInfHarvest',
+	    dInfHarvest,
+		envir = .GlobalEnv)
 
-# start <- Sys.time()
-# test <- dInfHarvest(
-#         x = 1,
-# 		  n_samples = nrow(d_fit_hunt_pos),
-#         a = d_fit_hunt_pos$ageweeks, #age (weeks) at harvest
-#         sex = d_fit_hunt_pos$sex,
-#         age2date = d_fit_hunt_pos$birthweek-1,
-#         beta_male = beta_male,
-#         beta0_sus = beta0_sus,
-#         beta0_inf = beta0_inf,
-#         age_effect_surv = age_effect_survival_test,
-#         period_effect_surv = period_effect_survival_test,
-#         f_age_foi = f_age_foi,
-#         m_age_foi = m_age_foi,
-#         age_lookup_f = age_lookup_f,
-#         age_lookup_m = age_lookup_m,
-#         period_lookup = period_lookup,
-#         f_period_foi = f_period_foi,
-#         m_period_foi = m_period_foi,
-#         space = rep(0,nrow(d_fit_hunt_pos)),
-# 		  sect = sect_hunt_pos,
-#         log = TRUE
-#         )
-# (end<- Sys.time()-start)
-# test
+start <- Sys.time()
+test <- dInfHarvest(
+        x = 1,
+		n_cases = d_fit_hunt_pos$n_cases,
+		n_samples = nrow(d_fit_hunt_pos),
+        a = d_fit_hunt_pos$ageweeks, #age (weeks) at harvest
+        sex = d_fit_hunt_pos$sex,
+        age2date = d_fit_hunt_pos$birthweek-1,
+        beta_male = beta_male,
+        beta0_sus = beta0_sus,
+        beta0_inf = beta0_inf,
+        age_effect_surv = age_effect_survival_test,
+        period_effect_surv = period_effect_survival_test,
+        f_age_foi = f_age_foi,
+        m_age_foi = m_age_foi,
+        age_lookup_f = age_lookup_f,
+        age_lookup_m = age_lookup_m,
+        period_lookup = period_lookup,
+        f_period_foi = f_period_foi,
+        m_period_foi = m_period_foi,
+        space = c(0,-.55),
+		sect = d_fit_hunt_pos$ew,
+        log = TRUE
+        )
+(end <- Sys.time() - start)
+test
 
 
 #######################################################################
@@ -204,8 +235,9 @@ dSusHarvest <- nimble::nimbleFunction(
     run = function(
         ### argument type declarations
         x = double(0),
+        n_cases = double(1),
         n_samples = integer(0), # number of samples in dataset
-		a = double(1), #age (weeks) at harvest
+        a = double(1), #age (weeks) at harvest
         sex = double(1),
         age2date = double(1),
         beta_male = double(0),
@@ -220,13 +252,13 @@ dSusHarvest <- nimble::nimbleFunction(
         f_period_foi=double(1),
         m_period_foi=double(1),
         space = double(1),
-		sect = double(1),
+        sect = double(1),
         log = double(0)
         ) {
 
-	# start the loop through individuals	
+	# start the loop through individuals
 	sumllik <- 0
-	for(i in 1:n_samples){
+	for(i in 1:n_samples) {
 		#intitialize vectors
 		lam_foi <- 0
 		lam_sus <- 0
@@ -239,22 +271,40 @@ dSusHarvest <- nimble::nimbleFunction(
 			for(j in 1:(a[i] - 1)) {
 				# sum up foi and sus hazards from 1  to a-1
 				sum_haz <- sum_haz + 
-					exp(space[sect[i]] + f_age_foi[age_lookup_f[j]] + f_period_foi[period_lookup[age2date[i] + j]]) +
-					exp(beta0_sus + age_effect_surv[j] + period_effect_surv[age2date[i] + j] + beta_male)
+					exp(space[sect[i]] +
+						f_age_foi[age_lookup_f[j]] +
+						f_period_foi[period_lookup[age2date[i] + j]]) +
+					exp(beta0_sus + 
+					    age_effect_surv[j] +
+						period_effect_surv[age2date[i] + j])
 			}
 			# now hazards for a
-			lam_sus <- exp(beta0_sus + age_effect_surv[a[i]] + period_effect_surv[age2date[i] + a[i]] + beta_male)
-			lam_foi <- exp(space[sect[i]] + f_age_foi[age_lookup_f[a[i]]] + f_period_foi[period_lookup[age2date[i] + a[i]]])
+			lam_sus <- exp(beta0_sus +
+						   age_effect_surv[a[i]] +
+						   period_effect_surv[age2date[i] + a[i]])
+			lam_foi <- exp(space[sect[i]] +
+			               f_age_foi[age_lookup_f[a[i]]] +
+						   f_period_foi[period_lookup[age2date[i] + a[i]]])
 		} else { # age loops for males
 			for(j in 1:(a[i] - 1)) {
 				# sum up foi and sus hazards from 1  to a-1
 				sum_haz <- sum_haz + 
-					lam_foi + exp(space[sect[i]] + m_age_foi[age_lookup_f[j]] + m_period_foi[period_lookup[age2date[i] + j]]) +
-					lam_sus + exp(beta0_sus + age_effect_surv[j] + period_effect_surv[age2date[i] + j])
+						   exp(space[sect[i]] +
+						       m_age_foi[age_lookup_f[j]] +
+							   m_period_foi[period_lookup[age2date[i] + j]]) +
+					       exp(beta0_sus +
+						       age_effect_surv[j] +
+							   period_effect_surv[age2date[i] + j] +
+							   beta_male)
 			}
 			# now hazards for a
-			lam_sus <- exp(beta0_sus + age_effect_surv[a[i]] + period_effect_surv[age2date[i] + a[i]])
-			lam_foi <- exp(space[sect[i]] + m_age_foi[age_lookup_f[a[i]]] + m_period_foi[period_lookup[age2date[i] + a[i]]])
+			lam_sus <- exp(beta0_sus +
+						   age_effect_surv[a[i]] +
+						   period_effect_surv[age2date[i] + a[i]] +
+						   beta_male)
+			lam_foi <- exp(space[sect[i]] +
+			               m_age_foi[age_lookup_f[a[i]]] +
+						   m_period_foi[period_lookup[age2date[i] + a[i]]])
 		}
 	
 		#######################################
@@ -263,7 +313,8 @@ dSusHarvest <- nimble::nimbleFunction(
 		###
 		#######################################
 		
-		sumllik <- sumllik - sum_haz + lam_foi + log(lam_sus)
+		sumllik <- sumllik +
+		           (- sum_haz + lam_foi + log(lam_sus)) * n_cases[i]
 	}
 	returnType(double(0))
 	if(log) return(sumllik) else return(exp(sumllik))    ## return log-likelihood
@@ -272,8 +323,9 @@ dSusHarvest <- nimble::nimbleFunction(
 
 nimble::registerDistributions(list(
     dSusHarvest = list(
-        BUGSdist = 'dSusHarvest(n_samples,a,sex,age2date,beta_male,beta0_sus,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup,space,sect)',
+        BUGSdist = 'dSusHarvest(n_cases,n_samples,a,sex,age2date,beta_male,beta0_sus,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup,space,sect)',
         types = c("value = double(0)",
+				  "n_cases = double(1)",
 				  "a = double(1)",
 				  "n_samples = integer(0)",
                   "sex = double(1)",
@@ -300,30 +352,31 @@ nimble::registerDistributions(list(
 # for a user-defined distribution
 assign('dSusHarvest', dSusHarvest, envir = .GlobalEnv)
 
-# start <- Sys.time()
-# test <- dSusHarvest(
-#         x = 1,
-# 		n_samples = nrow(d_fit_hunt_neg),
-#         a = d_fit_hunt_neg$ageweeks, #age (weeks) at harvest
-#         sex = d_fit_hunt_neg$sex,
-#         age2date = d_fit_hunt_neg$birthweek-1,
-#         beta_male = beta_male,
-#         beta0_sus = beta0_sus,
-#         age_effect_surv = age_effect_survival_test,
-#         period_effect_surv = period_effect_survival_test,
-#         f_age_foi = f_age_foi,
-#         m_age_foi = m_age_foi,
-#         age_lookup_f = age_lookup_f,
-#         age_lookup_m = age_lookup_m,
-#         period_lookup = period_lookup,
-#         f_period_foi = f_period_foi,
-#         m_period_foi = m_period_foi,
-#         space = rep(0,nrow(d_fit_hunt_neg)),
-# 		sect = sect_hunt_neg,
-#         log = TRUE
-#         )
-# (end<- Sys.time()-start)
-# test
+start <- Sys.time()
+test <- dSusHarvest(
+        x = 1,
+		n_cases = d_fit_hunt_neg$n_cases,
+		n_samples = nrow(d_fit_hunt_neg),
+        a = d_fit_hunt_neg$ageweeks, #age (weeks) at harvest
+        sex = d_fit_hunt_neg$sex,
+        age2date = d_fit_hunt_neg$birthweek-1,
+        beta_male = beta_male,
+        beta0_sus = beta0_sus,
+        age_effect_surv = age_effect_survival_test,
+        period_effect_surv = period_effect_survival_test,
+        f_age_foi = f_age_foi,
+        m_age_foi = m_age_foi,
+        age_lookup_f = age_lookup_f,
+        age_lookup_m = age_lookup_m,
+        period_lookup = period_lookup,
+        f_period_foi = f_period_foi,
+        m_period_foi = m_period_foi,
+        space = c(0,-.55),
+		sect = d_fit_hunt_neg$ew,
+        log = TRUE
+        )
+(end<- Sys.time()-start)
+test
 
 
 #######################################################################
@@ -379,7 +432,7 @@ dSusCensTest <- nimble::nimbleFunction(
 					exp(space[sect[i]] + f_age_foi[age_lookup_f[j]] + f_period_foi[period_lookup[age2date[i] + j]])
 				if(j > (e[i] - 1)){
 				lam_sus <- lam_sus + 
-					exp(beta0_sus + age_effect_surv[j] + period_effect_surv[age2date[i] + j] + beta_male)
+					exp(beta0_sus + age_effect_surv[j] + period_effect_surv[age2date[i] + j])
 				}
 			}
 		}else{ # age loops for males
@@ -389,7 +442,7 @@ dSusCensTest <- nimble::nimbleFunction(
 					exp(space[sect[i]] + m_age_foi[age_lookup_m[j]] + m_period_foi[period_lookup[age2date[i] + j]])
 				if(j > (e[i] - 1)){
 				lam_sus <- lam_sus + 
-					exp(beta0_sus + age_effect_surv[j] + period_effect_surv[age2date[i] + j])
+					exp(beta0_sus + age_effect_surv[j] + period_effect_surv[age2date[i] + j] + beta_male)
 				}
 			}
 		}		
@@ -517,7 +570,7 @@ dSusCensNo <- nimble::nimbleFunction(
 			for(j in (e[i] + 1):(r[i] - 1)) {
 				# sum up infected hazard from e to r
 				lam_inf <- lam_inf + exp(beta0_inf + age_effect_surv[j] + period_effect_surv[age2date[i] + j] + beta_male)
-			}			
+			}
 			for(j in 1:e[i]) {
 				# sum up infected hazard from 1 to e
 				lam_foi <- lam_foi + exp(space[sect[i]] + f_age_foi[age_lookup_f[j]] + f_period_foi[period_lookup[age2date[i] + j]])
@@ -525,13 +578,13 @@ dSusCensNo <- nimble::nimbleFunction(
 					lam_sus_e <- exp(beta0_sus + age_effect_surv[j] + period_effect_surv[age2date[i] + j] + beta_male)
 					lik_temp_e <- exp(-lam_sus_e) * exp(-lam_foi)
 				}
-			}			
+			}
 			# for(j = (e[i]+1)) {
 				# sum up foi hazard from e to r
 				lam_foij <-  exp(space[sect[i]] + f_age_foi[age_lookup_f[e[i]+1]] + f_period_foi[period_lookup[age2date[i] + e[i]+1]])
 				# sum up like_temp 
-				lik_temp  <- lik_temp + lam_foij * 
-									exp(-lam_inf)
+				lik_temp  <- lik_temp + lam_foij *
+									    exp(-lam_inf)
 				# now redefine hazards (subtract for lam_inf)
 				lam_sus <- exp(beta0_sus + age_effect_surv[e[i]+1] + period_effect_surv[age2date[i] + e[i]+1] + beta_male)
 				lam_foie <- lam_foij
