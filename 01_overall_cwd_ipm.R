@@ -39,7 +39,7 @@ library(splines)
 library(MetBrewer)
 library(ggforce)
 library(tidyr)
-
+library(abind)
 
 ###########################################################
 ### Source summary function for posteriors
