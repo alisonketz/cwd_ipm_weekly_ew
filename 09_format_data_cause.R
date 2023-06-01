@@ -7,6 +7,7 @@
 ##############################################################
 
 d_fit_hh <- d_surv[d_surv$censored == 0,]
+d_fit_hh[,1:3] <- d_fit_hh[,1:3] - nT_period_precollar
 age_class_indx <- c(intvl_step_yr_weekly,#fawns
                     intvl_step_yr_weekly * 2,#1
                     intvl_step_yr_weekly * 3,#2
