@@ -496,9 +496,9 @@ eab_antlered_beta <- gamma.moments(.71, .1015^2)$beta
 ###
 ###################################################
 
-df_age_nocwd$birthweek <-floor(as.duration(ymd("1994-05-15") %--% ymd(df_age_nocwd$birth_date))/dweeks(1))
-df_age_nocwd$birthmonth <-floor(as.duration(ymd("1994-05-15") %--% ymd(df_age_nocwd$birth_date))/dmonths(1))
-df_age_nocwd$age2date_weeks <-floor(as.duration(ymd("1994-05-15") %--% ymd(df_age_nocwd$birth_date))/dweeks(1))-1
-df_age_nocwd$age2date_months <-floor(as.duration(ymd("1994-05-15") %--% ymd(df_age_nocwd$birth_date))/dmonths(1))-1
+d_fit_aah$birthweek <-floor(as.duration(ymd("1994-05-15") %--% ymd(d_fit_aah$birth_date))/dweeks(1))
+d_fit_aah$birthmonth <-floor(as.duration(ymd("1994-05-15") %--% ymd(d_fit_aah$birth_date))/dmonths(1))
+d_fit_aah$age2date_weeks <-floor(as.duration(ymd("1994-05-15") %--% ymd(d_fit_aah$birth_date))/dweeks(1))-1
+d_fit_aah$age2date_months <-floor(as.duration(ymd("1994-05-15") %--% ymd(d_fit_aah$birth_date))/dmonths(1))-1
 
-d_fit_age_nocwd <- df_age_nocwd[df_age_nocwd$n>0,]
+d_fit_age_nocwd <- d_fit_aah[d_fit_aah$n>0,]
