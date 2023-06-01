@@ -961,8 +961,10 @@ d_post_cwd$cwdresult[d_post_cwd$cwdresult=='Pending'] <- "Negative"
 d_post_cwd$cwdresult[d_post_cwd$cwdresult=='Not tested'] <- "Negative"
 d_post_cwd$cwdresult <- as.character(d_post_cwd$cwdresult)
 
-# table(d_post_cwd$cwdresult)
-# d_post_cwd$cwdresult=as.numeric(as.factor(d_post_cwd$cwdresult))-1
+
+rm <- which(d_post_cwd$lowtag %in% c(6847,5119))
+d_post_cwd <- d_post_cwd[-rm,]
+n_postcwd <- nrow(d_post_cwd)
 
 n_cap <- nrow(df_cap)
 n_mort <- nrow(d_mort)

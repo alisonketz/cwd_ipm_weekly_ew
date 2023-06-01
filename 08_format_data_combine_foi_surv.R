@@ -9,7 +9,10 @@
 low_sus <- d_surv$lowtag
 
 # uninfected at recapture, antemortem negative
-low_recap_neg 
+# low_recap_neg 
+
+# infected at recapture,
+# low_recap_pos
 
 # infected at capture, antemortem
 low_icap <- d_surv$lowtag[d_surv$cwd_cap == 1]
@@ -17,16 +20,20 @@ low_icap <- d_surv$lowtag[d_surv$cwd_cap == 1]
 # test + infected at mortality but not at capture or recapture
 # remove infected at mortality from infected antemort
 # remove deer that died and weren't tested at mortality
-low_idead <- d_surv$lowtag[d_surv$cwd_mort == 1 & !is.na(d_surv$cwd_mort)]
+low_idead <- d_surv$lowtag[d_surv$cwd_mort == 1 & !is.na(d_surv$cwd_mort) & !is.na(d_surv$right_period_s)]
 low_idead <- low_idead[!(low_idead %in% c(low_recap, low_icap))]
 
 ### all individuals that are alive at the end of the study that weren't recaptured
 # low_endlive <- d_surv$lowtag[!(d_surv$lowtag %in% 
 #          as.integer(unique(c(d_cens$lowtag, d_mort$lowtag))))]
-low_endlive 
+# low_endlive 
 
 # never tested positive, and were tested at
-low_sus <- low_sus[!(low_sus %in% unique(c(low_icap, low_recap, low_idead, low_endlive)))]
+low_sus <- low_sus[!(low_sus %in% unique(c(low_icap,
+                                           low_recap_pos,
+                                           low_recap_neg,
+                                           low_idead,
+                                           low_endlive)))]
 
 d_fit_sus <- d_surv[d_surv$lowtag %in% low_sus, ]
 d_fit_icap <- d_surv[d_surv$lowtag %in% low_icap, ]
@@ -193,3 +200,8 @@ d_fit_icap_mort$fast <- ifelse(d_fit_icap_mort$left_age_e ==
 # obs_sample_sizes_desc <- read.csv("../obs_sample_sizes_description.csv")
 # print(xtable(obs_sample_sizes_desc),include.rownames=FALSE)
 
+
+        # d_fit_sus_cens_postno
+        # n_fit_sus_mort_postno
+        # n_fit_rec_neg_cens_postno
+        # n_fit_endlive
