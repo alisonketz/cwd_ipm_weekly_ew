@@ -1398,8 +1398,8 @@ assign("dIcapCens", dIcapCens, envir = .GlobalEnv)
 #         period_lookup = period_lookup,
 #         f_period_foi = f_period_foi,
 #         m_period_foi = m_period_foi,
-#         space = rep(0,n_sect),
-# 		sect = d_fit_icap_cens$sect,
+#         space = c(0,-.55),
+# 		sect = d_fit_icap_cens$study_area,
 #         log = TRUE
 #         )
 # test
@@ -1612,8 +1612,8 @@ assign("dIcapMort", dIcapMort, envir = .GlobalEnv)
 #         period_lookup = period_lookup,
 #         f_period_foi = f_period_foi,
 #         m_period_foi = m_period_foi,
-#         space = rep(0,n_sect),
-#   	  sect = d_fit_icap_mort$sect,
+#         space = c(0,-.55),
+#   	    sect = d_fit_icap_mort$study_area,
 #         log = TRUE
 #         )
 # (end <- Sys.time()-start)
