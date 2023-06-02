@@ -474,6 +474,7 @@ dSusCensTest <- nimble::nimbleFunction(
             #######################################
 
             sumllik <- sumllik - lam_sus - lam_foi
+            if(is.na(sumllik)){stop('ack')}
         } # end loop over individuals
 
         returnType(double(0))
@@ -519,10 +520,29 @@ nimble::registerDistributions(list(
 ### for a user-defined distribution
 assign("dSusCensTest", dSusCensTest, envir = .GlobalEnv)
 
+		# n_samples = nrow(d_fit_sus_cens_posttest)
+        # e = d_fit_sus_cens_posttest$left_age_e
+        # r = d_fit_sus_cens_posttest$right_age_r
+        # sex = d_fit_sus_cens_posttest$sex
+        # age2date = sus_cens_posttest_age2date
+        # beta_male = beta_male
+        # beta0_sus = beta0_survival_sus
+        # age_effect_surv = age_effect_survival_test
+        # period_effect_surv = period_effect_survival_test
+        # f_age_foi = f_age_foi
+        # m_age_foi = m_age_foi
+        # age_lookup_f = age_lookup_col_f
+        # age_lookup_m = age_lookup_col_m
+        # period_lookup = period_lookup
+        # f_period_foi = f_period_foi
+        # m_period_foi = m_period_foi
+        # sect = d_fit_sus_cens_posttest$study_area
+        # space = c(0,-.55)
+
 # start <- Sys.time()
 # test <- dSusCensTest(
 #         x = 1,
-# 		  n_samples = nrow(d_fit_sus_cens_posttest),
+# 		n_samples = nrow(d_fit_sus_cens_posttest),
 #         e = d_fit_sus_cens_posttest$left_age_e,
 #         r = d_fit_sus_cens_posttest$right_age_r,
 #         sex = d_fit_sus_cens_posttest$sex,
@@ -538,8 +558,8 @@ assign("dSusCensTest", dSusCensTest, envir = .GlobalEnv)
 #         period_lookup = period_lookup,
 #         f_period_foi = f_period_foi,
 #         m_period_foi = m_period_foi,
-# 		  sect = d_fit_sus_cens_posttest$sect,
-#         space = rep(0,n_sect),
+#         sect = d_fit_sus_cens_posttest$ew,
+#         space = c(0,-.55),
 #         log = TRUE
 #         )
 # (end<- Sys.time()-start)
@@ -2747,66 +2767,66 @@ nimble::registerDistributions(list(
 
 ### for a user-defined distribution
 assign("dAAH", dAAH, envir = .GlobalEnv)
-i=463
-      a = d_fit_aah$ageweeks[i]
-        sex = d_fit_aah$sexnum[i]
-        age2date = d_fit_aah$age2date_weeks[i]
-        n_cases = d_fit_aah$n[i]
-        beta_male = beta_male
-        beta0_sus = beta0_survival_sus
-        beta0_inf = beta0_survival_inf
-        age_effect_surv = age_effect_survival_test
-        period_effect_surv = period_effect_survival_test
-        f_age_foi = f_age_foi
-        m_age_foi = m_age_foi
-        age_lookup_f = age_lookup_f
-        age_lookup_m = age_lookup_m
-        period_lookup = period_lookup
-        f_period_foi = f_period_foi
-        m_period_foi = m_period_foi
 
-# i=73
-dAAH(x = 1,
-      a = d_fit_aah$ageweeks[1],
-        sex = d_fit_aah$sexnum[1],
-        age2date = d_fit_aah$age2date_weeks[1],
-        n_cases = d_fit_aah$n[1],
-        beta_male = beta_male,
-        beta0_sus = beta0_survival_sus,
-        beta0_inf = beta0_survival_inf,
-        age_effect_surv = age_effect_survival_test,
-        period_effect_surv = period_effect_survival_test,
-        f_age_foi = f_age_foi,
-        m_age_foi = m_age_foi,
-        age_lookup_f = age_lookup_f,
-        age_lookup_m = age_lookup_m,
-        period_lookup = period_lookup,
-        f_period_foi = f_period_foi,
-        m_period_foi = m_period_foi,
-        log = TRUE
-        )
+#       a = d_fit_aah$ageweeks[i]
+#         sex = d_fit_aah$sexnum[i]
+#         age2date = d_fit_aah$age2date_weeks[i]
+#         n_cases = d_fit_aah$n[i]
+#         beta_male = beta_male
+#         beta0_sus = beta0_survival_sus
+#         beta0_inf = beta0_survival_inf
+#         age_effect_surv = age_effect_survival_test
+#         period_effect_surv = period_effect_survival_test
+#         f_age_foi = f_age_foi
+#         m_age_foi = m_age_foi
+#         age_lookup_f = age_lookup_f
+#         age_lookup_m = age_lookup_m
+#         period_lookup = period_lookup
+#         f_period_foi = f_period_foi
+#         m_period_foi = m_period_foi
 
-test <- c()
-for(i in 1:nrow(d_fit_aah)){
-test[i] <- dAAH(x = 1,
-                a = d_fit_aah$ageweeks[i],
-                sex = d_fit_aah$sexnum[i],
-                age2date = d_fit_aah$age2date_weeks[i],
-                n_cases = d_fit_aah$n[i],
-                beta_male = beta_male,
-                beta0_sus = beta0_survival_sus,
-                beta0_inf = beta0_survival_inf,
-                age_effect_surv = age_effect_survival_test,
-                period_effect_surv = period_effect_survival_test,
-                f_age_foi = f_age_foi,
-                m_age_foi = m_age_foi,
-                age_lookup_f = age_lookup_col_f,
-                age_lookup_m = age_lookup_col_m,
-                period_lookup = period_lookup,
-                f_period_foi = f_period_foi,
-                m_period_foi = m_period_foi,
-                log = TRUE
-                )
- }
-test
+# # i=73
+# dAAH(x = 1,
+#       a = d_fit_aah$ageweeks[1],
+#         sex = d_fit_aah$sexnum[1],
+#         age2date = d_fit_aah$age2date_weeks[1],
+#         n_cases = d_fit_aah$n[1],
+#         beta_male = beta_male,
+#         beta0_sus = beta0_survival_sus,
+#         beta0_inf = beta0_survival_inf,
+#         age_effect_surv = age_effect_survival_test,
+#         period_effect_surv = period_effect_survival_test,
+#         f_age_foi = f_age_foi,
+#         m_age_foi = m_age_foi,
+#         age_lookup_f = age_lookup_f,
+#         age_lookup_m = age_lookup_m,
+#         period_lookup = period_lookup,
+#         f_period_foi = f_period_foi,
+#         m_period_foi = m_period_foi,
+#         log = TRUE
+#         )
+
+# test <- c()
+# for(i in 1:nrow(d_fit_aah)){
+# test[i] <- dAAH(x = 1,
+#                 a = d_fit_aah$ageweeks[i],
+#                 sex = d_fit_aah$sexnum[i],
+#                 age2date = d_fit_aah$age2date_weeks[i],
+#                 n_cases = d_fit_aah$n[i],
+#                 beta_male = beta_male,
+#                 beta0_sus = beta0_survival_sus,
+#                 beta0_inf = beta0_survival_inf,
+#                 age_effect_surv = age_effect_survival_test,
+#                 period_effect_surv = period_effect_survival_test,
+#                 f_age_foi = f_age_foi,
+#                 m_age_foi = m_age_foi,
+#                 age_lookup_f = age_lookup_col_f,
+#                 age_lookup_m = age_lookup_col_m,
+#                 period_lookup = period_lookup,
+#                 f_period_foi = f_period_foi,
+#                 m_period_foi = m_period_foi,
+#                 log = TRUE
+#                 )
+#  }
+# test
 

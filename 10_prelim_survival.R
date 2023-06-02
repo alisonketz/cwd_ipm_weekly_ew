@@ -25,20 +25,20 @@ surv_age_lookup <- c(1:nT_age_surv_aah,
 ########################################################################
 
 #left_period - left_age
-sus_age2date <- d_fit_sus$left_period_e - d_fit_sus$left_age_e + nT_period_precollar
-icap_cens_age2date <- d_fit_icap_cens$left_period_e - d_fit_icap_cens$left_age_e + nT_period_precollar
-icap_mort_age2date <- d_fit_icap_mort$left_period_e - d_fit_icap_mort$left_age_e + nT_period_precollar
-idead_age2date <- d_fit_idead$left_period_e - d_fit_idead$left_age_e + nT_period_precollar
-rec_neg_cens_posttest_age2date <- d_fit_rec_neg_cens_posttest$left_period_e - d_fit_rec_neg_cens_posttest$left_age_e + nT_period_precollar
-rec_neg_cens_postno_age2date <- d_fit_rec_neg_cens_postno$left_period_e - d_fit_rec_neg_cens_postno$left_age_e + nT_period_precollar
-rec_neg_mort_age2date <- d_fit_rec_neg_mort$left_period_e - d_fit_rec_neg_mort$left_age_e + nT_period_precollar
-rec_pos_cens_age2date <- d_fit_rec_pos_cens$left_period_e - d_fit_rec_pos_cens$left_age_e + nT_period_precollar
-rec_pos_mort_age2date <- d_fit_rec_pos_mort$left_period_e - d_fit_rec_pos_mort$left_age_e + nT_period_precollar
-sus_cens_postno_age2date <- d_fit_sus_cens_postno$left_period_e - d_fit_sus_cens_postno$left_age_e + nT_period_precollar
-sus_cens_posttest_age2date <- d_fit_sus_cens_posttest$left_period_e - d_fit_sus_cens_posttest$left_age_e + nT_period_precollar
-sus_mort_posttest_age2date <- d_fit_sus_mort_posttest$left_period_e - d_fit_sus_mort_posttest$left_age_e + nT_period_precollar
-sus_mort_postno_age2date <- d_fit_sus_mort_postno$left_period_e - d_fit_sus_mort_postno$left_age_e + nT_period_precollar
-endlive_age2date <- d_fit_endlive$left_period_e - d_fit_endlive$left_age_e + nT_period_precollar
+sus_age2date <- d_fit_sus$left_period_e - d_fit_sus$left_age_e
+icap_cens_age2date <- d_fit_icap_cens$left_period_e - d_fit_icap_cens$left_age_e
+icap_mort_age2date <- d_fit_icap_mort$left_period_e - d_fit_icap_mort$left_age_e
+idead_age2date <- d_fit_idead$left_period_e - d_fit_idead$left_age_e
+rec_neg_cens_posttest_age2date <- d_fit_rec_neg_cens_posttest$left_period_e - d_fit_rec_neg_cens_posttest$left_age_e
+rec_neg_cens_postno_age2date <- d_fit_rec_neg_cens_postno$left_period_e - d_fit_rec_neg_cens_postno$left_age_e
+rec_neg_mort_age2date <- d_fit_rec_neg_mort$left_period_e - d_fit_rec_neg_mort$left_age_e
+rec_pos_cens_age2date <- d_fit_rec_pos_cens$left_period_e - d_fit_rec_pos_cens$left_age_e
+rec_pos_mort_age2date <- d_fit_rec_pos_mort$left_period_e - d_fit_rec_pos_mort$left_age_e
+sus_cens_postno_age2date <- d_fit_sus_cens_postno$left_period_e - d_fit_sus_cens_postno$left_age_e
+sus_cens_posttest_age2date <- d_fit_sus_cens_posttest$left_period_e - d_fit_sus_cens_posttest$left_age_e
+sus_mort_posttest_age2date <- d_fit_sus_mort_posttest$left_period_e - d_fit_sus_mort_posttest$left_age_e
+sus_mort_postno_age2date <- d_fit_sus_mort_postno$left_period_e - d_fit_sus_mort_postno$left_age_e
+endlive_age2date <- d_fit_endlive$left_period_e - d_fit_endlive$left_age_e
 
 
 ################################################################
