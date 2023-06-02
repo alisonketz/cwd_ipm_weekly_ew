@@ -1509,6 +1509,8 @@ levels(d_fit_aah$agemonths) <- c(floor(as.duration(ymd("2014-05-15") %--% ymd("2
                                     
 d_fit_aah$ageweeks <- as.numeric(as.character(d_fit_aah$ageweeks))
 d_fit_aah$agemonths <- as.numeric(as.character(d_fit_aah$agemonths))
+
+d_fit_aah
 # sex=0=females, sex=1=males
 d_fit_aah$sexnum <- as.factor(d_fit_aah$sex)
 

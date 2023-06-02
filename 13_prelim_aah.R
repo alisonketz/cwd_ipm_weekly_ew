@@ -504,3 +504,5 @@ d_fit_aah$age2date_months <-floor(as.duration(ymd("1994-05-15") %--% ymd(d_fit_a
 d_fit_aah$age2date_months[d_fit_aah$age2date_months < 0] <- 0
 
 d_fit_age_nocwd <- d_fit_aah[d_fit_aah$n>0,]
+
+d_fit_aah$study_area <- ifelse(d_fit_aah$study_area=="east",1,2)

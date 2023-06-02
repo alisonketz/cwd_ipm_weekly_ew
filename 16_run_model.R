@@ -596,26 +596,27 @@ modelcode <- nimbleCode({
 #######################################################################
 
 
-  for (i in 1:nAAH) {
-    y_aah[i] ~ dAAH(
-        a = aah_ageweeks[i],
-        sex = aah_sex[i],
-        age2date = aah_age2date[i],
-        n_cases = aah_n[i],
-        beta_male = beta_male,
-        beta0_sus = beta0_survival_sus,
-        beta0_inf = beta0_survival_inf,
-        age_effect_surv = age_effect_survival[1:nT_age_surv],
-        period_effect_surv = period_effect_survival[1:nT_period_overall],
-        f_age_foi = f_age_foi[1:n_agef],
-        m_age_foi = m_age_foi[1:n_agem],
-        age_lookup_f = age_lookup_f[1:n_age_lookup_f],
-        age_lookup_m = age_lookup_m[1:n_age_lookup_m],
-        period_lookup = period_lookup[1:n_period_lookup],
-        f_period_foi = f_period_foi[1:n_year],
-        m_period_foi = m_period_foi[1:n_year]
-        )
-  }
+  y_aah ~ dAAH(
+      n_samples = nAAH,
+      a = aah_ageweeks[1:nAAH],
+      sex = aah_sex[1:nAAH],
+      age2date = aah_age2date[1:nAAH],
+      n_cases = aah_n[1:nAAH],
+      beta_male = beta_male,
+      beta0_sus = beta0_survival_sus,
+      beta0_inf = beta0_survival_inf,
+      age_effect_surv = age_effect_survival[1:nT_age_surv],
+      period_effect_surv = period_effect_survival[1:nT_period_overall],
+      f_age_foi = f_age_foi[1:n_agef],
+      m_age_foi = m_age_foi[1:n_agem],
+      age_lookup_f = age_lookup_f[1:n_age_lookup_f],
+      age_lookup_m = age_lookup_m[1:n_age_lookup_m],
+      period_lookup = period_lookup[1:n_period_lookup],
+      f_period_foi = f_period_foi[1:n_year],
+      m_period_foi = m_period_foi[1:n_year],
+      space = space[1:n_study_area],
+      sect = sect_aah
+      )
 
   #######################################################
   #######################################################
@@ -1152,7 +1153,7 @@ nimData <- list(Z_period = Z_period,
                 idead_dn = d_fit_idead$right_age_s,
                 idead_sex = d_fit_idead$sex,
                 idead_age2date = idead_age2date,
-                y_aah = rep(1,nrow(d_fit_aah)),
+                y_aah = nrow(d_fit_aah),
                 aah_ageweeks = d_fit_aah$ageweeks,
                 aah_sex = d_fit_aah$sexnum,
                 aah_age2date = d_fit_aah$age2date_weeks,
@@ -1243,6 +1244,7 @@ nimConsts <- list(n_year = n_year,
     sect_rec_pos_mort = d_fit_rec_pos_mort$study_area,
     sect_rec_pos_cens = d_fit_rec_pos_cens$study_area,
     sect_idead = d_fit_idead$study_area,
+    sect_aah = d_fit_aah$study_area,
     records_cause = records_cause,
     interval = d_fit_hh$right_period_s - 1,
     intvl_step_yr = intvl_step_yr_weekly,
