@@ -750,7 +750,6 @@ dSusCensNo <- nimble::nimbleFunction(
             sumllik <- sumllik + 
 			           log(lik_temp * lik_temp_e +
 					       exp(-(lam_sus + lam_sus_e)) * exp(-lam_foi))
-            if(is.na(sumllik)){stop("ack")}
         }
         returnType(double(0))
         if (log) {
@@ -2678,7 +2677,7 @@ assign("dNegCapPosMort", dNegCapPosMort, envir = .GlobalEnv)
 dAAH <- nimble::nimbleFunction(
     run = function( ### argument type declarations
                    x = integer(),
-                   n_samples = integer(0),
+                   n_samples = double(0),
                    a = double(1),
                    sex = double(1),
                    age2date = double(1),
@@ -2770,28 +2769,25 @@ dAAH <- nimble::nimbleFunction(
                                         -sum(lam_sus[1:(a[i] - 1)]) +
                                         -sum(lam_foi[1:(a[i] - 1)]) +
                                         log(sum(lik_temp[1:a[i]])))
-
-                # if(is.na(llik)){stop("ack")}
         }
         returnType(double(0))
         if (log) {
-            return(llik)
+            return(sumllik)
         } else {
-            return(exp(llik))
+            return(exp(sumllik))
         } ## return log-likelihood
     }
 )
-
 
 nimble::registerDistributions(list(
     dAAH = list(
         BUGSdist = "dAAH(n_samples,a,sex,age2date,n_cases,beta_male,beta0_sus,beta0_inf,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup,space,sect)",
         types = c(
-            "n_samples = integer(0)",
-            "a = integer(0)",
-            "sex = double(0)",
-            "age2date = double(0)",
-            "n_cases = double(0)",
+            "n_samples = double(0)",
+            "a = double(1)",
+            "sex = double(1)",
+            "age2date = double(1)",
+            "n_cases = double(1)",
             "beta_male = double(0)",
             "beta0_sus = double(0)",
             "beta0_inf = double(0)",
@@ -2878,4 +2874,5 @@ assign("dAAH", dAAH, envir = .GlobalEnv)
 #             log = TRUE
 #             )
 # test
+
 

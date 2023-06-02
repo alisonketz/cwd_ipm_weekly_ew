@@ -615,7 +615,7 @@ modelcode <- nimbleCode({
       f_period_foi = f_period_foi[1:n_year],
       m_period_foi = m_period_foi[1:n_year],
       space = space[1:n_study_area],
-      sect = sect_aah
+      sect = sect_aah[1:nAAH]
       )
 
   #######################################################
@@ -1301,6 +1301,9 @@ Rmodel <- nimbleModel(code = modelcode,
                       )
 # end_Rmodel <- Sys.time() - start_Rmodel
 Rmodel$initializeInfo()
+
+Cnim <- compileNimble(Rmodel)
+
 for(i in 1:10){beepr::beep(1)}
 
 #######################################
@@ -1363,7 +1366,6 @@ confMCMC <- configureMCMC(Rmodel,
                          # enableWAIC = TRUE,
                          useConjugacy = FALSE)
 nimMCMC <- buildMCMC(confMCMC)
-Cnim <- compileNimble(Rmodel)
 CnimMCMC <- compileNimble(nimMCMC,
                          project = Rmodel)
 for(i in 1:10){beepr::beep(1)}
