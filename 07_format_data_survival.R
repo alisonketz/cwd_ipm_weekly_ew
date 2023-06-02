@@ -146,7 +146,7 @@ for(i in 1:n_cens){
   d_surv$rmonth[d_surv$lowtag %in% d_cens$lowtag[i]] <- d_cens$rmonth[i]
 }
 
-#there's 100 still alive... 4 I'm unsure of why they are still in here
+#there's 81 alive after study
 low_endlive <- d_surv[which(is.na(d_surv[,2])),9]
 nrow(d_surv[which(is.na(d_surv[,2])),])
 nrow(df_cap) - (nrow(d_cens) + nrow(d_mort))
@@ -156,7 +156,7 @@ d_surv[which(is.na(d_surv[, 2])), 2] <- nT_period_collar
 d_surv$rmonth[which(d_surv$rmonth == 0)] <- nT_period_collar_monthly
 d_surv$smonth[which(d_surv$smonth == 0)] <- nT_period_collar_monthly
 
-# hist(d_surv$rmonth)
+d_surv[d_surv$right_period_r > nT_period_collar]
 
 ###
 ### converting to a data.frame
