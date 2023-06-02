@@ -793,53 +793,53 @@ nimble::registerDistributions(list(
 ### for a user-defined distribution
 assign("dSusCensNo", dSusCensNo, envir = .GlobalEnv)
 
-        n_samples = nrow(d_fit_sus_cens_postno)
-        e = d_fit_sus_cens_postno$left_age_e
-        r = d_fit_sus_cens_postno$right_age_r
-        sex = d_fit_sus_cens_postno$sex
-        age2date = sus_cens_postno_age2date
-        beta_male = beta_male
-        beta0_sus = beta0_survival_sus
-        beta0_inf = beta0_survival_inf
-        age_effect_surv = age_effect_survival_test
-        period_effect_surv = period_effect_survival_test
-        f_age_foi = f_age_foi
-        m_age_foi = m_age_foi
-        age_lookup_f = age_lookup_col_f
-        age_lookup_m = age_lookup_col_m
-        period_lookup = period_lookup
-        f_period_foi = f_period_foi
-        m_period_foi = m_period_foi
-        space = c(0,-.55)
-        sect = d_fit_sus_cens_postno$study_area
+#         n_samples = nrow(d_fit_sus_cens_postno)
+#         e = d_fit_sus_cens_postno$left_age_e
+#         r = d_fit_sus_cens_postno$right_age_r
+#         sex = d_fit_sus_cens_postno$sex
+#         age2date = sus_cens_postno_age2date
+#         beta_male = beta_male
+#         beta0_sus = beta0_survival_sus
+#         beta0_inf = beta0_survival_inf
+#         age_effect_surv = age_effect_survival_test
+#         period_effect_surv = period_effect_survival_test
+#         f_age_foi = f_age_foi
+#         m_age_foi = m_age_foi
+#         age_lookup_f = age_lookup_col_f
+#         age_lookup_m = age_lookup_col_m
+#         period_lookup = period_lookup
+#         f_period_foi = f_period_foi
+#         m_period_foi = m_period_foi
+#         space = c(0,-.55)
+#         sect = d_fit_sus_cens_postno$study_area
 
 
-start <- Sys.time()
-test <- dSusCensNo(
-        x = 1,
-        n_samples = nrow(d_fit_sus_cens_postno),
-        e = d_fit_sus_cens_postno$left_age_e,
-        r = d_fit_sus_cens_postno$right_age_r,
-        sex = d_fit_sus_cens_postno$sex,
-        age2date = sus_cens_postno_age2date,
-        beta_male = beta_male,
-        beta0_sus = beta0_survival_sus,
-        beta0_inf = beta0_survival_inf,
-        age_effect_surv = age_effect_survival_test,
-        period_effect_surv = period_effect_survival_test,
-        f_age_foi = f_age_foi,
-        m_age_foi = m_age_foi,
-        age_lookup_f = age_lookup_col_f,
-        age_lookup_m = age_lookup_col_m,
-        period_lookup = period_lookup,
-        f_period_foi = f_period_foi,
-        m_period_foi = m_period_foi,
-        space = c(0,-.55),
-        sect = d_fit_sus_cens_postno$study_area,
-        log = TRUE
-        )
-(end<- Sys.time()-start)
-test
+# start <- Sys.time()
+# test <- dSusCensNo(
+#         x = 1,
+#         n_samples = nrow(d_fit_sus_cens_postno),
+#         e = d_fit_sus_cens_postno$left_age_e,
+#         r = d_fit_sus_cens_postno$right_age_r,
+#         sex = d_fit_sus_cens_postno$sex,
+#         age2date = sus_cens_postno_age2date,
+#         beta_male = beta_male,
+#         beta0_sus = beta0_survival_sus,
+#         beta0_inf = beta0_survival_inf,
+#         age_effect_surv = age_effect_survival_test,
+#         period_effect_surv = period_effect_survival_test,
+#         f_age_foi = f_age_foi,
+#         m_age_foi = m_age_foi,
+#         age_lookup_f = age_lookup_col_f,
+#         age_lookup_m = age_lookup_col_m,
+#         period_lookup = period_lookup,
+#         f_period_foi = f_period_foi,
+#         m_period_foi = m_period_foi,
+#         space = c(0,-.55),
+#         sect = d_fit_sus_cens_postno$study_area,
+#         log = TRUE
+#         )
+# (end<- Sys.time()-start)
+# test
 
 # start <- Sys.time()
 # test2 <- dSusCensNo(
