@@ -67,6 +67,7 @@ calc_surv_aah <- nimble::nimbleFunction(
 
 Ccalc_surv_aah <- compileNimble(calc_surv_aah)
 
+assign("calc_surv_aah", calc_surv_aah, envir = .GlobalEnv)
 
 # starttime <- Sys.time()
 # sn_sus <- Ccalc_surv_aah(
@@ -237,7 +238,10 @@ calc_surv_harvest <- nimble::nimbleFunction(
   returnType(double(3))
   return(s_hunt[1:2,1:n_agef,1:n_year])
 })
+
 Ccalc_surv_harvest <- compileNimble(calc_surv_harvest)
+
+assign("calc_surv_harvest", calc_surv_harvest, envir = .GlobalEnv)
 
 # starttime <- Sys.time()
 # sh_sus <- Ccalc_surv_harvest(nT_age = n_agef*intvl_step_yr,
@@ -388,6 +392,8 @@ calc_infect_prob <- nimbleFunction(
 
 Ccalc_infect_prob <- compileNimble(calc_infect_prob)
 
+assign("calc_infect_prob", calc_infect_prob, envir = .GlobalEnv)
+
 # age_lookup_f = age_lookup_f_conv
 # age_lookup_m = age_lookup_m_conv
 # Nage_lookup = Nage_lookup_conv
@@ -474,3 +480,5 @@ set_period_effects_constant <- nimble::nimbleFunction(
 })
 
 Cset_period_effects_constant <- compileNimble(set_period_effects_constant)
+
+assign("set_period_effects_constant", set_period_effects_constant, envir = .GlobalEnv)
