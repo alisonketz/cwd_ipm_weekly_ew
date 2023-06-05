@@ -211,14 +211,14 @@ initsFun <- function()list(beta_male = rnorm(1, -.5, .01),
                   rnorm(1, -5, sd =.1),
                   rnorm(1, -5.5, sd =.1),
                   rnorm(1, -6, sd =.1),
-                  rnorm(1, -7.2, sd =.1)) - 2, #subtracting for scaling from monthly to weekly,
+                  rnorm(1, -7.2, sd =.1)) - 2,
     f_age_foi = c(rnorm(1, -6, sd =.1),
                   rnorm(1, -5.5, sd =.1),
                   rnorm(1, -6, sd =.1),
                   rnorm(1, -6.5, sd =.1),
                   rnorm(1, -6.8, sd =.1),
                   rnorm(1, -7.2, sd =.1),
-                  rnorm(1, -8, sd =.1)) - 2, #subtracting for scaling from monthly to weekly
+                  rnorm(1, -8, sd =.1)) - 2,
     tau_period_precollar = rgamma(1, 1, 1),
     period_annual_survival = rnorm(n_year_precollar + 1),
     beta0_cause = rnorm(1, -2.8, .1),
@@ -297,10 +297,10 @@ parameters <- c(
               "mu_fec",
               "fec_prec_eps",
               "fec_epsilon",
-              "sn_inf",
-              "sn_sus",
-              "sh_inf",
-              "sh_sus",
+              # "sn_inf",
+              # "sn_sus",
+              # "sh_inf",
+              # "sh_sus",
               "mu_obs",
               "tau_obs",
               "tau_pop"
@@ -319,7 +319,7 @@ for(i in 1:10){beepr::beep(1)}
 set.seed(7654321)
 starttime <- Sys.time()
 mcmcout <- runMCMC(CnimMCMC,
-                  niter = 1000,
+                  niter = 100,
                   nburnin = 0,
                   nchains = 1,
                   inits = initsFun,
@@ -337,111 +337,111 @@ for (i in 1:10) {beepr::beep(1)}
 # endtime_mcmc
 runtime
 
-sink("runtime_allsteps.txt")
+# sink("runtime_allsteps.txt")
 # cat("Rmodel:\n")
 # end_Rmodel
 # cat("\nCompile Rmodel:\n")
 # endtime_rmodel_compile
 # cat("\nCompile MCMC:\n")
 # endtime_mcmc
-cat("\nRun MCMC 1000 iter: ",runtime)
-sink()
+# cat("\nRun MCMC 100 iter: ",runtime)
+# sink()
 #############################################################
 ###
 ### Running in parallel, restartable
 ###
 #############################################################
 
-reps  <- 1000
-bin <- reps * .5
-n_thin <- 1
-n_chains <- 3
-starttime <- Sys.time()
-cl <- makeCluster(n_chains, timeout = 5184000)
+# reps  <- 1000
+# bin <- reps * .5
+# n_thin <- 1
+# n_chains <- 3
+# starttime <- Sys.time()
+# cl <- makeCluster(n_chains, timeout = 5184000)
 
-clusterExport(cl, c("modelcode",
-                    "initsFun",
-                    "nimData",
-                    "nimConsts",
-                    "parameters",
-                    "reps",
-                    "bin",
-                    "n_thin",
-                    "set_period_effects_constant",
-                    "dInfHarvest",
-                    "dSusHarvest",
-                    "dSusCensTest",
-                    "dSusCensNo",
-                    "dSusMortTest",
-                    "dSusMortNoTest",
-                    "dIcapCens",
-                    "dIcapMort",
-                    "dRecNegCensTest",
-                    "dRecNegMort",
-                    "dRecPosMort",
-                    "dRecPosCens",
-                    "dNegCapPosMort",
-                    "dAAH",
-                    "calc_surv_aah",
-                    "calc_surv_harvest",
-                    "calc_infect_prob"
-                    ))
-for (j in seq_along(cl)) {
-  set.seed(j + 1000)
-  init <- initsFun()
-  clusterExport(cl[j], "init")
-}
-for (i in 1:10) {beepr::beep(1)}
+# clusterExport(cl, c("modelcode",
+#                     "initsFun",
+#                     "nimData",
+#                     "nimConsts",
+#                     "parameters",
+#                     "reps",
+#                     "bin",
+#                     "n_thin",
+#                     "set_period_effects_constant",
+#                     "dInfHarvest",
+#                     "dSusHarvest",
+#                     "dSusCensTest",
+#                     "dSusCensNo",
+#                     "dSusMortTest",
+#                     "dSusMortNoTest",
+#                     "dIcapCens",
+#                     "dIcapMort",
+#                     "dRecNegCensTest",
+#                     "dRecNegMort",
+#                     "dRecPosMort",
+#                     "dRecPosCens",
+#                     "dNegCapPosMort",
+#                     "dAAH",
+#                     "calc_surv_aah",
+#                     "calc_surv_harvest",
+#                     "calc_infect_prob"
+#                     ))
+# for (j in seq_along(cl)) {
+#   set.seed(j + 1000)
+#   init <- initsFun()
+#   clusterExport(cl[j], "init")
+# }
+# for (i in 1:10) {beepr::beep(1)}
 
-starttime <- Sys.time()
-mcmcout1 <-  mcmc.list(clusterEvalQ(cl, {
-  library(nimble)
-  library(coda)
+# starttime <- Sys.time()
+# mcmcout1 <-  mcmc.list(clusterEvalQ(cl, {
+#   library(nimble)
+#   library(coda)
 
-  assign("set_period_effects_constant", set_period_effects_constant, envir = .GlobalEnv)
-  assign("dInfHarvest", dInfHarvest, envir = .GlobalEnv)
-  assign("dSusHarvest", dSusHarvest, envir = .GlobalEnv)
-  assign("dSusCensTest", dSusCensTest, envir = .GlobalEnv)
-  assign("dSusCensNo", dSusCensNo, envir = .GlobalEnv)
-  assign("dSusMortTest", dSusMortTest, envir = .GlobalEnv)
-  assign("dSusMortNoTest", dSusMortNoTest, envir = .GlobalEnv)
-  assign("dIcapCens", dIcapCens, envir = .GlobalEnv)
-  assign("dIcapMort", dIcapMort, envir = .GlobalEnv)
-  assign("dRecNegCensTest", dRecNegCensTest, envir = .GlobalEnv)
-  assign("dRecNegMort", dRecNegMort, envir = .GlobalEnv)
-  assign("dRecPosMort", dRecPosMort, envir = .GlobalEnv)
-  assign("dRecPosCens", dRecPosCens, envir = .GlobalEnv)
-  assign("dNegCapPosMort", dNegCapPosMort, envir = .GlobalEnv)
-  assign("dAAH", dAAH, envir = .GlobalEnv)
-  assign("calc_surv_aah", calc_surv_aah, envir = .GlobalEnv)
-  assign("calc_surv_harvest", calc_surv_harvest, envir = .GlobalEnv)
-  assign("calc_infect_prob", calc_infect_prob, envir = .GlobalEnv)
+#   assign("set_period_effects_constant", set_period_effects_constant, envir = .GlobalEnv)
+#   assign("dInfHarvest", dInfHarvest, envir = .GlobalEnv)
+#   assign("dSusHarvest", dSusHarvest, envir = .GlobalEnv)
+#   assign("dSusCensTest", dSusCensTest, envir = .GlobalEnv)
+#   assign("dSusCensNo", dSusCensNo, envir = .GlobalEnv)
+#   assign("dSusMortTest", dSusMortTest, envir = .GlobalEnv)
+#   assign("dSusMortNoTest", dSusMortNoTest, envir = .GlobalEnv)
+#   assign("dIcapCens", dIcapCens, envir = .GlobalEnv)
+#   assign("dIcapMort", dIcapMort, envir = .GlobalEnv)
+#   assign("dRecNegCensTest", dRecNegCensTest, envir = .GlobalEnv)
+#   assign("dRecNegMort", dRecNegMort, envir = .GlobalEnv)
+#   assign("dRecPosMort", dRecPosMort, envir = .GlobalEnv)
+#   assign("dRecPosCens", dRecPosCens, envir = .GlobalEnv)
+#   assign("dNegCapPosMort", dNegCapPosMort, envir = .GlobalEnv)
+#   assign("dAAH", dAAH, envir = .GlobalEnv)
+#   assign("calc_surv_aah", calc_surv_aah, envir = .GlobalEnv)
+#   assign("calc_surv_harvest", calc_surv_harvest, envir = .GlobalEnv)
+#   assign("calc_infect_prob", calc_infect_prob, envir = .GlobalEnv)
 
-  ##############################################################
-  ###
-  ### Execute MCMC
-  ###
-  ##############################################################
+#   ##############################################################
+#   ###
+#   ### Execute MCMC
+#   ###
+#   ##############################################################
 
-  Rmodel <- nimbleModel(code = modelcode,
-                        name = "modelcode",
-                        constants = nimConsts,
-                        data = nimData,
-                        inits = initsFun)
-  Cnim <- compileNimble(Rmodel)
-  confMCMC <- configureMCMC(Rmodel,
-                            monitors = parameters,
-                            thin = n_thin,
-                            useConjugacy = FALSE)
-  nimMCMC <- buildMCMC(confMCMC)
-  CnimMCMC <- compileNimble(nimMCMC,
-                            project = Rmodel)
+#   Rmodel <- nimbleModel(code = modelcode,
+#                         name = "modelcode",
+#                         constants = nimConsts,
+#                         data = nimData,
+#                         inits = initsFun)
+#   Cnim <- compileNimble(Rmodel)
+#   confMCMC <- configureMCMC(Rmodel,
+#                             monitors = parameters,
+#                             thin = n_thin,
+#                             useConjugacy = FALSE)
+#   nimMCMC <- buildMCMC(confMCMC)
+#   CnimMCMC <- compileNimble(nimMCMC,
+#                             project = Rmodel)
 
-  CnimMCMC$run(reps, reset = FALSE)
+#   CnimMCMC$run(reps, reset = FALSE)
 
-  return(as.mcmc(as.matrix(CnimMCMC$mvSamples)))
-}))
-runtime1 <- difftime(Sys.time(), starttime, units = "min")
+#   return(as.mcmc(as.matrix(CnimMCMC$mvSamples)))
+# }))
+# runtime1 <- difftime(Sys.time(), starttime, units = "min")
 
 # for(chn in 1:nc) { # nc must be > 1
 #   ind.keep <- c()
@@ -463,10 +463,10 @@ runtime1 <- difftime(Sys.time(), starttime, units = "min")
 #   out2[[chn]] <- out2[[chn]][nb.real:ni.saved,]
 # }
 # out.mcmc <- coda::as.mcmc.list(lapply(out2, coda::as.mcmc))
-stopCluster(cl)
+# stopCluster(cl)
 
-save(mcmcout1, file = "mcmcout1.Rdata")
-save(runtime1, file = "runtime1.Rdata")
+# save(mcmcout1, file = "mcmcout1.Rdata")
+# save(runtime1, file = "runtime1.Rdata")
 # save(endtime_rmodel_compile, file = "endtime_rmodel_compile.Rdata")
 # save(endtime_mcmc, file = "endtime_mcmc.Rdata")
 
