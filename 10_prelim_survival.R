@@ -7,15 +7,13 @@
 ### Number of age effects for survival
 nT_age_surv <- max(d_surv$right_age_s, na.rm = TRUE) - 1
 nT_age_surv_aah <- intvl_step_yr_weekly * n_agef
+nT_age_short <- intvl_step_yr_weekly * (n_agef - 1)
 
 ### The first 2 years period effects for survival 
 ### should be set to be the same as 1994 period effect
 
 surv_period_lookup <- c(rep(1, 2 * intvl_step_yr_weekly),
                        1:nT_period_overall)
-
-surv_age_lookup <- c(1:nT_age_surv_aah,
-                     rep(nT_age_surv_aah,nT_age_surv - nT_age_surv_aah))
 
 ########################################################################
 ###
