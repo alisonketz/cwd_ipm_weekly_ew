@@ -56,10 +56,10 @@ modelcode <- nimbleCode({
 
   ### random effect for East/West spatial model
   space[1] <- 0
-  space[2]  <- space_temp * space_alpha
+  space[2]  <- space_temp * space_mix
 
   space_temp ~ dnorm(0, 1)
-  space_alpha ~ dunif(-1, 1)
+  space_mix ~ dunif(-1, 1)
 
   ############################################################
   ############################################################
@@ -67,16 +67,25 @@ modelcode <- nimbleCode({
   ############################################################
   ############################################################
 
-  ##############################
-  ### Susceptibles
-  ##############################
+  ####################################
+  ### Susceptibles survival intercept
+  ####################################
 
-  #Priors for intercept and covariate
   beta0_sus_temp ~ dnorm(0, .01)
   sus_mix ~ dunif(-1, 1)
   beta0_survival_sus <- beta0_sus_temp * sus_mix
 
-  #Priors for Age and Period effects
+  ##################################
+  ### Infected survival intercept
+  ##################################
+
+  beta0_inf_temp ~ dnorm(0, .01)
+  inf_mix ~ dunif(-1, 1)
+  beta0_survival_inf <- beta0_inf_temp * inf_mix
+
+  ##################################
+  ### Priors for Age and Period effects
+  ##################################
   #Age effects
   for (k in 1:nknots_age) {
     b_age_survival[k] ~ dnorm(0, tau_age_survival)
@@ -114,15 +123,6 @@ modelcode <- nimbleCode({
         period_effect_surv = period_effect_surv[1:nT_period_collar],
         period_annual_survival = period_annual_survival[1:(n_year_precollar + 1)]
   )
-  ##################################
-  ## Infected survival intercept
-  ##################################
-
-  #Priors for intercept and covariate
-  beta0_inf_temp ~ dnorm(0, .01)
-  inf_mix ~ dunif(-1, 1)
-  beta0_survival_inf <- beta0_inf_temp * inf_mix
-
   #######################################################################
   #######################################################################
   ## Likelihoods of Joint Model
@@ -142,7 +142,7 @@ modelcode <- nimbleCode({
   y_hunt_pos ~ dInfHarvest(
                   n_cases = hunt_pos_n_cases[1:nInfHarvest],
                   n_samples = nInfHarvest,
-				          a = hunt_pos_ageweeks[1:nInfHarvest], #age (weeks) at harvest
+                  a = hunt_pos_ageweeks[1:nInfHarvest], #age (weeks) at harvest
                   sex = hunt_pos_sex[1:nInfHarvest],
                   age2date = hunt_pos_age2date[1:nInfHarvest],
                   beta_male = beta_male,
@@ -174,7 +174,7 @@ modelcode <- nimbleCode({
   y_hunt_neg ~ dSusHarvest(
                   n_cases = hunt_neg_n_cases[1:nInfHarvest],
                   n_samples = nSusHarvest,
-				          a = hunt_neg_ageweeks[1:nSusHarvest], #age (weeks) at harvest
+                  a = hunt_neg_ageweeks[1:nSusHarvest], #age (weeks) at harvest
                   sex = hunt_neg_sex[1:nSusHarvest],
                   age2date = hunt_neg_age2date[1:nSusHarvest],
                   beta_male = beta_male,
@@ -625,8 +625,9 @@ modelcode <- nimbleCode({
   #######################################################
   #######################################################
   #######################################################
-  #priors
-  #sex-specific hunt probability
+
+  ### priors
+  ### sex-specific hunt probability given mortalities
   beta0_cause ~ dnorm(0, .01)
   beta_cause_gun ~ dnorm(0, .01)
   beta_cause_ng ~ dnorm(0, .01)
@@ -640,8 +641,8 @@ modelcode <- nimbleCode({
 
   for (i in 1:records_cause) {
       p_cause[i]  <- ilogit(beta0_cause +
-                            Z_cause_ng[interval[i]] * beta_cause_ng +
-                            Z_cause_gun[interval[i]] * beta_cause_gun +
+                            Z_cause_ng[interval_cause[i]] * beta_cause_ng +
+                            Z_cause_gun[interval_cause[i]] * beta_cause_gun +
                             sex_cause[i] * beta_cause_male)
       mort_hh[i] ~ dbin(size = 1, prob = p_cause[i])
   }
@@ -1046,7 +1047,7 @@ modelcode <- nimbleCode({
   for(t in 1:n_year){
       #antlerless, male fawns
       Cage_less[k, 1:(n_ageclassf + 1),t] ~ dmulti(prob = p_less[k,1:(n_ageclassf + 1),t],
-                            size = sizeCage_f[k, t])  
+                            size = sizeCage_f[k, t])
       #antlered
       Cage_ant[k, 1:(n_ageclassm - 1),t] ~ dmulti(prob = p_ant[k, 1:(n_ageclassm - 1),t],
                 size = sizeCage_m[k, t])
