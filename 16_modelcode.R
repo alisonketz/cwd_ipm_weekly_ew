@@ -750,6 +750,8 @@ modelcode <- nimbleCode({
 
   sn_sus[1:n_sex, 1:n_agef, 1:n_year] <- calc_surv_aah(
           nT_age = nT_age_surv,
+          nT_age_surv_aah = nT_age_surv_aah,
+          nT_age_short = nT_age_short,
           nT_period = nT_period_overall,
           beta0 = beta0_survival_sus,
           beta_male = beta_male,
@@ -768,6 +770,8 @@ modelcode <- nimbleCode({
 
   sn_inf[1:n_sex,1:n_agef,1:n_year] <- calc_surv_aah(
           nT_age = nT_age_surv,
+          nT_age_surv_aah = nT_age_surv_aah,
+          nT_age_short = nT_age_short,
           nT_period = nT_period_overall,
           beta0 = beta0_survival_inf,
           beta_male = beta_male,
@@ -785,7 +789,9 @@ modelcode <- nimbleCode({
   ###################################################
 
   sh_sus[1:n_sex,1:n_agef,1:n_year] <- calc_surv_harvest(
-          nT_age = nT_age_surv, 
+          nT_age = nT_age_surv,
+          nT_age_surv_aah = nT_age_surv_aah,
+          nT_age_short = nT_age_short,
           nT_period = nT_period_overall,
           beta0 = beta0_survival_sus,
           beta_male = beta_male,
@@ -813,6 +819,8 @@ modelcode <- nimbleCode({
 
   sh_inf[1:n_sex,1:n_agef,1:n_year] <- calc_surv_harvest(
           nT_age = nT_age_surv,
+          nT_age_surv_aah = nT_age_surv_aah,
+          nT_age_short = nT_age_short,
           nT_period = nT_period_overall,
           beta0 = beta0_survival_inf,
           beta_male = beta_male,
