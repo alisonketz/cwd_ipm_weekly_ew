@@ -10,6 +10,8 @@ calc_surv_aah <- nimble::nimbleFunction(
         ### argument type declarations
         nT_age = double(0),
         nT_period = double(0),
+        nT_age_short = double(0),
+        nT_age_surv_aah = double(0),
         beta0 = double(0),
         beta_male = double(0),
         age_effect = double(1),
@@ -28,28 +30,40 @@ calc_surv_aah <- nimble::nimbleFunction(
     ###
     ###################################################################
 
+    mu_old_age_effect <- mean(age_effect[(nT_age_short + 1):nT_age])
+
 	############################################
 	# calculate hazards
 	############################################
 
-    UCH <- nimArray(NA, c(2, nT_age, nT_period))
+    UCH <- nimArray(NA, c(2, nT_age_short + 1, nT_period))
     s_aah <- nimArray(NA, c(2, n_agef, n_year))
 
-   for(i in 1:nT_age) {
-        for(j in 1:nT_period) {
+    for(j in 1:nT_period) {
+        for(i in 1:nT_age_short) {
             UCH[1, i, j] <- exp(beta0 +
-                                beta_male +
                                 age_effect[i] +
                                 period_effect[j])
             UCH[2, i, j] <- exp(beta0 +
+                                beta_male +
                                 age_effect[i] +
                                 period_effect[j])
         }
+        for(i in (nT_age_short + 1):(nT_age_surv_aah)) {
+            UCH[1, i, j] <- exp(beta0 +
+                                mu_old_age_effect +
+                                period_effect[j])
+            UCH[2, i, j] <- exp(beta0 +
+                                beta_male +
+                                mu_old_age_effect +
+                                period_effect[j])
+        }
     }
-	############################################
-	# calculate survival from cummulative haz
-	############################################
-    for (t in 1:n_year) {	
+
+    ############################################
+    # calculate survival from cummulative haz
+    ############################################
+    for (t in 1:n_year) {
         for (a in 1:n_agef) {
             s_aah[1, a, t] <- exp(-sum(UCH[1,
                                yr_start[a]:yr_end[a],
@@ -144,6 +158,8 @@ calc_surv_harvest <- nimble::nimbleFunction(
         ### argument type declarations
         nT_age = double(0),
         nT_period = double(0),
+        nT_age_surv_aah = double(0),
+        nT_age_short = double(0),
         beta0 = double(0),
         beta_male = double(0),
         age_effect = double(1),
@@ -170,6 +186,8 @@ calc_surv_harvest <- nimble::nimbleFunction(
     ###
     ###################################################################
 
+    mu_old_age_effect <- mean(age_effect[(nT_age_short + 1):nT_age])
+
 	############################################
 	# initialize hazard array
 	############################################
@@ -181,15 +199,25 @@ calc_surv_harvest <- nimble::nimbleFunction(
 	############################################
 	# calculate hazards
 	############################################
-    for(i in 1:nT_age) {
-        for(j in 1:nT_period) {
-            UCH[1,i,j] <- exp(beta0 +
-                              beta_male +
-                              age_effect[i] +
-                              period_effect[j])
-            UCH[2,i,j] <- exp(beta0 +
-                              age_effect[i] +
-                              period_effect[j])
+
+    for(j in 1:nT_period) {
+        for(i in 1:nT_age_short) {
+            UCH[1, i, j] <- exp(beta0 +
+                                age_effect[i] +
+                                period_effect[j])
+            UCH[2, i, j] <- exp(beta0 +
+                                beta_male +
+                                age_effect[i] +
+                                period_effect[j])
+        }
+        for(i in (nT_age_short + 1):(nT_age_surv_aah)) {
+            UCH[1, i, j] <- exp(beta0 +
+                                mu_old_age_effect +
+                                period_effect[j])
+            UCH[2, i, j] <- exp(beta0 +
+                                beta_male +
+                                mu_old_age_effect +
+                                period_effect[j])
         }
     }
 
@@ -445,12 +473,13 @@ set_period_effects_constant <- nimble::nimbleFunction(
         period_effect_surv = double(1),
         period_annual_survival = double(1)
         ) {
-  
+
   period_effect_survival_temp <- nimNumeric(nT_period_overall)
   period_effect_survival <- nimNumeric(nT_period_overall)
-  
+
   for(i in 1:n_year_precollar) {
-    period_effect_survival_temp[yr_start[i]:yr_end[i]] <- period_annual_survival[i]
+    period_effect_survival_temp[yr_start[i]:
+                                yr_end[i]] <- period_annual_survival[i]
   }
 
   ### for the year of the study when switching from
