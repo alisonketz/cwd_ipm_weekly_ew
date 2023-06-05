@@ -88,15 +88,16 @@ modelcode <- nimbleCode({
   ##################################
   #Age effects
   for (k in 1:nknots_age) {
-    b_age_survival[k] ~ dnorm(0, tau_age_survival)
+    ln_b_age_survival[k] ~ dnorm(0, tau_age_survival)
+    b_age_survival[k] <- exp(ln_b_age_survival[k])
   }
   tau_age_survival ~ dgamma(1, 1)
 
   for (t in 1:nT_age_surv) {
-    age_effect_survival[t] <- inprod(b_age_survival[1:nknots_age],
+    age_effect_survival_temp[t] <- inprod(b_age_survival[1:nknots_age],
                                      Z_age[t, 1:nknots_age])
+    age_effect_survival[t] <-  age_effect_survival_temp[t] - mu_age_effect_survival_temp
   }
-
   #Period effects from collar data
   for (k in 1:nknots_period) {
     b_period_survival[k] ~ dnorm(0, tau_period_survival)
@@ -993,65 +994,64 @@ modelcode <- nimbleCode({
 
   for(k in 1:n_study_area){
 
-    for (i in 1:n_sex) {
-      tau_obs[k, i] ~ dgamma(1, 1)
-    }#end i
+      for (i in 1:n_sex) {
+        tau_obs[k, i] ~ dgamma(1, 1)
+      }#end i
 
+      for (t in 1:n_year) {
+        for (a in 1:n_agef) {
+          harv_pop[k, 1, a, t] <- (pop_inf[k, 1, a, t] * (1 - sh_inf[1, a, t]) + pop_sus[k, 1, a, t] * (1 - sh_sus[1, a, t])) * report[t]
+        }
+        for (a in 1:n_agem) {
+          harv_pop[k, 2, a, t] <- (pop_inf[k, 2, a, t] * (1 - sh_inf[2, a, t]) + pop_sus[k, 2, a, t] * (1 - sh_sus[2, a, t])) * report[t]
+        }
 
-  for (t in 1:n_year) {
-    for (a in 1:n_agef) {
-      harv_pop[k, 1, a, t] <- (pop_inf[k, 1, a, t] * (1 - sh_inf[1, a, t]) + pop_sus[k, 1, a, t] * (1 - sh_sus[1, a, t])) * report[t]
-    }
-    for (a in 1:n_agem) {
-      harv_pop[k, 2, a, t] <- (pop_inf[k, 2, a, t] * (1 - sh_inf[2, a, t]) + pop_sus[k, 2, a, t] * (1 - sh_sus[2, a, t])) * report[t]
-    }
+        #Total Antlerless Harvest
+        #adding in male fawns
+        mu_obs[k, 1, t] <- (sum(harv_pop[k, 1, 1:n_agef, t]) + harv_pop[k, 2, 1, t]) # eab_antlerless[t] * 
 
-    #Total Antlerless Harvest
-    #adding in male fawns
-    mu_obs[k, 1, t] <- (sum(harv_pop[k, 1, 1:n_agef, t]) + harv_pop[k, 2, 1, t]) # eab_antlerless[t] * 
+        #Total Antlered Harvest
+        mu_obs[k, 2, t] <- sum(harv_pop[k, 2, 2:n_agem, t])#excludes male fawns eab_antlered[t] * 
 
-    #Total Antlered Harvest
-    mu_obs[k, 2, t] <- sum(harv_pop[k, 2, 2:n_agem, t])#excludes male fawns eab_antlered[t] * 
+        ###################################
+        #Likelihood for overall total
+        ###################################
+        
+        for (j in 1:n_sex) {
+          O[k, j, t] ~ dnorm(mu_obs[k, j, t], tau_obs[k, j])
+        }#end i
 
-    ###################################
-    #Likelihood for overall total
-    ###################################
-    
-    for (j in 1:n_sex) {
-      O[k, j, t] ~ dnorm(mu_obs[k, j, t], tau_obs[k, j])
-    }#end i
+        ###################################
+        #Likelihood for overall total
+        ###################################
 
-    ###################################
-    #Likelihood for overall total
-    ###################################
+        ###parameters for likelihood harvest data by antlerless group
+        p_less[k, 1, t] <- harv_pop[k, 1, 1, t] / mu_obs[k, 1, t]#proportion female fawns
+        p_less[k, 2, t] <- harv_pop[k, 1, 2, t] / mu_obs[k, 1, t]#1
+        p_less[k, 3, t] <- harv_pop[k, 1, 3, t] / mu_obs[k, 1, t]#2
+        p_less[k, 4, t] <- harv_pop[k, 1, 4, t] / mu_obs[k, 1, t]#3
+        p_less[k, 5, t] <- sum(harv_pop[k, 1, 5:6, t]) / mu_obs[k, 1, t]#4-5
+        p_less[k, 6, t] <- sum(harv_pop[k, 1, 7:9, t]) / mu_obs[k, 1, t]#6-8
+        p_less[k, 7, t] <- harv_pop[k, 1, 10, t] / mu_obs[k, 1, t]#9+
+        p_less[k, 8, t] <- 1 - sum(p_less[k, 1:7, t])#proportion male fawns, antlerless
 
-    ###parameters for likelihood harvest data by antlerless group
-    p_less[k, 1, t] <- harv_pop[k, 1, 1, t] / mu_obs[k, 1, t]#proportion female fawns
-    p_less[k, 2, t] <- harv_pop[k, 1, 2, t] / mu_obs[k, 1, t]#1
-    p_less[k, 3, t] <- harv_pop[k, 1, 3, t] / mu_obs[k, 1, t]#2
-    p_less[k, 4, t] <- harv_pop[k, 1, 4, t] / mu_obs[k, 1, t]#3
-    p_less[k, 5, t] <- sum(harv_pop[k, 1, 5:6, t]) / mu_obs[k, 1, t]#4-5
-    p_less[k, 6, t] <- sum(harv_pop[k, 1, 7:9, t]) / mu_obs[k, 1, t]#6-8
-    p_less[k, 7, t] <- harv_pop[k, 1, 10, t] / mu_obs[k, 1, t]#9+
-    p_less[k, 8, t] <- 1 - sum(p_less[k, 1:7, t])#proportion male fawns, antlerless
+        #harvest data bt antlered group
+        p_ant[k, 1, t] <- harv_pop[k, 2, 2, t] / mu_obs[k, 2, t]#1
+        p_ant[k, 2, t] <- harv_pop[k, 2, 3, t] / mu_obs[k, 2, t]#2
+        p_ant[k, 3, t] <- harv_pop[k, 2, 4, t] / mu_obs[k, 2, t]#3
+        p_ant[k, 4, t] <- sum(harv_pop[k, 2, 5:6, t]) / mu_obs[k, 2, t]#4-5
+        p_ant[k, 5, t] <- 1 - sum(p_ant[k, 1:4, t]) #6+
 
-    #harvest data bt antlered group
-    p_ant[k, 1, t] <- harv_pop[k, 2, 2, t] / mu_obs[k, 2, t]#1
-    p_ant[k, 2, t] <- harv_pop[k, 2, 3, t] / mu_obs[k, 2, t]#2
-    p_ant[k, 3, t] <- harv_pop[k, 2, 4, t] / mu_obs[k, 2, t]#3
-    p_ant[k, 4, t] <- sum(harv_pop[k, 2, 5:6, t]) / mu_obs[k, 2, t]#4-5
-    p_ant[k, 5, t] <- 1 - sum(p_ant[k, 1:4, t]) #6+
+      }# end t
 
-  }# end t
-
-  # for(t in 1:n_year){
-  #     #antlerless, male fawns
-  #     Cage_less[k, 1:(n_ageclassf + 1),t] ~ dmulti(prob = p_less[k,1:(n_ageclassf + 1),t],
-  #                           size = sizeCage_f[k, t])
-  #     #antlered
-  #     Cage_ant[k, 1:(n_ageclassm - 1),t] ~ dmulti(prob = p_ant[k, 1:(n_ageclassm - 1),t],
-  #               size = sizeCage_m[k, t])
-  #   }
+      # for(t in 1:n_year){
+      #     #antlerless, male fawns
+      #     Cage_less[k, 1:(n_ageclassf + 1),t] ~ dmulti(prob = p_less[k,1:(n_ageclassf + 1),t],
+      #                           size = sizeCage_f[k, t])
+      #     #antlered
+      #     Cage_ant[k, 1:(n_ageclassm - 1),t] ~ dmulti(prob = p_ant[k, 1:(n_ageclassm - 1),t],
+      #               size = sizeCage_m[k, t])
+      #   }
   }
 
 })#end model statement

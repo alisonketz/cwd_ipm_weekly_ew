@@ -150,11 +150,11 @@ convex = function(x, t, pred.new=TRUE){
 # ##############################################################
 
 quant_age <- .2
-knots_age <- c(1, round(quantile(d_fit_sus$right_age_s - 1,
+knots_age <- c(1, round(quantile(d_surv$right_age_r,
                        c(seq(quant_age, .99, by = quant_age),
                        .99))))
 knots_age <- unique(knots_age)
-delta_i <- convex(1:nT_age_surv_aah, knots_age, pred.new = FALSE)
+delta_i <- convex(1:nT_age_surv, knots_age, pred.new = FALSE)
 delta <- t(rbind(delta_i$sigma - 
                 t(delta_i$x.mat %*%
                 delta_i$center.vector)))

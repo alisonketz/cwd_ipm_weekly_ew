@@ -2712,8 +2712,8 @@ dAAH <- nimble::nimbleFunction(
 
             # survival hazard for susceptible deer
             lam_sus[1:a[i]] <- exp(beta0_sus +
-                                age_effect_surv[1:a[i]] +
-                                period_effect_surv[(1 + age2date[i]):(a[i] + age2date[i])])
+                age_effect_surv[1:a[i]] +
+                period_effect_surv[(1 + age2date[i]):(a[i] + age2date[i])])
 
             # survival hazard while infected
             lam_inf[1:a[i]] <- exp(beta0_inf +
@@ -2728,9 +2728,9 @@ dAAH <- nimble::nimbleFunction(
             } else { # males
             # survival hazard for susceptible deer
             lam_sus[1:a[i]] <- exp(beta0_sus +
-                                age_effect_surv[1:a[i]] +
-                                period_effect_surv[(1 + age2date[i]):(a[i] + age2date[i])] +
-                                beta_male)
+                age_effect_surv[1:a[i]] +
+                period_effect_surv[(1 + age2date[i]):(a[i] + age2date[i])] +
+                beta_male)
 
             # survival hazard while infected
             lam_inf[1:a[i]] <- exp(beta0_inf +
