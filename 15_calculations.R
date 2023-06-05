@@ -36,7 +36,7 @@ calc_surv_aah <- nimble::nimbleFunction(
 	# calculate hazards
 	############################################
 
-    UCH <- nimArray(NA, c(2, nT_age_short + 1, nT_period))
+    UCH <- nimArray(NA, c(2, nT_age_surv_aah, nT_period))
     s_aah <- nimArray(NA, c(2, n_agef, n_year))
 
     for(j in 1:nT_period) {
@@ -84,14 +84,16 @@ Ccalc_surv_aah <- compileNimble(calc_surv_aah)
 assign("calc_surv_aah", calc_surv_aah, envir = .GlobalEnv)
 
 # starttime <- Sys.time()
-# sn_sus <- Ccalc_surv_aah(
-# 	nT_age = n_agef*intvl_step_yr,
-#     nT_period = n_year*intvl_step_yr,
-#     beta0 = sus_beta0_survival,
-#     beta_male = sus_beta_sex_survival,
-#     age_effect = age_effect_survival,        # length = 962
-#     period_effect = period_effect_survival,  # length = 1564
-# 	  yr_start = d_fit_season$yr_start,
+# sn_sus <- calc_surv_aah(
+# 	nT_age = nT_age_surv,
+#     nT_age_short = nT_age_short,
+#     nT_age_surv_aah = nT_age_surv_aah,
+#     nT_period = nT_period_overall,
+#     beta0 = beta0_survival_sus,
+#     beta_male = beta_male,
+#     age_effect = age_effect_survival_test,        # length = 962
+#     period_effect = period_effect_survival_test,  # length = 1564
+# 	yr_start = d_fit_season$yr_start,
 #     yr_end = d_fit_season$yr_end,
 #     intvl_step_yr = intvl_step_yr,
 #     n_year = n_year,
@@ -120,14 +122,17 @@ assign("calc_surv_aah", calc_surv_aah, envir = .GlobalEnv)
 # sn_inf[2,3,]
 
 
-# sn_sus[1:2,1:n_agef,1:n_year] <- Ccalc_surv_aah(
-#	  nT_age = n_agef*intvl_step_yr,
-#     nT_period = n_year*intvl_step_yr,
+# sn_sus[1:2,1:n_agef,1:n_year] <- calc_surv_aah(
+# 	nT_age = nT_age_surv,
+#     nT_age_short = nT_age_short,
+#     nT_age_surv_aah = nT_age_surv_aah,
+#     nT_period = nT_period_overall,
 #     beta0 = sus_beta0_survival,
-#     beta_male = sus_beta_sex_survival,
-#     age_effect = age_effect_survival,
-#     period_effect = period_effect_survival,
-#     yr_end_indx = d_fit_season$yr_end,
+#     beta_male = .5,
+#     age_effect = age_effect_survival_test,
+#     period_effect = period_effect_survival_test,
+#     yr_start = d_Fit_season$yr_start,
+#     yr_end = d_fit_season$yr_end,
 #     intvl_step_yr = intvl_step_yr,
 #     n_year = n_year,
 #     n_agef = n_agef,
@@ -192,8 +197,8 @@ calc_surv_harvest <- nimble::nimbleFunction(
 	# initialize hazard array
 	############################################
 
-    UCH <- nimArray(NA, c(2, nT_age, nT_period))
-    UCH_hunt <- nimArray(NA, c(2, nT_age, nT_period))
+    UCH <- nimArray(NA, c(2, nT_age_surv_aah, nT_period))
+    UCH_hunt <- nimArray(NA, c(2, nT_age_surv_aah, nT_period))
     s_hunt <- nimArray(NA, c(2, n_agef, n_year))
 
 	############################################
@@ -226,25 +231,25 @@ calc_surv_harvest <- nimble::nimbleFunction(
 	############################################
     for(i in 1:n_year){
         for(j in yr_start[i]:(ng_start[i] - 1)) {
-            UCH_hunt[1, 1:nT_age, j] <- UCH[1, 1:nT_age, j]
-            UCH_hunt[2, 1:nT_age, j] <- UCH[2, 1:nT_age, j]
+            UCH_hunt[1, 1:nT_age_surv_aah, j] <- UCH[1, 1:nT_age_surv_aah, j]
+            UCH_hunt[2, 1:nT_age_surv_aah, j] <- UCH[2, 1:nT_age_surv_aah, j]
         }
         for(j in (ng_end[i] + 1):(yr_end[i])){
-            UCH_hunt[1, 1:nT_age, j] <- UCH[1, 1:nT_age, j]
-            UCH_hunt[2, 1:nT_age, j] <- UCH[2, 1:nT_age, j]
+            UCH_hunt[1, 1:nT_age_surv_aah, j] <- UCH[1, 1:nT_age_surv_aah, j]
+            UCH_hunt[2, 1:nT_age_surv_aah, j] <- UCH[2, 1:nT_age_surv_aah, j]
         }
         for(j in ng_start[i]:(gun_start[i] - 1)){
-            UCH_hunt[1, 1:nT_age, j] <- UCH[1, 1:nT_age, j] * p_nogun_f
-            UCH_hunt[2, 1:nT_age, j] <- UCH[2, 1:nT_age, j] * p_nogun_m
+            UCH_hunt[1, 1:nT_age_surv_aah, j] <- UCH[1, 1:nT_age_surv_aah, j] * p_nogun_f
+            UCH_hunt[2, 1:nT_age_surv_aah, j] <- UCH[2, 1:nT_age_surv_aah, j] * p_nogun_m
         }
         for(j in gun_start[i]:(gun_end[i])){
-            UCH_hunt[1, 1:nT_age, j] <- UCH[1, 1:nT_age, j] * p_gun_f
-            UCH_hunt[2, 1:nT_age, j] <- UCH[2, 1:nT_age, j] * p_gun_m
+            UCH_hunt[1, 1:nT_age_surv_aah, j] <- UCH[1, 1:nT_age_surv_aah, j] * p_gun_f
+            UCH_hunt[2, 1:nT_age_surv_aah, j] <- UCH[2, 1:nT_age_surv_aah, j] * p_gun_m
         }
 		if(gun_end[i] < ng_end[i]){
         for(j in (gun_end[i] + 1):(ng_end[i])){
-            UCH_hunt[1, 1:nT_age, j] <- UCH[1, 1:nT_age, j] * p_nogun_f
-            UCH_hunt[2, 1:nT_age, j] <- UCH[2, 1:nT_age, j] * p_nogun_m
+            UCH_hunt[1, 1:nT_age_surv_aah, j] <- UCH[1, 1:nT_age_surv_aah, j] * p_nogun_f
+            UCH_hunt[2, 1:nT_age_surv_aah, j] <- UCH[2, 1:nT_age_surv_aah, j] * p_nogun_m
        }}
     }
 	
