@@ -10,8 +10,10 @@ calc_surv_aah <- nimble::nimbleFunction(
         ### argument type declarations
         nT_age = double(0),
         nT_period = double(0),
-        nT_age_short = double(0),
-        nT_age_surv_aah = double(0),
+        nT_age_short_f = double(0),
+        nT_age_short_m = double(0),
+        nT_age_surv_aah_f = double(0),
+        nT_age_surv_aah_m = double(0),
         beta0 = double(0),
         beta_male = double(0),
         age_effect = double(1),
@@ -30,32 +32,42 @@ calc_surv_aah <- nimble::nimbleFunction(
     ###
     ###################################################################
 
-    mu_old_age_effect <- mean(age_effect[(nT_age_short + 1):nT_age])
+    mu_old_age_effect_f <- mean(age_effect[(nT_age_short_f + 1):nT_age])
+    mu_old_age_effect_m <- mean(age_effect[(nT_age_short_m + 1):nT_age])
 
 	############################################
-	# calculate hazards
+	# Calculate hazards
 	############################################
 
-    UCH <- nimArray(NA, c(2, nT_age_surv_aah, nT_period))
+    UCH <- nimArray(NA, c(2, nT_age_surv_aah_f, nT_period))
     s_aah <- nimArray(NA, c(2, n_agef, n_year))
 
+    ### Females
     for(j in 1:nT_period) {
-        for(i in 1:nT_age_short) {
+        for(i in 1:nT_age_short_f) {
             UCH[1, i, j] <- exp(beta0 +
                                 age_effect[i] +
                                 period_effect[j])
+        }
+        for(i in (nT_age_short_f + 1):(nT_age_surv_aah_f)) {
+            UCH[1, i, j] <- exp(beta0 +
+                                mu_old_age_effect_f +
+                                period_effect[j])
+        }
+    }
+
+    ### Males
+    for(j in 1:nT_period) {
+        for(i in 1:nT_age_short_m) {
             UCH[2, i, j] <- exp(beta0 +
                                 beta_male +
                                 age_effect[i] +
                                 period_effect[j])
         }
-        for(i in (nT_age_short + 1):(nT_age_surv_aah)) {
-            UCH[1, i, j] <- exp(beta0 +
-                                mu_old_age_effect +
-                                period_effect[j])
+        for(i in (nT_age_short_m + 1):(nT_age_surv_aah_m)) {
             UCH[2, i, j] <- exp(beta0 +
                                 beta_male +
-                                mu_old_age_effect +
+                                mu_old_age_effect_m +
                                 period_effect[j])
         }
     }
@@ -162,9 +174,11 @@ calc_surv_harvest <- nimble::nimbleFunction(
     run = function(
         ### argument type declarations
         nT_age = double(0),
+        nT_age_short_f = double(0),
+        nT_age_short_m = double(0),
+        nT_age_surv_aah_f = double(0),
+        nT_age_surv_aah_m = double(0),
         nT_period = double(0),
-        nT_age_surv_aah = double(0),
-        nT_age_short = double(0),
         beta0 = double(0),
         beta_male = double(0),
         age_effect = double(1),
@@ -191,65 +205,74 @@ calc_surv_harvest <- nimble::nimbleFunction(
     ###
     ###################################################################
 
-    mu_old_age_effect <- mean(age_effect[(nT_age_short + 1):nT_age])
+    mu_old_age_effect_f <- mean(age_effect[(nT_age_short_f + 1):nT_age])
+    mu_old_age_effect_m <- mean(age_effect[(nT_age_short_m + 1):nT_age])
 
 	############################################
-	# initialize hazard array
+	# Initialize hazard array
 	############################################
 
-    UCH <- nimArray(NA, c(2, nT_age_surv_aah, nT_period))
-    UCH_hunt <- nimArray(NA, c(2, nT_age_surv_aah, nT_period))
+    UCH <- nimArray(NA, c(2, nT_age_surv_aah_f, nT_period))
+    UCH_hunt <- nimArray(NA, c(2, nT_age_surv_aah_f, nT_period))
     s_hunt <- nimArray(NA, c(2, n_agef, n_year))
 
 	############################################
-	# calculate hazards
+	# Calculate hazards
 	############################################
 
+    ### Females
     for(j in 1:nT_period) {
-        for(i in 1:nT_age_short) {
+        for(i in 1:nT_age_short_f) {
             UCH[1, i, j] <- exp(beta0 +
-                                age_effect[i] +
-                                period_effect[j])
-            UCH[2, i, j] <- exp(beta0 +
-                                beta_male +
                                 age_effect[i] +
                                 period_effect[j])
         }
-        for(i in (nT_age_short + 1):(nT_age_surv_aah)) {
+        for(i in (nT_age_short_f + 1):(nT_age_surv_aah_f)) {
             UCH[1, i, j] <- exp(beta0 +
-                                mu_old_age_effect +
-                                period_effect[j])
-            UCH[2, i, j] <- exp(beta0 +
-                                beta_male +
-                                mu_old_age_effect +
+                                mu_old_age_effect_f +
                                 period_effect[j])
         }
     }
 
+    ### Males
+    for(j in 1:nT_period) {
+        for(i in 1:nT_age_short_m) {
+            UCH[2, i, j] <- exp(beta0 +
+                                beta_male +
+                                age_effect[i] +
+                                period_effect[j])
+        }
+        for(i in (nT_age_short_m + 1):(nT_age_surv_aah_m)) {
+            UCH[2, i, j] <- exp(beta0 +
+                                beta_male +
+                                mu_old_age_effect_m +
+                                period_effect[j])
+        }
+    }
 	############################################
 	# adjust hazards to remove harvest hazards
 	############################################
     for(i in 1:n_year){
         for(j in yr_start[i]:(ng_start[i] - 1)) {
-            UCH_hunt[1, 1:nT_age_surv_aah, j] <- UCH[1, 1:nT_age_surv_aah, j]
-            UCH_hunt[2, 1:nT_age_surv_aah, j] <- UCH[2, 1:nT_age_surv_aah, j]
+            UCH_hunt[1, 1:nT_age_surv_aah_f, j] <- UCH[1, 1:nT_age_surv_aah_f, j]
+            UCH_hunt[2, 1:nT_age_surv_aah_m, j] <- UCH[2, 1:nT_age_surv_aah_m, j]
         }
         for(j in (ng_end[i] + 1):(yr_end[i])){
-            UCH_hunt[1, 1:nT_age_surv_aah, j] <- UCH[1, 1:nT_age_surv_aah, j]
-            UCH_hunt[2, 1:nT_age_surv_aah, j] <- UCH[2, 1:nT_age_surv_aah, j]
+            UCH_hunt[1, 1:nT_age_surv_aah_f, j] <- UCH[1, 1:nT_age_surv_aah_f, j]
+            UCH_hunt[2, 1:nT_age_surv_aah_m, j] <- UCH[2, 1:nT_age_surv_aah_m, j]
         }
         for(j in ng_start[i]:(gun_start[i] - 1)){
-            UCH_hunt[1, 1:nT_age_surv_aah, j] <- UCH[1, 1:nT_age_surv_aah, j] * p_nogun_f
-            UCH_hunt[2, 1:nT_age_surv_aah, j] <- UCH[2, 1:nT_age_surv_aah, j] * p_nogun_m
+            UCH_hunt[1, 1:nT_age_surv_aah_f, j] <- UCH[1, 1:nT_age_surv_aah_f, j] * p_nogun_f
+            UCH_hunt[2, 1:nT_age_surv_aah_m, j] <- UCH[2, 1:nT_age_surv_aah_m, j] * p_nogun_m
         }
         for(j in gun_start[i]:(gun_end[i])){
-            UCH_hunt[1, 1:nT_age_surv_aah, j] <- UCH[1, 1:nT_age_surv_aah, j] * p_gun_f
-            UCH_hunt[2, 1:nT_age_surv_aah, j] <- UCH[2, 1:nT_age_surv_aah, j] * p_gun_m
+            UCH_hunt[1, 1:nT_age_surv_aah_f, j] <- UCH[1, 1:nT_age_surv_aah_f, j] * p_gun_f
+            UCH_hunt[2, 1:nT_age_surv_aah_m, j] <- UCH[2, 1:nT_age_surv_aah_m, j] * p_gun_m
         }
 		if(gun_end[i] < ng_end[i]){
         for(j in (gun_end[i] + 1):(ng_end[i])){
-            UCH_hunt[1, 1:nT_age_surv_aah, j] <- UCH[1, 1:nT_age_surv_aah, j] * p_nogun_f
-            UCH_hunt[2, 1:nT_age_surv_aah, j] <- UCH[2, 1:nT_age_surv_aah, j] * p_nogun_m
+            UCH_hunt[1, 1:nT_age_surv_aah_f, j] <- UCH[1, 1:nT_age_surv_aah_f, j] * p_nogun_f
+            UCH_hunt[2, 1:nT_age_surv_aah_m, j] <- UCH[2, 1:nT_age_surv_aah_m, j] * p_nogun_m
        }}
     }
 	

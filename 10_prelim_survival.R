@@ -6,11 +6,13 @@
 
 ### Number of age effects for survival
 nT_age_surv <- max(d_surv$right_age_s, na.rm = TRUE) - 1
-nT_age_surv_aah <- intvl_step_yr_weekly * n_agef
-nT_age_short <- intvl_step_yr_weekly * (n_agef - 1)
+nT_age_surv_aah_f <- intvl_step_yr_weekly * n_agef
+nT_age_short_f <- intvl_step_yr_weekly * (n_agef - 1)
+nT_age_surv_aah_m <- intvl_step_yr_weekly * n_agem
+nT_age_short_m <- intvl_step_yr_weekly * (n_agem - 1)
 
 ### The first 2 years period effects for survival 
-### should be set to be the same as 1994 period effect
+### should be set to be the same as 1994 annual period effect
 
 surv_period_lookup <- c(rep(1, 2 * intvl_step_yr_weekly),
                        1:nT_period_overall)
@@ -140,12 +142,12 @@ convex = function(x, t, pred.new=TRUE){
 }
 
 
-# ##############################################################
-# ###
-# ### Basis calculated from the BCGAM Meyer (2008) and
-# ### bcgam R-package
-# ###
-# ##############################################################
+##############################################################
+###
+### Basis calculated from the BCGAM Meyer (2008) and
+### bcgam R-package
+###
+##############################################################
 
 quant_age <- .2
 knots_age <- c(1, round(quantile(d_surv$right_age_r,
@@ -166,13 +168,13 @@ nknots_age <- dim(Z_age)[2]
 # ###
 # ##############################################################
 # pdf("basis_function_age.pdf")
-# plot(1:nT_age_surv_aah,
+# plot(1:nT_age_surv_aah_f,
 #      Z_age[, 1],
 #      ylim = c(-1, 1),
 #      type = "l",
 #      main = "Basis Function Age Effect")
 # for (i in 2:nknots_age) {
-#   lines(1:nT_age_surv_aah, Z_age[, i])
+#   lines(1:nT_age_surv_aah_f, Z_age[, i])
 # }
 # dev.off()
 
