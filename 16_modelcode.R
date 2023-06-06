@@ -97,7 +97,7 @@ modelcode <- nimbleCode({
   for (t in 1:nT_age_surv) {
     age_effect_survival_temp[t] <- inprod(b_age_survival[1:nknots_age],
                                      Z_age[t, 1:nknots_age])
-    age_effect_survival[t] <-  age_effect_survival_temp[t] - 
+    age_effect_survival[t] <-  age_effect_survival_temp[t] -
                                mu_age_effect_survival_temp
   }
   mu_age_effect_survival_temp <- mean(age_effect_survival_temp[1:nT_age_surv])
@@ -129,6 +129,7 @@ modelcode <- nimbleCode({
         yr_end = yr_end[1:n_year],
         period_effect_surv = period_effect_surv[1:nT_period_collar],
         period_annual_survival = period_annual_survival[1:(n_year_precollar + 1)],
+        indx_mat_pe_surv = indx_mat_pe_surv[1:6,1:intvl_step_yr],
         intvl_step_yr = intvl_step_yr
   )
 

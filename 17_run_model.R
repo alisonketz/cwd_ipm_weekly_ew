@@ -182,6 +182,7 @@ nimConsts <- list(n_year = n_year,
     sect_aah = d_fit_aah$study_area,
     records_cause = records_cause,
     interval_cause = d_fit_hh$right_period_s - 1,
+    indx_mat_pe_surv = indx_mat_pe_surv,
     intvl_step_yr = intvl_step_yr_weekly
     )
 
@@ -219,7 +220,7 @@ initsFun <- function()list(beta_male = rnorm(1, -.5, .01),
                   rnorm(1, -7.2, sd =.1),
                   rnorm(1, -8, sd =.1)) - 2,
     tau_period_precollar = rgamma(1, 1, 1),
-    period_annual_survival = rnorm(n_year_precollar + 1),
+    period_annual_survival = rnorm(n_year_precollar + 1, .1),
     beta0_cause = rnorm(1, -2.8, .1),
     beta_cause_male = rnorm(1, 0, 1),
     beta_cause_gun = rnorm(1, 1.5, .1),
@@ -320,7 +321,7 @@ for(i in 1:10){beepr::beep(1)}
 set.seed(7654321)
 starttime <- Sys.time()
 mcmcout <- runMCMC(CnimMCMC,
-                  niter = 500,
+                  niter = 5,
                   nburnin = 0,
                   nchains = 1,
                   inits = initsFun,
