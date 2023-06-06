@@ -129,7 +129,6 @@ nimConsts <- list(n_year = n_year,
     report_hyp_y = report_hyp_y,
     nT_period_overall = nT_period_overall,
     nT_period_overall_ext = nT_period_overall_ext,
-    nT_period_precollar_ext = nT_period_precollar_ext,
     nT_period_precollar = nT_period_precollar,
     nT_period_collar = nT_period_collar,
     nT_period_prestudy_ext = nT_period_prestudy_ext,
@@ -183,8 +182,7 @@ nimConsts <- list(n_year = n_year,
     sect_aah = d_fit_aah$study_area,
     records_cause = records_cause,
     interval_cause = d_fit_hh$right_period_s - 1,
-    intvl_step_yr = intvl_step_yr_weekly,
-    lookup_pe_surv = lookup_pe_surv
+    intvl_step_yr = intvl_step_yr_weekly
     )
 
 
