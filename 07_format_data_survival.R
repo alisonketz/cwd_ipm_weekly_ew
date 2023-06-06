@@ -8,20 +8,29 @@
 #########################################
 
 #setting the maximum number of periods that are estimated by the collar data
-nT_period_collar <- interval("2017-01-09","2022-05-14") %/% weeks(1)
-nT_period_collar_monthly <- interval("2017-01-09","2022-05-14") %/% months(1)
+nT_period_collar <- interval("2017-01-09", "2022-05-14") %/% weeks(1)
+nT_period_collar_monthly <- interval("2017-01-09", "2022-05-14") %/% months(1)
 
-#the first birth is in 1992
+#the first birth is in 1985
 # weekly calculation
-nT_period_overall_ext <- interval("1992-05-15","2022-05-09") %/% weeks(1)
-nT_period_overall <- interval("1994-05-15","2022-05-09") %/% weeks(1)
+nT_period_overall_ext <- interval("1985-05-15",
+                                  "2022-05-14") %/% weeks(1)
+# nT_period_overall_ext <- interval("1992-05-15","2022-05-14") %/% weeks(1)
+nT_period_overall <- interval("1994-05-15", "2022-05-14") %/% weeks(1)
 nT_period_precollar <- nT_period_overall - nT_period_collar
+nT_period_prestudy_ext <- nT_period_overall_ext - nT_period_overall
+nT_period_precollar_ext <- nT_period_overall_ext - nT_period_collar
 
+nT_period_prestudy_ext + nT_period_overall
 
-nT_period_overall_ext_monthly <- interval("1992-05-15","2022-05-14") %/% months(1)
+nT_period_overall_ext_monthly <- interval("1985-05-15",
+                                          "2022-05-14") %/% months(1)
+# nT_period_overall_ext_monthly <- interval("1992-05-15","2022-05-14") %/% months(1)
 nT_period_overall_monthly <- interval("1994-05-15","2022-05-14") %/% months(1)
-nT_period_precollar_monthly <- nT_period_overall_monthly - nT_period_collar
-
+nT_period_precollar_ext_monthly <- nT_period_overall_ext_monthly - nT_period_collar
+n_year_precollar <- 2017 - 1994
+n_year_precollar_ext <- 2017 - 1985
+n_year_prestudy_ext <- 1994 - 1985
 
 ########################################################
 ###
@@ -51,9 +60,10 @@ nT_period_precollar_monthly <- nT_period_overall_monthly - nT_period_collar
 ### d_surv[,26] = age in weeks at recapture
 ### d_surv[,27] = age in months at recapture
 ### d_surv[,28] = period week at recapture
- ### d_surv[,29] = period week at recapture
- ### d_surv[,30] =  "dsection"
- ### d_surv[,31] =  "study_area"
+### d_surv[,29] = period week at recapture
+### d_surv[,30] =  "dsection"
+### d_surv[,31] =  "study_area"
+
 n_cap <- nrow(df_cap)
 n_mort <- nrow(d_mort)
 n_cens <- nrow(d_cens)
@@ -179,7 +189,7 @@ for (i in 1:n_postcwd) {
     d_surv$cwd_mort[d_surv$lowtag %in% d_post_cwd$lowtag[i]] <- d_post_cwd$cwdresult[i]
 }
 d_surv$cwd_mort <- as.factor(d_surv$cwd_mort)
-levels(d_surv$cwd_mort) <- c(0,1)
+levels(d_surv$cwd_mort) <- c(0, 1)
 
 d_surv$cwd_mort <- as.numeric(as.character(d_surv$cwd_mort))
 d_surv$cwd_mort[which(d_surv$cwd_cap == 1)] <- 1
@@ -216,9 +226,9 @@ n_cens <- dim(d_cens)[1]
 
 #fixing fast right censored individuals
 d_surv$right_age_r[which(d_surv$right_period_r - d_surv$left_period_e < 1 & d_surv$censored == 1)] <- 
-  d_surv$right_age_r[which(d_surv$right_period_r - d_surv$left_period_e < 1 & d_surv$censored == 1)] +1
+  d_surv$right_age_r[which(d_surv$right_period_r - d_surv$left_period_e < 1 & d_surv$censored == 1)] + 1
 d_surv$right_period_r[which(d_surv$right_period_r - d_surv$left_period_e < 1 & d_surv$censored == 1)] <- 
-  d_surv$right_period_r[which(d_surv$right_period_r - d_surv$left_period_e < 1 & d_surv$censored == 1)] +1
+  d_surv$right_period_r[which(d_surv$right_period_r - d_surv$left_period_e < 1 & d_surv$censored == 1)] + 1
 
 #fixing fast mortalities individuals
 d_surv$right_age_s[which(d_surv$right_period_s - d_surv$left_period_e < 1 & d_surv$censored == 0)] <- 
@@ -293,18 +303,18 @@ n_surv <- nrow(d_surv)
 #recalibrating periods of collar data
 #weekly adjustment
 
-d_surv$left_period_e <- d_surv$left_period_e + nT_period_precollar
-d_surv$right_period_r <- d_surv$right_period_r + nT_period_precollar
-d_surv$right_period_s <- d_surv$right_period_s + nT_period_precollar
+d_surv$left_period_e <- d_surv$left_period_e + nT_period_precollar_ext
+d_surv$right_period_r <- d_surv$right_period_r + nT_period_precollar_ext
+d_surv$right_period_s <- d_surv$right_period_s + nT_period_precollar_ext
 d_surv$periodweek_recap[d_surv$periodweek_recap != 0] <- 
           d_surv$periodweek_recap[d_surv$periodweek_recap != 0] + 
-          nT_period_precollar
+          nT_period_precollar_ext
 
 #monthly adjustment
-d_surv$emonth <- d_surv$emonth + nT_period_precollar_monthly
-d_surv$rmonth <- d_surv$rmonth + nT_period_precollar_monthly
-d_surv$smonth <- d_surv$smonth + nT_period_precollar_monthly
+d_surv$emonth <- d_surv$emonth + nT_period_precollar_ext_monthly
+d_surv$rmonth <- d_surv$rmonth + nT_period_precollar_ext_monthly
+d_surv$smonth <- d_surv$smonth + nT_period_precollar_ext_monthly
 d_surv$periodmonth_recap[d_surv$periodmonth_recap != 0] <- 
           d_surv$periodmonth_recap[d_surv$periodmonth_recap != 0] + 
-          nT_period_precollar_monthly
+          nT_period_precollar_ext_monthly
 

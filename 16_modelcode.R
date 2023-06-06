@@ -118,16 +118,19 @@ modelcode <- nimbleCode({
     period_annual_survival[k] ~ dnorm(0, tau_period_precollar)
   }
 
-  period_effect_survival[1:nT_period_overall] <- set_period_effects_constant(
+  period_effect_survival[1:nT_period_overall_ext] <- set_period_effects_constant(
         n_year_precollar = n_year_precollar,
         nT_period_precollar = nT_period_precollar,
         nT_period_collar = nT_period_collar,
         nT_period_overall = nT_period_overall,
+        nT_period_overall_ext = nT_period_overall_ext,
+        nT_period_prestudy_ext = nT_period_prestudy_ext,
         yr_start = yr_start[1:n_year],
         yr_end = yr_end[1:n_year],
         period_effect_surv = period_effect_surv[1:nT_period_collar],
         period_annual_survival = period_annual_survival[1:(n_year_precollar + 1)]
   )
+
   #######################################################################
   #######################################################################
   ## Likelihoods of Joint Model
@@ -160,7 +163,7 @@ modelcode <- nimbleCode({
                   m_age_foi = m_age_foi[1:n_ageclassm],
                   age_lookup_f = age_lookup_f[1:n_age_lookup_f],
                   age_lookup_m = age_lookup_m[1:n_age_lookup_m],
-                  period_lookup = period_lookup[1:n_period_lookup],
+                  period_lookup_foi = period_lookup_foi[1:n_period_lookup],
                   f_period_foi = f_period_foi[1:n_year],
                   m_period_foi = m_period_foi[1:n_year],
                   space = space[1:n_study_area],
@@ -191,7 +194,7 @@ modelcode <- nimbleCode({
                   m_age_foi = m_age_foi[1:n_ageclassm],
                   age_lookup_f = age_lookup_f[1:n_age_lookup_f],
                   age_lookup_m = age_lookup_m[1:n_age_lookup_m],
-                  period_lookup = period_lookup[1:n_period_lookup],
+                  period_lookup_foi = period_lookup_foi[1:n_period_lookup],
                   f_period_foi = f_period_foi[1:n_year],
                   m_period_foi = m_period_foi[1:n_year],
                   space = space[1:n_study_area],
@@ -224,7 +227,7 @@ modelcode <- nimbleCode({
         m_age_foi = m_age_foi[1:n_ageclassm],
         age_lookup_f = age_lookup_f[1:n_age_lookup_f],
         age_lookup_m = age_lookup_m[1:n_age_lookup_m],
-        period_lookup = period_lookup[1:n_period_lookup],
+        period_lookup_foi = period_lookup_foi[1:n_period_lookup],
         f_period_foi = f_period_foi[1:n_year],
         m_period_foi = m_period_foi[1:n_year],
         space = space[1:n_study_area],
@@ -261,7 +264,7 @@ modelcode <- nimbleCode({
         m_age_foi = m_age_foi[1:n_ageclassm],
         age_lookup_f = age_lookup_f[1:n_age_lookup_f],
         age_lookup_m = age_lookup_m[1:n_age_lookup_m],
-        period_lookup = period_lookup[1:n_period_lookup],
+        period_lookup_foi = period_lookup_foi[1:n_period_lookup],
         f_period_foi = f_period_foi[1:n_year],
         m_period_foi = m_period_foi[1:n_year],
         space = space[1:n_study_area],
@@ -295,7 +298,7 @@ modelcode <- nimbleCode({
       m_age_foi = m_age_foi[1:n_ageclassm],
       age_lookup_f = age_lookup_f[1:n_age_lookup_f],
       age_lookup_m = age_lookup_m[1:n_age_lookup_m],
-      period_lookup = period_lookup[1:n_period_lookup],
+      period_lookup_foi = period_lookup_foi[1:n_period_lookup],
       f_period_foi = f_period_foi[1:n_year],
       m_period_foi = m_period_foi[1:n_year],
       space = space[1:n_study_area],
@@ -332,7 +335,7 @@ modelcode <- nimbleCode({
       m_age_foi = m_age_foi[1:n_ageclassm],
       age_lookup_f = age_lookup_f[1:n_age_lookup_f],
       age_lookup_m = age_lookup_m[1:n_age_lookup_m],
-      period_lookup = period_lookup[1:n_period_lookup],
+      period_lookup_foi = period_lookup_foi[1:n_period_lookup],
       f_period_foi = f_period_foi[1:n_year],
       m_period_foi = m_period_foi[1:n_year],
       space = space[1:n_study_area],
@@ -366,7 +369,7 @@ modelcode <- nimbleCode({
     m_age_foi = m_age_foi[1:n_ageclassm],
     age_lookup_f = age_lookup_f[1:n_age_lookup_f],
     age_lookup_m = age_lookup_m[1:n_age_lookup_m],
-    period_lookup = period_lookup[1:n_period_lookup],
+    period_lookup_foi = period_lookup_foi[1:n_period_lookup],
     f_period_foi = f_period_foi[1:n_year],
     m_period_foi = m_period_foi[1:n_year],
     space = space[1:n_study_area],
@@ -401,7 +404,7 @@ modelcode <- nimbleCode({
     m_age_foi = m_age_foi[1:n_ageclassm],
     age_lookup_f = age_lookup_f[1:n_age_lookup_f],
     age_lookup_m = age_lookup_m[1:n_age_lookup_m],
-    period_lookup = period_lookup[1:n_period_lookup],
+    period_lookup_foi = period_lookup_foi[1:n_period_lookup],
     f_period_foi = f_period_foi[1:n_year],
     m_period_foi = m_period_foi[1:n_year],
     space = space[1:n_study_area],
@@ -435,7 +438,7 @@ modelcode <- nimbleCode({
       m_age_foi = m_age_foi[1:n_ageclassm],
       age_lookup_f = age_lookup_f[1:n_age_lookup_f],
       age_lookup_m = age_lookup_m[1:n_age_lookup_m],
-      period_lookup = period_lookup[1:n_period_lookup],
+      period_lookup_foi = period_lookup_foi[1:n_period_lookup],
       f_period_foi = f_period_foi[1:n_year],
       m_period_foi = m_period_foi[1:n_year],
       space = space[1:n_study_area],
@@ -471,7 +474,7 @@ modelcode <- nimbleCode({
       m_age_foi = m_age_foi[1:n_ageclassm],
       age_lookup_f = age_lookup_f[1:n_age_lookup_f],
       age_lookup_m = age_lookup_m[1:n_age_lookup_m],
-      period_lookup = period_lookup[1:n_period_lookup],
+      period_lookup_foi = period_lookup_foi[1:n_period_lookup],
       f_period_foi = f_period_foi[1:n_year],
       m_period_foi = m_period_foi[1:n_year],
       space = space[1:n_study_area],
@@ -509,7 +512,7 @@ modelcode <- nimbleCode({
       m_age_foi = m_age_foi[1:n_ageclassm],
       age_lookup_f = age_lookup_f[1:n_age_lookup_f],
       age_lookup_m = age_lookup_m[1:n_age_lookup_m],
-      period_lookup = period_lookup[1:n_period_lookup],
+      period_lookup_foi = period_lookup_foi[1:n_period_lookup],
       f_period_foi = f_period_foi[1:n_year],
       m_period_foi = m_period_foi[1:n_year],
       space = space[1:n_study_area],
@@ -545,7 +548,7 @@ modelcode <- nimbleCode({
       m_age_foi = m_age_foi[1:n_ageclassm],
       age_lookup_f = age_lookup_f[1:n_age_lookup_f],
       age_lookup_m = age_lookup_m[1:n_age_lookup_m],
-      period_lookup = period_lookup[1:n_period_lookup],
+      period_lookup_foi = period_lookup_foi[1:n_period_lookup],
       f_period_foi = f_period_foi[1:n_year],
       m_period_foi = m_period_foi[1:n_year],
       space = space[sect_rec_pos_cens]
@@ -582,7 +585,7 @@ modelcode <- nimbleCode({
       m_age_foi = m_age_foi[1:n_ageclassm],
       age_lookup_f = age_lookup_f[1:n_age_lookup_f],
       age_lookup_m = age_lookup_m[1:n_age_lookup_m],
-      period_lookup = period_lookup[1:n_period_lookup],
+      period_lookup_foi = period_lookup_foi[1:n_period_lookup],
       f_period_foi = f_period_foi[1:n_year],
       m_period_foi = m_period_foi[1:n_year],
       space = space[1:n_study_area],
@@ -616,7 +619,7 @@ modelcode <- nimbleCode({
       m_age_foi = m_age_foi[1:n_ageclassm],
       age_lookup_f = age_lookup_f[1:n_age_lookup_f],
       age_lookup_m = age_lookup_m[1:n_age_lookup_m],
-      period_lookup = period_lookup[1:n_period_lookup],
+      period_lookup_foi = period_lookup_foi[1:n_period_lookup],
       f_period_foi = f_period_foi[1:n_year],
       m_period_foi = m_period_foi[1:n_year],
       space = space[1:n_study_area],
@@ -774,7 +777,7 @@ modelcode <- nimbleCode({
   #### Overall Survival CWD Infected
   ###################################################
 
-  sn_inf[1:n_sex,1:n_agef,1:n_year] <- calc_surv_aah(
+  sn_inf[1:n_sex, 1:n_agef, 1:n_year] <- calc_surv_aah(
           nT_age = nT_age_surv,
           nT_age_surv_aah_f = nT_age_surv_aah_f,
           nT_age_surv_aah_m = nT_age_surv_aah_m,
@@ -796,7 +799,7 @@ modelcode <- nimbleCode({
   #### Hunting Survival Susceptibles
   ###################################################
 
-  sh_sus[1:n_sex,1:n_agef,1:n_year] <- calc_surv_harvest(
+  sh_sus[1:n_sex, 1:n_agef, 1:n_year] <- calc_surv_harvest(
           nT_age = nT_age_surv,
           nT_age_surv_aah_f = nT_age_surv_aah_f,
           nT_age_surv_aah_m = nT_age_surv_aah_m,
@@ -827,7 +830,7 @@ modelcode <- nimbleCode({
   #### Hunting Survival Infected
   ###################################################
 
-  sh_inf[1:n_sex,1:n_agef,1:n_year] <- calc_surv_harvest(
+  sh_inf[1:n_sex, 1:n_agef, 1:n_year] <- calc_surv_harvest(
           nT_age = nT_age_surv,
           nT_age_surv_aah_f = nT_age_surv_aah_f,
           nT_age_surv_aah_m = nT_age_surv_aah_m,
@@ -859,12 +862,12 @@ modelcode <- nimbleCode({
   #### Probability of Infection based on FOI hazards
   ###################################################
 
-  psi[1:n_study_area, 1:n_sex, 1:n_agef, 1:n_year] <- 
+  psi[1:n_study_area, 1:n_sex, 1:n_agef, 1:n_year] <-
       calc_infect_prob(
-            age_lookup_f = age_lookup_f_conv[1:n_age_lookup_f_conv],
-            age_lookup_m = age_lookup_m_conv[1:n_age_lookup_m_conv],
-            Nage_lookup_f = n_age_lookup_f_conv,
-            Nage_lookup_m = n_age_lookup_m_conv,
+            age_lookup_f = age_lookup_f[1:n_age_lookup_f],
+            age_lookup_m = age_lookup_m[1:n_age_lookup_m],
+            Nage_lookup_f = n_age_lookup_f,
+            Nage_lookup_m = n_age_lookup_m,
             n_agef = n_agef,
             n_agem = n_agem,
             yr_end = yr_end[1:n_year],

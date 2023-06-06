@@ -7,7 +7,7 @@
 
 ### Number of age classes and sex classes
 n_study_area <- 2
-n_year_ext <- length(1992:2022)-1
+n_year_ext <- length(1985:2022)-1
 n_year <- length(1994:2022)-1
 n_ageclass <- 7
 n_ageclassm <- 6

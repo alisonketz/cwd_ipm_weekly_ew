@@ -450,9 +450,9 @@ Ccalc_infect_prob <- compileNimble(calc_infect_prob)
 
 assign("calc_infect_prob", calc_infect_prob, envir = .GlobalEnv)
 
-# age_lookup_f = age_lookup_f_conv
-# age_lookup_m = age_lookup_m_conv
-# Nage_lookup = Nage_lookup_conv
+# age_lookup_f = age_lookup_f
+# age_lookup_m = age_lookup_m
+# Nage_lookup = Nage_lookup
 # yr_end = d_fit_season$yr_end
 # f_age = f_age_foi-2
 # m_age = m_age_foi-2
@@ -460,9 +460,9 @@ assign("calc_infect_prob", calc_infect_prob, envir = .GlobalEnv)
 # m_period = m_period_foi-2
 ###testing state.transition function as R function
 # starttime <- Sys.time()
-# psi <- calc_infect_prob(age_lookup_f = age_lookup_f_conv,
-#                         age_lookup_m = age_lookup_m_conv,
-#                         Nage_lookup_f = Nage_lookup_conv,
+# psi <- calc_infect_prob(age_lookup_f = age_lookup_f,
+#                         age_lookup_m = age_lookup_m,
+#                         Nage_lookup_f = Nage_lookup,
 #                         Nage_lookup_m = length(age_lookup_m_conv),
 #                         n_agef = n_agef,
 #                         n_agem = n_agem,
@@ -539,3 +539,95 @@ set_period_effects_constant <- nimble::nimbleFunction(
 Cset_period_effects_constant <- compileNimble(set_period_effects_constant)
 
 assign("set_period_effects_constant", set_period_effects_constant, envir = .GlobalEnv)
+
+
+#######################################################################
+###
+### Function to set and center period effects across full study time
+### where period effects for non-harvest period effects
+### based on aah data were different but constant each year
+###
+#######################################################################
+
+set_period_effects_ave <- nimble::nimbleFunction(
+    run = function(
+        ### argument type declarations
+        n_year_precollar = double(0),
+        nT_period_precollar = double(0),
+        nT_period_collar = double(0),
+        nT_period_overall = double(0),
+        nT_period_overall_ext = double(0),
+        nT_period_prestudy_ext = double(0),
+        yr_start = double(1),
+        yr_end = double(1),
+        period_effect_surv = double(1),
+        period_annual_survival = double(1),
+        indx_mat_pe_surv = double(2),
+        intvl_step_yr = double(0)
+        ) {
+
+    period_effect_survival_temp <- nimNumeric(nT_period_overall_ext)
+    period_effect_survival <- nimNumeric(nT_period_overall_ext)
+    period_effect_within_yr <- nimNumeric(intvl_step_yr)
+
+
+    ### Calculating the period effects by week, 
+    ### averaged across all years with collar data
+
+    for(i in 1:34){
+        period_effect_within_yr[i] <- mean(period_effect_surv[indx_mat_pe_surv[2:6,i]])
+    }
+    for(i in 35:intvl_step_yr){
+        period_effect_within_yr[i] <- mean(period_effect_surv[indx_mat_pe_surv[1:6,i]])
+    }
+
+    for(i in 1:n_year_precollar) {
+        period_effect_survival_temp[(yr_start[i]+nT_period_prestudy_ext):
+                                (yr_end[i]+nT_period_prestudy_ext)] <- 
+            period_annual_survival[i] + period_effect_within_yr
+    }
+
+    ### for the year of the study when switching from
+    ### estimating period effects from collar data
+    ### versus estimating from aah data
+
+    period_effect_survival_temp[
+            (yr_start[n_year_precollar] + nT_period_prestudy_ext):
+            (nT_period_precollar + nT_period_prestudy_ext)] <-
+                period_annual_survival[n_year_precollar + 1] +
+                period_effect_within_yr[1:length((yr_start[n_year_precollar]:nT_period_precollar))]
+
+    ############################################################
+    ## incorporating period effects from collar data
+    ############################################################
+
+    period_effect_survival_temp[((nT_period_precollar + 1 + nT_period_prestudy_ext):
+                                nT_period_overall + nT_period_prestudy_ext)] <-
+                                period_effect_surv[1:nT_period_collar]
+
+    #making the period effects sum to zero using centering
+    ### only during the study though.... ignoring centering outside the study?
+    # mu_period <- mean(period_effect_survival_temp[(1 + nT_period_prestudy_ext):
+    #                                                (nT_period_overall + nT_period_prestudy_ext)])
+    
+    # period_effect_survival[1:nT_period_prestudy_ext] <-
+    #     period_effect_survival_temp[1:nT_period_prestudy_ext] 
+
+    # period_effect_survival[(1+nT_period_prestudy_ext):(nT_period_overall+nT_period_prestudy_ext)] <-
+    #     period_effect_survival_temp - mu_period
+
+    #### centering across all period effects, including years prior to study
+    mu_period <- mean(period_effect_survival_temp[1:nT_period_overall_ext])
+    
+    period_effect_survival[1:nT_period_overall_ext] <- 
+                period_effect_survival_temp[1:nT_period_overall_ext] - 
+                mu_period
+
+
+    returnType(double(1))
+    return(period_effect_survival[1:(nT_period_overall_ext)])
+})
+
+Cset_period_effects_ave <- compileNimble(set_period_effects_ave)
+
+assign("set_period_effects_ave", set_period_effects_ave, envir = .GlobalEnv)

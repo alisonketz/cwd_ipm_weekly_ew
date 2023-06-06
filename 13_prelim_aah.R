@@ -498,10 +498,8 @@ eab_antlered_beta <- gamma.moments(.71, .1015^2)$beta
 
 d_fit_aah$birthweek <-floor(as.duration(ymd("1994-05-15") %--% ymd(d_fit_aah$birth_date))/dweeks(1))
 d_fit_aah$birthmonth <-floor(as.duration(ymd("1994-05-15") %--% ymd(d_fit_aah$birth_date))/dmonths(1))
-d_fit_aah$age2date_weeks <- interval("1994-05-15",d_fit_aah$birth_date)%/% weeks(1) - 1
-d_fit_aah$age2date_weeks[d_fit_aah$age2date_weeks < 0] <- 0
-d_fit_aah$age2date_months <-floor(as.duration(ymd("1994-05-15") %--% ymd(d_fit_aah$birth_date))/dmonths(1))-1
-d_fit_aah$age2date_months[d_fit_aah$age2date_months < 0] <- 0
+d_fit_aah$age2date_weeks <- interval("1985-05-15",d_fit_aah$birth_date)%/% weeks(1)
+d_fit_aah$age2date_months <-interval("1985-05-15",d_fit_aah$birth_date)%/% months(1)
 
 d_fit_age_nocwd <- d_fit_aah[d_fit_aah$n>0,]
 

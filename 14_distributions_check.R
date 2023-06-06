@@ -13,7 +13,7 @@ age_effect_survival_test <- 2*exp(-.09*seq(1:nT_age_surv))
 age_effect_survival_test[600:nT_age_surv] <- .00001*exp(.009*seq(600:nT_age_surv))
 age_effect_survival_test <- age_effect_survival_test- mean(age_effect_survival_test)
 
-period_effect_survival_test <- 1 * sin(2/52 * pi * (1:nT_period_overall)) + rnorm(nT_period_overall,0,.1)
+period_effect_survival_test <- 1 * sin(2/52 * pi * (1:nT_period_overall_ext)) + rnorm(nT_period_overall_ext,0,.1)
 period_effect_survival_test <- period_effect_survival_test - mean(period_effect_survival_test)
 
 ##########################################################################

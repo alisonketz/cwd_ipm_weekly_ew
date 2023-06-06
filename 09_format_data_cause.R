@@ -7,7 +7,7 @@
 ##############################################################
 
 d_fit_hh <- d_surv[d_surv$censored == 0,]
-d_fit_hh[,1:3] <- d_fit_hh[,1:3] - nT_period_precollar
+d_fit_hh[,1:3] <- d_fit_hh[,1:3] - nT_period_precollar_ext
 age_class_indx <- c(intvl_step_yr_weekly,#fawns
                     intvl_step_yr_weekly * 2,#1
                     intvl_step_yr_weekly * 3,#2
@@ -130,7 +130,7 @@ for (i in 1:length(unique(temp$Year))) {
 ### postharvest start
 ### end of aah annual year, expressed in period effects
 
-n_year_precollar <- 23
+# n_year_precollar <- 23
 d_fit_season <- matrix(NA, nrow = n_year, ncol = 8)
 for(t in 1:n_year) {
    d_fit_season[t, ] <- c(intvl_step_yr_weekly * (t - 1) + 1,
@@ -170,11 +170,11 @@ for(i in 1:5){
 }
 
 
-Z_overall_ng <- rep(0,nT_period_overall)
-Z_overall_gun <- rep(0,nT_period_overall)
+Z_overall_ng <- rep(0,nT_period_overall_ext)
+Z_overall_gun <- rep(0,nT_period_overall_ext)
 for(i in 1:n_year){
-    Z_overall_ng[d_fit_season$ng_start[i]:d_fit_season$ng_end[i]] <- 1
-    Z_overall_gun[d_fit_season$gun_start[i]:d_fit_season$gun_end[i]] <- 1
+    Z_overall_ng[(d_fit_season$ng_start[i]:d_fit_season$ng_end[i]) + nT_period_prestudy_ext] <- 1
+    Z_overall_gun[(d_fit_season$gun_start[i]:d_fit_season$gun_end[i]) + nT_period_prestudy_ext] <- 1
 }
 
 
