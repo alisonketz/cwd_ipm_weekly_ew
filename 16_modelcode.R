@@ -118,7 +118,6 @@ modelcode <- nimbleCode({
     period_annual_survival[k] ~ dnorm(0, tau_period_precollar)
   }
 
-
   period_effect_survival[1:nT_period_overall_ext] <- set_period_effects_constant(
         n_year_precollar = n_year_precollar,
         n_year_precollar_ext = n_year_precollar_ext,

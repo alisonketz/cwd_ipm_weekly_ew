@@ -143,7 +143,7 @@ assign("calc_surv_aah", calc_surv_aah, envir = .GlobalEnv)
 #     beta_male = .5,
 #     age_effect = age_effect_survival_test,
 #     period_effect = period_effect_survival_test,
-#     yr_start = d_Fit_season$yr_start,
+#     yr_start = d_fit_season$yr_start,
 #     yr_end = d_fit_season$yr_end,
 #     intvl_step_yr = intvl_step_yr,
 #     n_year = n_year,
@@ -548,10 +548,10 @@ Cset_period_effects_constant <- compileNimble(set_period_effects_constant)
 assign("set_period_effects_constant", set_period_effects_constant, envir = .GlobalEnv)
 
 
-yr_start = d_fit_season$yr_start
-yr_end = d_fit_season$yr_end
+# yr_start = d_fit_season$yr_start
+# yr_end = d_fit_season$yr_end
 
-period_effect_surv
+# period_effect_surv
 
 
 
@@ -652,20 +652,20 @@ assign("set_period_effects_ave", set_period_effects_ave, envir = .GlobalEnv)
 
 
 
-set_period_effects_ave(
-        n_year_precollar = n_year_precollar,
-        nT_period_precollar = nT_period_precollar_ext,
-        nT_period_collar = nT_period_collar,
-        nT_period_overall = nT_period_overall,
-        nT_period_overall_ext = nT_period_overall_ext,
-        nT_period_prestudy_ext = nT_period_prestudy_ext,
-        yr_start = yr_start[1:n_year],
-        yr_end = yr_end[1:n_year],
-        period_effect_surv = period_effect_survival_test[nT_period_precollar_ext:nT_period_overall_ext],
-        period_annual_survival = period_annual_survival[1:(n_year_precollar + 1)],
-        indx_mat_pe_surv = indx_mat_pe_surv[1:6,1:intvl_step_yr_weekly],
-        intvl_step_yr = intvl_step_yr_weekly
-  )
+# set_period_effects_ave(
+#         n_year_precollar = n_year_precollar,
+#         nT_period_precollar = nT_period_precollar_ext,
+#         nT_period_collar = nT_period_collar,
+#         nT_period_overall = nT_period_overall,
+#         nT_period_overall_ext = nT_period_overall_ext,
+#         nT_period_prestudy_ext = nT_period_prestudy_ext,
+#         yr_start = yr_start[1:n_year],
+#         yr_end = yr_end[1:n_year],
+#         period_effect_surv = period_effect_survival_test[nT_period_precollar_ext:nT_period_overall_ext],
+#         period_annual_survival = period_annual_survival[1:(n_year_precollar + 1)],
+#         indx_mat_pe_surv = indx_mat_pe_surv[1:6,1:intvl_step_yr_weekly],
+#         intvl_step_yr = intvl_step_yr_weekly
+#   )
 
-length(nT_period_prestudy_ext:nT_period_overall_ext)
-nT_period_precollar_ext:nT_period_overall_ext
+# length(nT_period_prestudy_ext:nT_period_overall_ext)
+# nT_period_precollar_ext:nT_period_overall_ext
