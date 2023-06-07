@@ -1576,3 +1576,4 @@ for(j in 1:dim(d_fit_notest)[1]) {
                                         "-05-15")
 }
 d_fit_notest$birth_date <- as.Date(d_fit_notest$birth_date)
+

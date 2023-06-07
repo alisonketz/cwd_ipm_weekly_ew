@@ -11,7 +11,7 @@ age_lookup_f <- c(rep(1:4, each = intvl_step_yr_weekly),
                        rep(7, intvl_step_yr_weekly))
 age_lookup_m <- c(rep(1:4, each = intvl_step_yr_weekly),
                        rep(5, 2 * intvl_step_yr_weekly),
-                       rep(6, 3 * intvl_step_yr_weekly))
+                       rep(6, 4 * intvl_step_yr_weekly))
 n_age_lookup_f <- length(age_lookup_f)
 n_age_lookup_m <- length(age_lookup_m)
 
