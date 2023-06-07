@@ -185,7 +185,7 @@ nimConsts <- list(n_year = n_year,
     sect_aah = d_fit_notest$study_area,
     records_cause = records_cause,
     interval_cause = d_fit_hh$right_period_s - 1,
-    indx_mat_pe_surv = indx_mat_pe_surv,
+    # indx_mat_pe_surv = indx_mat_pe_surv,
     intvl_step_yr = intvl_step_yr_weekly
     )
 
@@ -324,7 +324,7 @@ for(i in 1:10){beepr::beep(1)}
 set.seed(7654321)
 starttime <- Sys.time()
 mcmcout <- runMCMC(CnimMCMC,
-                  niter = 5,
+                  niter = 1000,
                   nburnin = 0,
                   nchains = 1,
                   inits = initsFun,
@@ -357,70 +357,70 @@ runtime
 ###
 #############################################################
 
-# reps  <- 1000
-# bin <- reps * .5
-# n_thin <- 1
-# n_chains <- 3
-# starttime <- Sys.time()
-# cl <- makeCluster(n_chains, timeout = 5184000)
+reps  <- 10
+bin <- reps * .5
+n_thin <- 1
+n_chains <- 3
+starttime <- Sys.time()
+cl <- makeCluster(n_chains, timeout = 5184000)
 
-# clusterExport(cl, c("modelcode",
-#                     "initsFun",
-#                     "nimData",
-#                     "nimConsts",
-#                     "parameters",
-#                     "reps",
-#                     "bin",
-#                     "n_thin",
-#                     "set_period_effects_constant",
-#                     "dInfHarvest",
-#                     "dSusHarvest",
-#                     "dSusCensTest",
-#                     "dSusCensNo",
-#                     "dSusMortTest",
-#                     "dSusMortNoTest",
-#                     "dIcapCens",
-#                     "dIcapMort",
-#                     "dRecNegCensTest",
-#                     "dRecNegMort",
-#                     "dRecPosMort",
-#                     "dRecPosCens",
-#                     "dNegCapPosMort",
-#                     "dAAH",
-#                     "calc_surv_aah",
-#                     "calc_surv_harvest",
-#                     "calc_infect_prob"
-#                     ))
-# for (j in seq_along(cl)) {
-#   set.seed(j + 1000)
-#   init <- initsFun()
-#   clusterExport(cl[j], "init")
-# }
-# for (i in 1:10) {beepr::beep(1)}
+clusterExport(cl, c("modelcode",
+                    "initsFun",
+                    "nimData",
+                    "nimConsts",
+                    "parameters",
+                    "reps",
+                    "bin",
+                    "n_thin",
+                    "set_period_effects_constant",
+                    "dInfHarvest",
+                    "dSusHarvest",
+                    "dSusCensTest",
+                    "dSusCensNo",
+                    "dSusMortTest",
+                    "dSusMortNoTest",
+                    "dIcapCens",
+                    "dIcapMort",
+                    "dRecNegCensTest",
+                    "dRecNegMort",
+                    "dRecPosMort",
+                    "dRecPosCens",
+                    "dNegCapPosMort",
+                    "dAAH",
+                    "calc_surv_aah",
+                    "calc_surv_harvest",
+                    "calc_infect_prob"
+                    ))
+for (j in seq_along(cl)) {
+  set.seed(j + 1000)
+  init <- initsFun()
+  clusterExport(cl[j], "init")
+}
+for (i in 1:10) {beepr::beep(1)}
 
 # starttime <- Sys.time()
 # mcmcout1 <-  mcmc.list(clusterEvalQ(cl, {
 #   library(nimble)
 #   library(coda)
 
-#   assign("set_period_effects_constant", set_period_effects_constant, envir = .GlobalEnv)
-#   assign("dInfHarvest", dInfHarvest, envir = .GlobalEnv)
-#   assign("dSusHarvest", dSusHarvest, envir = .GlobalEnv)
-#   assign("dSusCensTest", dSusCensTest, envir = .GlobalEnv)
-#   assign("dSusCensNo", dSusCensNo, envir = .GlobalEnv)
-#   assign("dSusMortTest", dSusMortTest, envir = .GlobalEnv)
-#   assign("dSusMortNoTest", dSusMortNoTest, envir = .GlobalEnv)
-#   assign("dIcapCens", dIcapCens, envir = .GlobalEnv)
-#   assign("dIcapMort", dIcapMort, envir = .GlobalEnv)
-#   assign("dRecNegCensTest", dRecNegCensTest, envir = .GlobalEnv)
-#   assign("dRecNegMort", dRecNegMort, envir = .GlobalEnv)
-#   assign("dRecPosMort", dRecPosMort, envir = .GlobalEnv)
-#   assign("dRecPosCens", dRecPosCens, envir = .GlobalEnv)
-#   assign("dNegCapPosMort", dNegCapPosMort, envir = .GlobalEnv)
-#   assign("dAAH", dAAH, envir = .GlobalEnv)
-#   assign("calc_surv_aah", calc_surv_aah, envir = .GlobalEnv)
-#   assign("calc_surv_harvest", calc_surv_harvest, envir = .GlobalEnv)
-#   assign("calc_infect_prob", calc_infect_prob, envir = .GlobalEnv)
+  compile(dInfHarvest)
+  compile(dSusHarvest)
+  compile(dSusCensTest)
+  compile(dSusCensNo)
+  compile(dSusMortTest)
+  compile(dSusMortNoTest)
+  compile(dIcapCens)
+  compile(dIcapMort)
+  compile(dRecNegCensTest)
+  compile(dRecNegMort)
+  compile(dRecPosMort)
+  compile(dRecPosCens)
+  compile(dNegCapPosMort)
+  compile(dAAH)
+  compile(set_period_effects_constant)
+  compile(calc_surv_aah)
+  compile(calc_surv_harvest)
+  compile(calc_infect_prob)
 
 #   ##############################################################
 #   ###
