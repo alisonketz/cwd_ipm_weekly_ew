@@ -513,5 +513,4 @@ d_fit_notest$birthmonth <-floor(as.duration(ymd("1994-05-15") %--% ymd(d_fit_not
 d_fit_notest$age2date_weeks <- interval("1985-05-15",d_fit_notest$birth_date)%/% weeks(1)
 d_fit_notest$age2date_months <-interval("1985-05-15",d_fit_notest$birth_date)%/% months(1)
 d_fit_notest$study_area <- ifelse(d_fit_notest$study_area=="east",1,2)
-d_fit_age_nocwd <- d_fit_notest[d_fit_notest$n>0,]
-
+d_fit_notest <- d_fit_notest[d_fit_notest$n>0,]

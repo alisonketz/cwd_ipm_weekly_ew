@@ -74,7 +74,7 @@ dInfHarvest <- nimble::nimbleFunction( # nolint
             ### have to loop separately for lam_inf
             #################################################
 
-            if (sex[i] == 1) { # age loops for females
+            if (sex[i] == 0) { # age loops for females
                 for (j in 1:(a[i] - 1)) {
                     # sum up infected hazard from 1 to a-1
                     lam_inf <- lam_inf +
@@ -299,7 +299,7 @@ dSusHarvest <- nimble::nimbleFunction(
             #############################################
             # preliminary hazards for the likelihood
             #############################################
-            if (sex[i] == 1) { # age loops for females
+            if (sex[i] == 0) { # age loops for females
                 for (j in 1:(a[i] - 1)) {
                     # sum up foi and sus hazards from 1  to a-1
                     sum_haz <- sum_haz +
@@ -477,7 +477,7 @@ dSusCensTest <- nimble::nimbleFunction(
             #############################################
             # preliminary hazards for the likelihood
             #############################################
-            if (sex[i] == 1) { # age loops for females
+            if (sex[i] == 0) { # age loops for females
                 for (j in 1:(r[i] - 1)) {
                     # sum up foi
                     lam_foi <- lam_foi +
@@ -662,7 +662,7 @@ dSusCensNo <- nimble::nimbleFunction(
             #############################################
             # preliminary hazards for the likelihood
             #############################################
-            if (sex[i] == 1) { # age loops for females
+            if (sex[i] == 0) { # age loops for females
                 for (j in (e[i] + 1):(r[i] - 1)) {
                     # sum up infected hazard from e to r
                     lam_inf <- lam_inf +
@@ -994,7 +994,7 @@ dSusMortTest <- nimble::nimbleFunction(
             #############################################
             # preliminary hazards for the likelihood
             #############################################
-            if (sex[i] == 1) {
+            if (sex[i] == 0) {
                 for (j in r[i]:(s[i] - 1)) {
                     # sum up surv hazard from r to s-1
                     lam_susD <- lam_susD +
@@ -1186,7 +1186,7 @@ dSusMortNoTest <- nimble::nimbleFunction(
             #############################################
             # preliminary hazards for the likelihood
             #############################################
-            if (sex[i] == 1) { # age loops for females
+            if (sex[i] == 0) { # age loops for females
                 # survival hazard for susceptible deer
                 lam_sus[e[i]:(s[i] - 1)] <- exp(beta0_sus +
                     age_effect_surv[e[i]:(s[i] - 1)] +
@@ -1391,7 +1391,7 @@ dIcapCens <- nimble::nimbleFunction(
             #############################################
             # preliminary hazards for the likelihood
             #############################################
-            if (sex[i] == 1) { # age loops for females
+            if (sex[i] == 0) { # age loops for females
                 # lam_inf from 1 to e-1
                 for (j in 1:(e[i] - 1)) {
                     lam_inf <- lam_inf +
@@ -1610,7 +1610,7 @@ dIcapMort <- nimble::nimbleFunction(
             #############################################
             # preliminary hazards for the likelihood
             #############################################
-            if (sex[i] == 1) { # females
+            if (sex[i] == 0) { # females
                 # sum up infected hazard from 1 to e-1
                 for (j in 1:(e[i] - 1)) {
                     lam_inf <- lam_inf +
@@ -1851,7 +1851,7 @@ dRecNegCensTest <- nimble::nimbleFunction(
             #############################################
             # preliminary hazards for the likelihood
             #############################################
-            if (sex[i] == 1) { # females
+            if (sex[i] == 0) { # females
                 for (j in e[i]:(r[i] - 1)) {
                     # survival hazard for susceptible deer
                     lam_sus <- lam_sus + exp(beta0_sus +
@@ -2011,7 +2011,7 @@ dRecNegCensPostNo <- nimble::nimbleFunction(
             #############################################
             # preliminary hazards for the likelihood
             #############################################
-            if (sex[i] == 1) { # females
+            if (sex[i] == 0) { # females
                 # survival hazard for susceptible deer
                 lam_sus[e[i]:(r[i] - 1)] <- exp(beta0_sus +
                     age_effect_surv[e[i]:(r[i] - 1)] +
@@ -2192,7 +2192,7 @@ dRecNegMort <- nimble::nimbleFunction(
             #############################################
             # preliminary hazards for the likelihood
             #############################################
-            if (sex[i] == 1) { # age loops for females
+            if (sex[i] == 0) { # age loops for females
                 # survival hazard for susceptible deer
                 for (j in e[i]:(r[i] - 1)) {
                     lam_sus <- lam_sus + exp(beta0_sus +
@@ -2370,7 +2370,7 @@ dRecPosMort <- nimble::nimbleFunction(
             #############################################
             # preliminary hazards for the likelihood
             #############################################
-            if (sex[i] == 1) { # females
+            if (sex[i] == 0) { # females
                 # survival hazard for susceptible deer
                 lam_sus[e[i]:(dn[i] - 1)] <- exp(beta0_sus +
                     age_effect_surv[e[i]:(dn[i] - 1)] +
@@ -2764,7 +2764,7 @@ dNegCapPosMort <- nimble::nimbleFunction(
             #############################################
             # preliminary hazards for the likelihood
             #############################################
-            if (sex[i] == 1) { # females
+            if (sex[i] == 0) { # females
                 # survival hazard for susceptible deer
                 lam_sus[e[i]:(dn[i] - 1)] <- exp(beta0_sus +
                     age_effect_surv[e[i]:(dn[i] - 1)] +
@@ -2981,7 +2981,7 @@ dAAH <- nimble::nimbleFunction(
         lam_sus <- nimNumeric(a[i])
         lik_temp <- nimNumeric(a[i])
 
-        if (sex[i] == 1) { # females
+        if (sex[i] == 0) { # females
             #############################################
             # preliminary hazards for the likelihood
             #############################################

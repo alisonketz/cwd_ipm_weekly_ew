@@ -1511,7 +1511,6 @@ levels(d_fit_aah$agemonths) <- c(floor(as.duration(ymd("2014-05-15") %--% ymd("2
 d_fit_aah$ageweeks <- as.numeric(as.character(d_fit_aah$ageweeks))
 d_fit_aah$agemonths <- as.numeric(as.character(d_fit_aah$agemonths))
 
-d_fit_aah
 # sex=0=females, sex=1=males
 d_fit_aah$sexnum <- as.factor(d_fit_aah$sex)
 
@@ -1537,7 +1536,7 @@ d_fit_aah$birth_date <- as.Date(d_fit_aah$birth_date)
 #####################################################################################
 
 #comining all age-at-harvest data (tested, pos+neg, not tested)
-d_fit_notest <- df_aah_notest 
+d_fit_notest <- df_aah_notest[df_aah_notest$year > 1993,]
 d_fit_notest$agemonths <- as.factor(d_fit_notest$age)
 d_fit_notest$ageweeks <- as.factor(d_fit_notest$age)
 
@@ -1560,7 +1559,6 @@ levels(d_fit_notest$agemonths) <- c(floor(as.duration(ymd("2014-05-15") %--% ymd
 d_fit_notest$ageweeks <- as.numeric(as.character(d_fit_notest$ageweeks))
 d_fit_notest$agemonths <- as.numeric(as.character(d_fit_notest$agemonths))
 
-d_fit_notest
 # sex=0=females, sex=1=males
 d_fit_notest$sexnum <- as.factor(d_fit_notest$sex)
 
