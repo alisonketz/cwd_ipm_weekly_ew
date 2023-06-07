@@ -1481,7 +1481,8 @@ df_age_sus <- rbind(df_age_early,df_age_sus)
 
 ###################################################################################
 ###
-### setting up aah harvest data for estimating period effects
+### setting up aah harvest data for AAH multinomial 
+### includes harvest surveillance and notest
 ###
 #####################################################################################
 
@@ -1528,3 +1529,52 @@ for(j in 1:dim(d_fit_aah)[1]) {
                                         "-05-15")
 }
 d_fit_aah$birth_date <- as.Date(d_fit_aah$birth_date)
+
+###################################################################################
+###
+### setting up aah harvest data for dAAH joint likelihood without CWD status 
+###
+#####################################################################################
+
+#comining all age-at-harvest data (tested, pos+neg, not tested)
+d_fit_notest <- df_aah_notest 
+d_fit_notest$agemonths <- as.factor(d_fit_notest$age)
+d_fit_notest$ageweeks <- as.factor(d_fit_notest$age)
+
+levels(d_fit_notest$ageweeks) <- c(floor(as.duration(ymd("2014-05-15") %--% ymd("2014-11-30"))/dweeks(1)),#0
+                                floor(as.duration(ymd("2014-05-15") %--% ymd("2015-11-30"))/dweeks(1)),#1
+                                floor(as.duration(ymd("2014-05-15") %--% ymd("2016-11-30"))/dweeks(1)),#2
+                                floor(as.duration(ymd("2014-05-15") %--% ymd("2017-11-30"))/dweeks(1)),#3
+                                floor(as.duration(ymd("2014-05-15") %--% ymd("2018-11-30"))/dweeks(1)),#4
+                                floor(as.duration(ymd("2014-05-15") %--% ymd("2020-11-30"))/dweeks(1)),#6
+                                floor(as.duration(ymd("2014-05-15") %--% ymd("2023-11-30"))/dweeks(1)))#9
+                                    
+levels(d_fit_notest$agemonths) <- c(floor(as.duration(ymd("2014-05-15") %--% ymd("2014-11-30"))/dmonths(1)),#0
+                                    floor(as.duration(ymd("2014-05-15") %--% ymd("2015-11-30"))/dmonths(1)),#1
+                                    floor(as.duration(ymd("2014-05-15") %--% ymd("2016-11-30"))/dmonths(1)),#2
+                                    floor(as.duration(ymd("2014-05-15") %--% ymd("2017-11-30"))/dmonths(1)),#3
+                                    floor(as.duration(ymd("2014-05-15") %--% ymd("2018-11-30"))/dmonths(1)),#4
+                                    floor(as.duration(ymd("2014-05-15") %--% ymd("2020-11-30"))/dmonths(1)),#6
+                                    floor(as.duration(ymd("2014-05-15") %--% ymd("2023-11-30"))/dmonths(1)))#9
+                                    
+d_fit_notest$ageweeks <- as.numeric(as.character(d_fit_notest$ageweeks))
+d_fit_notest$agemonths <- as.numeric(as.character(d_fit_notest$agemonths))
+
+d_fit_notest
+# sex=0=females, sex=1=males
+d_fit_notest$sexnum <- as.factor(d_fit_notest$sex)
+
+levels(d_fit_notest$sexnum) <- c(0,1)
+d_fit_notest$sexnum <- as.numeric(as.character(d_fit_notest$sexnum))
+
+#age2date - period effects
+#calculating the birth weeks in period notation
+d_fit_notest$agenum <- as.numeric(as.character(d_fit_notest$age))
+
+d_fit_notest$birth_date <- NA
+for(j in 1:dim(d_fit_notest)[1]) {
+    d_fit_notest$birth_date[j] <- paste0(d_fit_notest$year[j] -
+                                        d_fit_notest$agenum[j],
+                                        "-05-15")
+}
+d_fit_notest$birth_date <- as.Date(d_fit_notest$birth_date)

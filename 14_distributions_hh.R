@@ -42,6 +42,10 @@ dInfHarvest <- nimble::nimbleFunction( # nolint
                    beta_male = double(0),
                    beta0_sus = double(0),
                    beta0_inf = double(0),
+                   beta_gun_hh = double(0),
+                   beta_ng_hh = double(0),
+                   Z_overall_gun_collar = double(1),
+                   Z_overall_ng_collar = double(1),
                    age_effect_surv = double(1),
                    period_effect_surv = double(1),
                    f_age_foi = double(1),
@@ -76,6 +80,8 @@ dInfHarvest <- nimble::nimbleFunction( # nolint
                     lam_inf <- lam_inf +
                         exp(beta0_inf +
                             age_effect_surv[j] +
+                            beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                            beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
                             period_effect_surv[age2date[i] + j])
                 }
                 for (j in 1:a[i]) {
@@ -94,14 +100,20 @@ dInfHarvest <- nimble::nimbleFunction( # nolint
                         lam_sus <- lam_sus +
                             exp(beta0_sus +
                                 age_effect_surv[j] +
+                                beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                                beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
                                 period_effect_surv[age2date[i] + j])
                         lam_inf <- lam_inf -
                             exp(beta0_inf +
                                 age_effect_surv[j] +
+                                beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                                beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
                                 period_effect_surv[age2date[i] + j])
                     } else { # now calculate infected hazard for final age
                         lam_inf <- exp(beta0_inf +
                             age_effect_surv[j] +
+                            beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                            beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
                             period_effect_surv[age2date[i] + j])
                     }
                 }
@@ -111,6 +123,8 @@ dInfHarvest <- nimble::nimbleFunction( # nolint
                     lam_inf <- lam_inf +
                         exp(beta0_inf +
                             age_effect_surv[j] +
+                            beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                            beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
                             period_effect_surv[age2date[i] + j] +
                             beta_male)
                 }
@@ -129,17 +143,23 @@ dInfHarvest <- nimble::nimbleFunction( # nolint
                         lam_sus <- lam_sus +
                             exp(beta0_sus +
                                 age_effect_surv[j] +
+                                beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                                beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
                                 period_effect_surv[age2date[i] + j] +
                                 beta_male)
                         lam_inf <- lam_inf -
                             exp(beta0_inf +
                                 age_effect_surv[j] +
+                                beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                                beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
                                 period_effect_surv[age2date[i] + j] +
                                 beta_male)
                     } else {
                         # now calculate infected hazard for final age
                         lam_inf <- exp(beta0_inf +
                             age_effect_surv[j] +
+                            beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                            beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
                             period_effect_surv[age2date[i] + j] +
                             beta_male)
                     }
@@ -163,7 +183,7 @@ dInfHarvest <- nimble::nimbleFunction( # nolint
 
 nimble::registerDistributions(list(
     dInfHarvest = list(
-        BUGSdist = "dInfHarvest(n_cases,n_samples,a,sex,age2date,beta_male,beta0_sus,beta0_inf,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup_foi,space,sect)",
+        BUGSdist = "dInfHarvest(n_cases,n_samples,a,sex,age2date,beta_male,beta0_sus,beta0_inf,beta_gun_hh,beta_ng_hh,Z_overall_gun_collar,Z_overall_ng_collar,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup_foi,space,sect)",
         types = c(
             "value = integer(0)",
             "n_cases = double(1)",
@@ -174,6 +194,10 @@ nimble::registerDistributions(list(
             "beta_male = double(0)",
             "beta0_sus = double(0)",
             "beta0_inf = double(0)",
+            "beta_gun_hh = double(0)",
+            "beta_ng_hh = double(0)",
+            "Z_overall_gun_collar = double(1)",
+            "Z_overall_ng_collar = double(1)",
             "age_effect_surv = double(1)",
             "period_effect_surv = double(1)",
             "f_age_foi = double(1)",
@@ -247,6 +271,10 @@ dSusHarvest <- nimble::nimbleFunction(
                    age2date = double(1),
                    beta_male = double(0),
                    beta0_sus = double(0),
+                   beta_gun_hh = double(0),
+                   beta_ng_hh = double(0),
+                   Z_overall_gun_collar = double(1),
+                   Z_overall_ng_collar = double(1),
                    age_effect_surv = double(1),
                    period_effect_surv = double(1),
                    f_age_foi = double(1),
@@ -280,11 +308,15 @@ dSusHarvest <- nimble::nimbleFunction(
                             f_period_foi[period_lookup_foi[age2date[i] + j]]) +
                         exp(beta0_sus +
                             age_effect_surv[j] +
+                            beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                            beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
                             period_effect_surv[age2date[i] + j])
                 }
                 # now hazards for a
                 lam_sus <- exp(beta0_sus +
                     age_effect_surv[a[i]] +
+                    beta_gun_hh * Z_overall_gun_collar[age2date[i]  + a[i]] + 
+                    beta_ng_hh * Z_overall_ng_collar[age2date[i] +  a[i]] +
                     period_effect_surv[age2date[i] + a[i]])
                 lam_foi <- exp(space[sect[i]] +
                     f_age_foi[age_lookup_f[a[i]]] +
@@ -298,12 +330,16 @@ dSusHarvest <- nimble::nimbleFunction(
                             m_period_foi[period_lookup_foi[age2date[i] + j]]) +
                         exp(beta0_sus +
                             age_effect_surv[j] +
+                            beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                            beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
                             period_effect_surv[age2date[i] + j]+
                             beta_male)
                 }
                 # now hazards for a
                 lam_sus <- exp(beta0_sus +
                     age_effect_surv[a[i]] +
+                    beta_gun_hh * Z_overall_gun_collar[age2date[i] + a[i]] + 
+                    beta_ng_hh * Z_overall_ng_collar[age2date[i] + a[i]] +
                     period_effect_surv[age2date[i] + a[i]] +
                     beta_male)
                 lam_foi <- exp(space[sect[i]] +
@@ -332,7 +368,7 @@ dSusHarvest <- nimble::nimbleFunction(
 
 nimble::registerDistributions(list(
     dSusHarvest = list(
-        BUGSdist = "dSusHarvest(n_cases,n_samples,a,sex,age2date,beta_male,beta0_sus,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup_foi,space,sect)",
+        BUGSdist = "dSusHarvest(n_cases,n_samples,a,sex,age2date,beta_male,beta0_sus,beta_gun_hh,beta_ng_hh,Z_overall_gun_collar,Z_overall_ng_collar,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup_foi,space,sect)",
         types = c(
             "value = double(0)",
             "n_cases = double(1)",
@@ -342,6 +378,10 @@ nimble::registerDistributions(list(
             "age2date = double(1)",
             "beta_male = double(0)",
             "beta0_sus = double(0)",
+            "beta_gun_hh = double(0)",
+            "beta_ng_hh = double(0)",
+            "Z_overall_gun_collar = double(1)",
+            "Z_overall_ng_collar = double(1)",
             "age_effect_surv = double(1)",
             "period_effect_surv = double(1)",
             "f_age_foi = double(1)",
@@ -410,6 +450,10 @@ dSusCensTest <- nimble::nimbleFunction(
                    age2date = double(1),
                    beta_male = double(0),
                    beta0_sus = double(0),
+                   beta_gun_hh = double(0),
+                   beta_ng_hh = double(0),
+                   Z_overall_gun_collar = double(1),
+                   Z_overall_ng_collar = double(1),
                    age_effect_surv = double(1),
                    period_effect_surv = double(1),
                    f_age_foi = double(1),
@@ -444,6 +488,8 @@ dSusCensTest <- nimble::nimbleFunction(
                         lam_sus <- lam_sus +
                             exp(beta0_sus +
                                 age_effect_surv[j] +
+                                beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                                beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] + 
                                 period_effect_surv[age2date[i] + j])
                     }
                 }
@@ -458,6 +504,8 @@ dSusCensTest <- nimble::nimbleFunction(
                         lam_sus <- lam_sus +
                             exp(beta0_sus +
                                 age_effect_surv[j] +
+                                beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                                beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] + 
                                 period_effect_surv[age2date[i] + j] +
                                 beta_male)
                     }
@@ -483,7 +531,7 @@ dSusCensTest <- nimble::nimbleFunction(
 
 nimble::registerDistributions(list(
     dSusCensTest = list(
-        BUGSdist = "dSusCensTest(n_samples,e,r,sex,age2date,beta_male,beta0_sus,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup_foi,sect,space)",
+        BUGSdist = "dSusCensTest(n_samples,e,r,sex,age2date,beta_male,beta0_sus,beta_gun_hh,beta_ng_hh,Z_overall_gun_collar,Z_overall_ng_collar,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup_foi,sect,space)",
         types = c(
             "value = integer(0)",
             "n_samples = integer(0)",
@@ -493,6 +541,10 @@ nimble::registerDistributions(list(
             "age2date = double(1)",
             "beta_male = double(0)",
             "beta0_sus = double(0)",
+            "beta_gun_hh = double(0)",
+            "beta_ng_hh = double(0)",
+            "Z_overall_gun_collar = double(1)",
+            "Z_overall_ng_collar = double(1)",
             "age_effect_surv = double(1)",
             "period_effect_surv = double(1)",
             "f_age_foi = double(1)",
@@ -584,6 +636,10 @@ dSusCensNo <- nimble::nimbleFunction(
                    beta_male = double(0),
                    beta0_sus = double(0),
                    beta0_inf = double(0),
+                   beta_gun_hh = double(0),
+                   beta_ng_hh = double(0),
+                   Z_overall_gun_collar = double(1),
+                   Z_overall_ng_collar = double(1),
                    age_effect_surv = double(1),
                    period_effect_surv = double(1),
                    f_age_foi = double(1),
@@ -612,6 +668,8 @@ dSusCensNo <- nimble::nimbleFunction(
                     lam_inf <- lam_inf +
                         exp(beta0_inf +
                             age_effect_surv[j] +
+                            beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                            beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] + 
                             period_effect_surv[age2date[i] + j])
                 }
                 for (j in 1:e[i]) {
@@ -623,6 +681,8 @@ dSusCensNo <- nimble::nimbleFunction(
                     if (j == e[i]) {
                         lam_sus_e <- exp(beta0_sus +
                             age_effect_surv[j] +
+                            beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                            beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] + 
                             period_effect_surv[age2date[i] + j])
                         lik_temp_e <- exp(-lam_sus_e) * exp(-lam_foi)
                     }
@@ -638,12 +698,16 @@ dSusCensNo <- nimble::nimbleFunction(
                 # now redefine hazards (subtract for lam_inf)
                 lam_sus <- exp(beta0_sus +
                     age_effect_surv[e[i] + 1] +
+                    beta_gun_hh * Z_overall_gun_collar[age2date[i] + e[i] + 1] +
+                    beta_ng_hh * Z_overall_ng_collar[age2date[i] + e[i] + 1] +
                     period_effect_surv[age2date[i] + e[i] + 1])
                 lam_foie <- lam_foij
                 lam_foi <- lam_foi + lam_foij
                 lam_inf <- lam_inf -
                     exp(beta0_inf +
                         age_effect_surv[e[i] + 1] +
+                        beta_gun_hh * Z_overall_gun_collar[age2date[i] + e[i] + 1] +
+                        beta_ng_hh * Z_overall_ng_collar[age2date[i] + e[i] + 1] +
                         period_effect_surv[age2date[i] + e[i] + 1])
 
                 if ((r[i] - e[i]) > 2) {
@@ -662,10 +726,14 @@ dSusCensNo <- nimble::nimbleFunction(
                         lam_sus <- lam_sus +
                             exp(beta0_sus +
                                 age_effect_surv[j] +
+                                beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                                beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] + 
                                 period_effect_surv[age2date[i] + j])
                         lam_inf <- lam_inf -
                             exp(beta0_inf +
                                 age_effect_surv[j] +
+                                beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                                beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
                                 period_effect_surv[age2date[i] + j])
                     }
                 }
@@ -675,6 +743,8 @@ dSusCensNo <- nimble::nimbleFunction(
                     lam_inf <- lam_inf +
                         	   exp(beta0_inf +
 							       age_effect_surv[j] +
+                                   beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                                   beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
 								   period_effect_surv[age2date[i] + j] +
 								   beta_male)
                 }
@@ -688,6 +758,8 @@ dSusCensNo <- nimble::nimbleFunction(
                         lam_sus_e <- exp(beta0_sus +
 						                 age_effect_surv[j] +
 										 period_effect_surv[age2date[i] + j] +
+                                         beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                                         beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
 										 beta_male)
                         lik_temp_e <- exp(-lam_sus_e) * exp(-lam_foi)
                     }
@@ -703,6 +775,8 @@ dSusCensNo <- nimble::nimbleFunction(
                 # now redefine the hazards (subtract for lam_inf)
                 lam_sus <- exp(beta0_sus +
 				               age_effect_surv[e[i] + 1] +
+                               beta_gun_hh * Z_overall_gun_collar[age2date[i] + e[i] + 1] + 
+                               beta_ng_hh * Z_overall_ng_collar[age2date[i] + e[i] + 1] +
 							   period_effect_surv[age2date[i] + e[i] + 1] +
 							   beta_male)
                 lam_foie <- lam_foij
@@ -710,6 +784,8 @@ dSusCensNo <- nimble::nimbleFunction(
                 lam_inf <- lam_inf -
 				           exp(beta0_inf +
 				               age_effect_surv[e[i] + 1] +
+                               beta_gun_hh * Z_overall_gun_collar[age2date[i] + e[i] + 1] + 
+                               beta_ng_hh * Z_overall_ng_collar[age2date[i] + e[i] + 1] +
 							   period_effect_surv[age2date[i] + e[i] + 1] +
 							   beta_male)
 
@@ -728,11 +804,15 @@ dSusCensNo <- nimble::nimbleFunction(
                         lam_sus <- lam_sus + 
 						           exp(beta0_sus +
 								       age_effect_surv[j] +
+                                       beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                                       beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
 									   period_effect_surv[age2date[i] + j] +
 									   beta_male)
                         lam_inf <- lam_inf - 
 						           exp(beta0_inf +
 								       age_effect_surv[j] +
+                                       beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                                       beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
 									   period_effect_surv[age2date[i] + j] +
 									   beta_male)
                     }
@@ -756,7 +836,7 @@ dSusCensNo <- nimble::nimbleFunction(
 
 nimble::registerDistributions(list(
     dSusCensNo = list(
-        BUGSdist = "dSusCensNo(n_samples,e,r,sex,age2date,beta_male,beta0_sus,beta0_inf,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup_foi,space,sect)",
+        BUGSdist = "dSusCensNo(n_samples,e,r,sex,age2date,beta_male,beta0_sus,beta0_inf,beta_gun_hh,beta_ng_hh,Z_overall_gun_collar,Z_overall_ng_collar,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup_foi,space,sect)",
         types = c(
             "value=integer(0)",
             "n_samples = integer(0)",
@@ -767,6 +847,10 @@ nimble::registerDistributions(list(
             "beta_male = double(0)",
             "beta0_sus = double(0)",
             "beta0_inf = double(0)",
+            "beta_gun_hh = double(0)",
+            "beta_ng_hh = double(0)",
+            "Z_overall_gun_collar = double(1)",
+            "Z_overall_ng_collar = double(1)",
             "age_effect_surv = double(1)",
             "period_effect_surv = double(1)",
             "f_age_foi = double(1)",
@@ -885,6 +969,10 @@ dSusMortTest <- nimble::nimbleFunction(
                    age2date = double(1),
                    beta_male = double(0),
                    beta0_sus = double(0),
+                   beta_gun_hh = double(0),
+                   beta_ng_hh = double(0),
+                   Z_overall_gun_collar = double(1),
+                   Z_overall_ng_collar = double(1),
                    age_effect_surv = double(1),
                    period_effect_surv = double(1),
                    f_age_foi = double(1),
@@ -912,6 +1000,8 @@ dSusMortTest <- nimble::nimbleFunction(
                     lam_susD <- lam_susD +
 					            exp(beta0_sus +
 								    age_effect_surv[j] +
+                                    beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                                    beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
 									period_effect_surv[age2date[i] + j])
                 }
 
@@ -925,6 +1015,8 @@ dSusMortTest <- nimble::nimbleFunction(
                         lam_sus <- lam_sus +
 						           exp(beta0_sus +
 								       age_effect_surv[j] +
+                                       beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                                       beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
 									   period_effect_surv[age2date[i] + j])
                     }
                 }
@@ -934,6 +1026,8 @@ dSusMortTest <- nimble::nimbleFunction(
                     lam_susD <- lam_susD +
 					            exp(beta0_sus +
 								    age_effect_surv[j] +
+                                    beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                                    beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
 									period_effect_surv[age2date[i] + j] +
 									beta_male)
                 }
@@ -948,6 +1042,8 @@ dSusMortTest <- nimble::nimbleFunction(
                         lam_sus <- lam_sus +
 						           exp(beta0_sus +
 								       age_effect_surv[j] +
+                                       beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                                       beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
 									   period_effect_surv[age2date[i] + j] +
 									   beta_male)
                     }
@@ -973,7 +1069,7 @@ dSusMortTest <- nimble::nimbleFunction(
 
 nimble::registerDistributions(list(
     dSusMortTest = list(
-        BUGSdist = "dSusMortTest(n_samples,e,r,s,sex,age2date,beta_male,beta0_sus,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup_foi,space,sect)",
+        BUGSdist = "dSusMortTest(n_samples,e,r,s,sex,age2date,beta_male,beta0_sus,beta_gun_hh,beta_ng_hh,Z_overall_gun_collar,Z_overall_ng_collar,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup_foi,space,sect)",
         types = c(
             "value = double(0)",
             "n_samples = integer(0)",
@@ -984,6 +1080,10 @@ nimble::registerDistributions(list(
             "age2date = double(1)",
             "beta_male = double(0)",
             "beta0_sus = double(0)",
+            "beta_gun_hh = double(0)",
+            "beta_ng_hh = double(0)",
+            "Z_overall_gun_collar = double(1)",
+            "Z_overall_ng_collar = double(1)",
             "age_effect_surv = double(1)",
             "period_effect_surv = double(1)",
             "f_age_foi = double(1)",
@@ -1060,6 +1160,10 @@ dSusMortNoTest <- nimble::nimbleFunction(
                    beta_male = double(0),
                    beta0_sus = double(0),
                    beta0_inf = double(0),
+                   beta_gun_hh = double(0),
+                   beta_ng_hh = double(0),
+                   Z_overall_gun_collar = double(1),
+                   Z_overall_ng_collar = double(1),
                    age_effect_surv = double(1),
                    period_effect_surv = double(1),
                    f_age_foi = double(1),
@@ -1086,11 +1190,15 @@ dSusMortNoTest <- nimble::nimbleFunction(
                 # survival hazard for susceptible deer
                 lam_sus[e[i]:(s[i] - 1)] <- exp(beta0_sus +
                     age_effect_surv[e[i]:(s[i] - 1)] +
+                    beta_gun_hh * Z_overall_gun_collar[(e[i] + age2date[i]):(s[i] - 1 + age2date[i])] +
+                    beta_ng_hh * Z_overall_ng_collar[(e[i] + age2date[i]):(s[i] - 1 + age2date[i])] +
                     period_effect_surv[(e[i] + age2date[i]):(s[i] - 1 + age2date[i])])
 
                 # survival hazard while infected
                 lam_inf[e[i]:(s[i] - 1)] <- exp(beta0_inf +
                     age_effect_surv[e[i]:(s[i] - 1)] +
+                    beta_gun_hh * Z_overall_gun_collar[(e[i] + age2date[i]):(s[i] - 1 + age2date[i])] +
+                    beta_ng_hh * Z_overall_ng_collar[(e[i] + age2date[i]):(s[i] - 1 + age2date[i])] +
                     period_effect_surv[(e[i] + age2date[i]):(s[i] - 1 + age2date[i])])
 
                 # force of infection infection hazard
@@ -1101,12 +1209,16 @@ dSusMortNoTest <- nimble::nimbleFunction(
                 # survival hazard for susceptible deer
                 lam_sus[e[i]:(s[i] - 1)] <- exp(beta0_sus +
                     age_effect_surv[e[i]:(s[i] - 1)] +
+                    beta_gun_hh * Z_overall_gun_collar[(e[i] + age2date[i]):(s[i] - 1 + age2date[i])] + 
+                    beta_ng_hh * Z_overall_ng_collar[(e[i] + age2date[i]):(s[i] - 1 + age2date[i])] +
                     period_effect_surv[(e[i] + age2date[i]):(s[i] - 1 + age2date[i])] +
                     beta_male)
 
                 # survival hazard while infected
                 lam_inf[e[i]:(s[i] - 1)] <- exp(beta0_inf +
                     age_effect_surv[e[i]:(s[i] - 1)] +
+                    beta_gun_hh * Z_overall_gun_collar[(e[i] + age2date[i]):(s[i] - 1 + age2date[i])] + 
+                    beta_ng_hh * Z_overall_ng_collar[a(e[i] + age2date[i]):(s[i] - 1 + age2date[i])] +
                     period_effect_surv[(e[i] + age2date[i]):(s[i] - 1 + age2date[i])] +
                     beta_male)
 
@@ -1163,7 +1275,7 @@ dSusMortNoTest <- nimble::nimbleFunction(
 
 nimble::registerDistributions(list(
     dSusMortNoTest = list(
-        BUGSdist = "dSusMortNoTest(n_samples,e,r,s,dn1,sex,age2date,beta_male,beta0_sus,beta0_inf,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup_foi,space,sect)",
+        BUGSdist = "dSusMortNoTest(n_samples,e,r,s,dn1,sex,age2date,beta_male,beta0_sus,beta0_inf,beta_gun_hh,beta_ng_hh,Z_overall_gun_collar,Z_overall_ng_collar,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup_foi,space,sect)",
         types = c(
             "value = integer(0)",
             "n_samples = integer(0)",
@@ -1176,6 +1288,10 @@ nimble::registerDistributions(list(
             "beta_male = double(0)",
             "beta0_inf = double(0)",
             "beta0_sus = double(0)",
+            "beta_gun_hh = double(0)",
+            "beta_ng_hh = double(0)",
+            "Z_overall_gun_collar = double(1)",
+            "Z_overall_ng_collar = double(1)",
             "age_effect_surv = double(1)",
             "period_effect_surv = double(1)",
             "f_age_foi = double(1)",
@@ -1249,6 +1365,10 @@ dIcapCens <- nimble::nimbleFunction(
                    beta_male = double(0),
                    beta0_sus = double(0),
                    beta0_inf = double(0),
+                   beta_gun_hh = double(0),
+                   beta_ng_hh = double(0),
+                   Z_overall_gun_collar = double(1),
+                   Z_overall_ng_collar = double(1),
                    age_effect_surv = double(1),
                    period_effect_surv = double(1),
                    f_age_foi = double(1),
@@ -1277,6 +1397,8 @@ dIcapCens <- nimble::nimbleFunction(
                     lam_inf <- lam_inf +
 					           exp(beta0_inf +
 							       age_effect_surv[j] +
+                                   beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                                   beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
 								   period_effect_surv[age2date[i] + j])
                 }
                 for (j in 1:(e[i] - 1)) {
@@ -1292,10 +1414,14 @@ dIcapCens <- nimble::nimbleFunction(
                     lam_sus <- lam_sus +
 					           exp(beta0_sus +
 							       age_effect_surv[j] +
+                                   beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                                   beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
 								   period_effect_surv[age2date[i] + j])
                     lam_inf <- lam_inf -
 					           exp(beta0_inf +
 							       age_effect_surv[j] +
+                                   beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                                   beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
 								   period_effect_surv[age2date[i] + j])
                 }
                 # now recalculate lam_inf to sum over e to r-1
@@ -1304,6 +1430,8 @@ dIcapCens <- nimble::nimbleFunction(
                     lam_inf <- lam_inf +
 					           exp(beta0_inf +
 							       age_effect_surv[j] +
+                                   beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                                   beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
 								   period_effect_surv[age2date[i] + j])
                 }
             } else { # age loops for males
@@ -1312,6 +1440,8 @@ dIcapCens <- nimble::nimbleFunction(
                     lam_inf <- lam_inf +
 					           exp(beta0_inf +
 							       age_effect_surv[j] +
+                                   beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                                   beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
 								   period_effect_surv[age2date[i] + j] +
 								   beta_male)
                 }
@@ -1328,11 +1458,15 @@ dIcapCens <- nimble::nimbleFunction(
                     lam_sus <- lam_sus +
 					           exp(beta0_sus +
 							       age_effect_surv[j] +
+                                   beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                                   beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
 								   period_effect_surv[age2date[i] + j] +
 								   beta_male)
                     lam_inf <- lam_inf -
 					           exp(beta0_inf +
 							       age_effect_surv[j] +
+                                   beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                                   beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
 								   period_effect_surv[age2date[i] + j] +
 								   beta_male)
                 }
@@ -1342,6 +1476,8 @@ dIcapCens <- nimble::nimbleFunction(
                     lam_inf <- lam_inf +
 					           exp(beta0_inf +
 							       age_effect_surv[j] +
+                                   beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                                   beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
 								   period_effect_surv[age2date[i] + j] +
 								   beta_male)
                 }
@@ -1363,7 +1499,7 @@ dIcapCens <- nimble::nimbleFunction(
 
 nimble::registerDistributions(list(
     dIcapCens = list(
-        BUGSdist = "dIcapCens(n_samples,e,r,sex,age2date,beta_male,beta0_inf,beta0_sus,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup_foi,space,sect)",
+        BUGSdist = "dIcapCens(n_samples,e,r,sex,age2date,beta_male,beta0_inf,beta0_sus,beta_gun_hh,beta_ng_hh,Z_overall_gun_collar,Z_overall_ng_collar,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup_foi,space,sect)",
         types = c(
             "value=integer(0)",
             "n_samples = integer(0)",
@@ -1374,6 +1510,8 @@ nimble::registerDistributions(list(
             "beta_male = double(0)",
             "beta0_inf = double(0)",
             "beta0_sus = double(0)",
+            "beta_gun_hh = double(0)",
+            "beta_ng_hh = double(0)", 
             "age_effect_surv = double(1)",
             "period_effect_surv = double(1)",
             "f_age_foi = double(1)",
@@ -1444,6 +1582,10 @@ dIcapMort <- nimble::nimbleFunction(
                    beta_male = double(0),
                    beta0_sus = double(0),
                    beta0_inf = double(0),
+                   beta_gun_hh = double(0),
+                   beta_ng_hh = double(0),
+                   Z_overall_gun_collar = double(1),
+                   Z_overall_ng_collar = double(1),
                    age_effect_surv = double(1),
                    period_effect_surv = double(1),
                    f_age_foi = double(1),
@@ -1474,6 +1616,8 @@ dIcapMort <- nimble::nimbleFunction(
                     lam_inf <- lam_inf +
 					           exp(beta0_inf +
 							       age_effect_surv[j] +
+                                   beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                                   beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
 								   period_effect_surv[age2date[i] + j])
                 }
                 # now accumulate the other sums up to e-1
@@ -1494,18 +1638,26 @@ dIcapMort <- nimble::nimbleFunction(
                         lam_sus <- lam_sus +
 						           exp(beta0_sus +
 								       age_effect_surv[j] +
+                                       beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                                       beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
 									   period_effect_surv[age2date[i] + j])
                         lam_inf <- lam_inf -
 						           exp(beta0_inf +
 								       age_effect_surv[j] +
+                                       beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                                       beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
 									   period_effect_surv[age2date[i] + j])
                     } else { # now calculate infected hazard for later
                         lam_inf <- sum(exp(beta0_inf +
 						                   age_effect_surv[e[i]:(r[i] - 1)] +
-										   period_effect_surv[age2date[i] + e[i]:(r[i] - 1)]))
+                                           beta_gun_hh * Z_overall_gun_collar[(age2date[i] + e[i]):(r[i] - 1)] + 
+                                           beta_ng_hh * Z_overall_ng_collar[(age2date[i] + e[i]):(r[i] - 1)] +
+										   period_effect_surv[(age2date[i] + e[i]):(r[i] - 1)]))
                         lam_inf_s <- sum(exp(beta0_inf +
 						                     age_effect_surv[(r[i]):(s[i] - 1)] +
-											 period_effect_surv[age2date[i] + (r[i]):(s[i] - 1)]))
+                                             beta_gun_hh * Z_overall_gun_collar[(age2date[i] + r[i]):(s[i] - 1)] + 
+                                             beta_ng_hh * Z_overall_ng_collar[(age2date[i] + r[i]):(s[i] - 1)] +
+											 period_effect_surv[(age2date[i] + r[i]):(s[i] - 1)]))
                     }
                 }
             } else {
@@ -1514,7 +1666,9 @@ dIcapMort <- nimble::nimbleFunction(
                     lam_inf <- lam_inf +
 					           exp(beta0_inf +
 							   age_effect_surv[j] +
-							   period_effect_surv[age2date[i] + j] +
+                               beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                               beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
+    						   period_effect_surv[age2date[i] + j] +
 							   beta_male)
                 }
                 # now accumulate the other sums up to e-1
@@ -1534,21 +1688,29 @@ dIcapMort <- nimble::nimbleFunction(
                         lam_sus <- lam_sus +
 						           exp(beta0_sus +
 								       age_effect_surv[j] +
+                                       beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                                       beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
 									   period_effect_surv[age2date[i] + j] +
 									   beta_male)
                         lam_inf <- lam_inf -
 						           exp(beta0_inf +
 								       age_effect_surv[j] +
+                                       beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                                       beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
 									   period_effect_surv[age2date[i] + j] +
 									   beta_male)
                     } else { # now calculate infected hazard for later
                         lam_inf <- sum(exp(beta0_inf +
 						                   age_effect_surv[e[i]:(r[i] - 1)] +
-										   period_effect_surv[age2date[i] + e[i]:(r[i] - 1)] +
+                                           beta_gun_hh * Z_overall_gun_collar[(age2date[i] + e[i]):(r[i] - 1)] + 
+                                           beta_ng_hh * Z_overall_ng_collar[(age2date[i] + e[i]):(r[i] - 1)] +
+										   period_effect_surv[(age2date[i] + e[i]):(r[i] - 1)] +
 										   beta_male))
                         lam_inf_s <- sum(exp(beta0_inf +
 						                     age_effect_surv[r[i]:(s[i] - 1)] +
-											 period_effect_surv[age2date[i] + r[i]:(s[i] - 1)] +
+                                             beta_gun_hh * Z_overall_gun_collar[(age2date[i] + r[i]):(s[i] - 1)] + 
+                                             beta_ng_hh * Z_overall_ng_collar[(age2date[i] + r[i]):(s[i] - 1)] +
+											 period_effect_surv[(age2date[i] + r[i]):(s[i] - 1)] +
 											 beta_male))
                     }
                 }
@@ -1574,7 +1736,7 @@ dIcapMort <- nimble::nimbleFunction(
 
 nimble::registerDistributions(list(
     dIcapMort = list(
-        BUGSdist = "dIcapMort(n_samples,e,r,s,sex,age2date,beta_male,beta0_sus,beta0_inf,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup_foi,space,sect)",
+        BUGSdist = "dIcapMort(n_samples,e,r,s,sex,age2date,beta_male,beta0_sus,beta0_inf,beta_gun_hh,beta_ng_hh,Z_overall_gun_collar,Z_overall_ng_collar,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup_foi,space,sect)",
         types = c(
             "value = integer(0)",
             "n_samples = integer(0)",
@@ -1586,6 +1748,10 @@ nimble::registerDistributions(list(
             "beta_male = double(0)",
             "beta0_sus = double(0)",
             "beta0_inf = double(0)",
+            "beta_gun_hh = double(0)",
+            "beta_ng_hh = double(0)",
+            "Z_overall_gun_collar = double(1)",
+            "Z_overall_ng_collar = double(1)",
             "age_effect_surv = double(1)",
             "period_effect_surv = double(1)",
             "f_age_foi = double(1)",
@@ -1659,6 +1825,10 @@ dRecNegCensTest <- nimble::nimbleFunction(
                    age2date = double(1),
                    beta_male = double(0),
                    beta0_sus = double(0),
+                   beta_gun_hh = double(0),
+                   beta_ng_hh = double(0),
+                   Z_overall_gun_collar = double(1),
+                   Z_overall_ng_collar = double(1),
                    age_effect_surv = double(1),
                    period_effect_surv = double(1),
                    f_age_foi = double(1),
@@ -1686,20 +1856,24 @@ dRecNegCensTest <- nimble::nimbleFunction(
                     # survival hazard for susceptible deer
                     lam_sus <- lam_sus + exp(beta0_sus +
                         age_effect_surv[j] +
-                        period_effect_surv[j + age2date[i]])
+                        beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                        beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
+                        period_effect_surv[age2date[i] + j])
                 }
                 # force of infection infection hazard
                 for (j in 1:(r[i] - 1)) {
                     lam_foi <- lam_foi + exp(space[sect[i]] +
                         f_age_foi[age_lookup_f[j]] +
-                        f_period_foi[period_lookup_foi[j + age2date[i]]])
+                        f_period_foi[period_lookup_foi[age2date[i] + j]])
                 }
             } else { # males
                 for (j in e[i]:(r[i] - 1)) {
                     # survival hazard for susceptible deer
                     lam_sus <- lam_sus + exp(beta0_sus +
                         age_effect_surv[j] +
-                        period_effect_surv[j + age2date[i]] +
+                        beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                        beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
+                        period_effect_surv[age2date[i] + j] +
                         beta_male)
                 }
                 # force of infection infection hazard
@@ -1725,7 +1899,7 @@ dRecNegCensTest <- nimble::nimbleFunction(
 
 nimble::registerDistributions(list(
     dRecNegCensTest = list(
-        BUGSdist = "dRecNegCensTest(n_samples,e,r,sex,age2date,beta_male,beta0_sus,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup_foi,space,sect)",
+        BUGSdist = "dRecNegCensTest(n_samples,e,r,sex,age2date,beta_male,beta0_sus,beta_gun_hh,beta_ng_hh,Z_overall_gun_collar,Z_overall_ng_collar,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup_foi,space,sect)",
         types = c(
             "value = integer(0)",
             "n_samples = integer(0)",
@@ -1735,6 +1909,10 @@ nimble::registerDistributions(list(
             "age2date = double(1)",
             "beta_male = double(0)",
             "beta0_sus = double(0)",
+            "beta_gun_hh = double(0)",
+            "beta_ng_hh = double(0)",
+            "Z_overall_gun_collar = double(1)",
+            "Z_overall_ng_collar = double(1)",
             "age_effect_surv = double(1)",
             "period_effect_surv = double(1)",
             "f_age_foi = double(1)",
@@ -1807,6 +1985,10 @@ dRecNegCensPostNo <- nimble::nimbleFunction(
                    beta_male = double(0),
                    beta0_sus = double(0),
                    beta0_inf = double(0),
+                   beta_gun_hh = double(0),
+                   beta_ng_hh = double(0),
+                   Z_overall_gun_collar = double(1),
+                   Z_overall_ng_collar = double(1),
                    age_effect_surv = double(1),
                    period_effect_surv = double(1),
                    f_age_foi = double(1),
@@ -1833,10 +2015,14 @@ dRecNegCensPostNo <- nimble::nimbleFunction(
                 # survival hazard for susceptible deer
                 lam_sus[e[i]:(r[i] - 1)] <- exp(beta0_sus +
                     age_effect_surv[e[i]:(r[i] - 1)] +
+                    beta_gun_hh * Z_overall_gun_collar[(e[i] + age2date[i]):(r[i] - 1 + age2date[i])] + 
+                    beta_ng_hh * Z_overall_ng_collar[(e[i] + age2date[i]):(r[i] - 1 + age2date[i])] +
                     period_effect_surv[(e[i] + age2date[i]):(r[i] - 1 + age2date[i])])
                 # survival hazard while infected
                 lam_inf[(dn1[i] + 1):(r[i] - 1)] <- exp(beta0_inf +
                     age_effect_surv[(dn1[i] + 1):(r[i] - 1)] +
+                    beta_gun_hh * Z_overall_gun_collar[(dn1[i] + 1 + age2date[i]):(r[i] - 1 + age2date[i])] + 
+                    beta_ng_hh * Z_overall_ng_collar[(dn1[i] + 1 + age2date[i]):(r[i] - 1 + age2date[i])] +
                     period_effect_surv[(dn1[i] + 1 + age2date[i]):(r[i] - 1 + age2date[i])])
                 # force of infection infection hazard
                 lam_foi[1:(r[i] - 1)] <- exp(space[sect[i]] +
@@ -1846,11 +2032,15 @@ dRecNegCensPostNo <- nimble::nimbleFunction(
                 # survival hazard for susceptible deer
                 lam_sus[e[i]:(r[i] - 1)] <- exp(beta0_sus +
                     age_effect_surv[e[i]:(r[i] - 1)] +
+                    beta_gun_hh * Z_overall_gun_collar[(e[i] + age2date[i]):(r[i] - 1 + age2date[i])] + 
+                    beta_ng_hh * Z_overall_ng_collar[(e[i] + age2date[i]):(r[i] - 1 + age2date[i])] +
                     period_effect_surv[(e[i] + age2date[i]):(r[i] - 1 + age2date[i])] +
                     beta_male)
                 # survival hazard while infected
                 lam_inf[(dn1[i] + 1):(r[i] - 1)] <- exp(beta0_inf +
                     age_effect_surv[(dn1[i] + 1):(r[i] - 1)] +
+                    beta_gun_hh * Z_overall_gun_collar[(dn1[i] + 1 + age2date[i]):(r[i] - 1 + age2date[i])] + 
+                    beta_ng_hh * Z_overall_ng_collar[(dn1[i] + 1 + age2date[i]):(r[i] - 1 + age2date[i])] +
                     period_effect_surv[(dn1[i] + 1 + age2date[i]):(r[i] - 1 + age2date[i])] +
                     beta_male)
                 # force of infection infection hazard
@@ -1891,7 +2081,7 @@ dRecNegCensPostNo <- nimble::nimbleFunction(
 
 nimble::registerDistributions(list(
     dRecNegCensPostNo = list(
-        BUGSdist = "dRecNegCensPostNo(n_samples,e,r,dn1,sex,age2date,beta_male,beta0_inf,beta0_sus,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup_foi,sect,space)",
+        BUGSdist = "dRecNegCensPostNo(n_samples,e,r,dn1,sex,age2date,beta_male,beta0_inf,beta0_sus,beta_gun_hh,beta_ng_hh,Z_overall_gun_collar,Z_overall_ng_collar,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup_foi,sect,space)",
         types = c(
             "value = integer(0)",
             "n_samples = integer(0)",
@@ -1903,6 +2093,10 @@ nimble::registerDistributions(list(
             "beta_male = double(0)",
             "beta0_inf = double(0)",
             "beta0_sus = double(0)",
+            "beta_gun_hh = double(0)",
+            "beta_ng_hh = double(0)",
+            "Z_overall_gun_collar = double(1)",
+            "Z_overall_ng_collar = double(1)",
             "age_effect_surv = double(1)",
             "period_effect_surv = double(1)",
             "f_age_foi = double(1)",
@@ -1974,6 +2168,10 @@ dRecNegMort <- nimble::nimbleFunction(
                    age2date = double(1),
                    beta_male = double(0),
                    beta0_sus = double(0),
+                   beta_gun_hh = double(0),
+                   beta_ng_hh = double(0),
+                   Z_overall_gun_collar = double(1),
+                   Z_overall_ng_collar = double(1),
                    age_effect_surv = double(1),
                    period_effect_surv = double(1),
                    f_age_foi = double(1),
@@ -1999,10 +2197,14 @@ dRecNegMort <- nimble::nimbleFunction(
                 for (j in e[i]:(r[i] - 1)) {
                     lam_sus <- lam_sus + exp(beta0_sus +
                         age_effect_surv[j] +
-                        period_effect_surv[(j + age2date[i])])
+                        beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                        beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
+                        period_effect_surv[(age2date[i] + j)])
                 }
                 lam_sus_s <- sum(exp(beta0_sus +
                     age_effect_surv[r[i]:(s[i] - 1)] +
+                    beta_gun_hh * Z_overall_gun_collar[(r[i] + age2date[i]):(s[i] - 1 + age2date[i])] + 
+                    beta_ng_hh * Z_overall_ng_collar[(r[i] + age2date[i]):(s[i] - 1 + age2date[i])] +
                     period_effect_surv[(r[i] + age2date[i]):(s[i] - 1 + age2date[i])]))
                 # force of infection infection hazard
                 for (j in 1:(s[i] - 1)) {
@@ -2015,11 +2217,15 @@ dRecNegMort <- nimble::nimbleFunction(
                 for (j in e[i]:(r[i] - 1)) {
                     lam_sus <- lam_sus + exp(beta0_sus +
                         age_effect_surv[j] +
-                        period_effect_surv[(j + age2date[i])] +
+                        beta_gun_hh * Z_overall_gun_collar[age2date[i] + j] + 
+                        beta_ng_hh * Z_overall_ng_collar[age2date[i] + j] +
+                        period_effect_surv[(age2date[i] + j)] +
                         beta_male)
                 }
                 lam_sus_s <- sum(exp(beta0_sus +
                     age_effect_surv[r[i]:(s[i] - 1)] +
+                    beta_gun_hh * Z_overall_gun_collar[(r[i] + age2date[i]):(s[i] - 1 + age2date[i])] + 
+                    beta_ng_hh * Z_overall_ng_collar[(r[i] + age2date[i]):(s[i] - 1 + age2date[i])] +
                     period_effect_surv[(r[i] + age2date[i]):(s[i] - 1 + age2date[i])] +
                         beta_male))
 
@@ -2048,7 +2254,7 @@ dRecNegMort <- nimble::nimbleFunction(
 
 nimble::registerDistributions(list(
     dRecNegMort = list(
-        BUGSdist = "dRecNegMort(n_samples,e,r,s,sex,age2date,beta_male,beta0_sus,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup_foi,space,sect)",
+        BUGSdist = "dRecNegMort(n_samples,e,r,s,sex,age2date,beta_male,beta0_sus,beta_gun_hh,beta_ng_hh,Z_overall_gun_collar,Z_overall_ng_collar,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup_foi,space,sect)",
         types = c(
             "value = integer(0)",
             "n_samples = integer(0)",
@@ -2059,6 +2265,10 @@ nimble::registerDistributions(list(
             "age2date =  double(1)",
             "beta_male = double(0)",
             "beta0_sus = double(0)",
+            "beta_gun_hh = double(0)",
+            "beta_ng_hh = double(0)",
+            "Z_overall_gun_collar = double(1)",
+            "Z_overall_ng_collar = double(1)",
             "age_effect_surv = double(1)",
             "period_effect_surv = double(1)",
             "f_age_foi = double(1)",
@@ -2134,6 +2344,10 @@ dRecPosMort <- nimble::nimbleFunction(
                    beta_male = double(0),
                    beta0_sus = double(0),
                    beta0_inf = double(0),
+                   beta_gun_hh = double(0),
+                   beta_ng_hh = double(0),
+                   Z_overall_gun_collar = double(1),
+                   Z_overall_ng_collar = double(1),
                    age_effect_surv = double(1),
                    period_effect_surv = double(1),
                    f_age_foi = double(1),
@@ -2160,11 +2374,19 @@ dRecPosMort <- nimble::nimbleFunction(
                 # survival hazard for susceptible deer
                 lam_sus[e[i]:(dn[i] - 1)] <- exp(beta0_sus +
                     age_effect_surv[e[i]:(dn[i] - 1)] +
+                    beta_gun_hh * Z_overall_gun_collar[(e[i] + age2date[i]):
+									   (dn[i] - 1 + age2date[i])] +
+                    beta_ng_hh * Z_overall_ng_collar[(e[i] + age2date[i]):
+									   (dn[i] - 1 + age2date[i])] +
                     period_effect_surv[(e[i] + age2date[i]):
 									   (dn[i] - 1 + age2date[i])])
                 # survival hazard while infected
                 lam_inf[dn1[i]:(s[i] - 1)] <- exp(beta0_inf +
                     age_effect_surv[dn1[i]:(s[i] - 1)] +
+                    beta_gun_hh * Z_overall_gun_collar[(dn1[i] + age2date[i]):
+                    (s[i] - 1 + age2date[i])] + 
+                    beta_ng_hh * Z_overall_ng_collar[(dn1[i] + age2date[i]):
+                    (s[i] - 1 + age2date[i])] +
                     period_effect_surv[(dn1[i] + age2date[i]):
                     (s[i] - 1 + age2date[i])] +
                     beta_male)
@@ -2177,12 +2399,20 @@ dRecPosMort <- nimble::nimbleFunction(
                 # survival hazard for susceptible deer
                 lam_sus[e[i]:(dn[i] - 1)] <- exp(beta0_sus +
                     age_effect_surv[e[i]:(dn[i] - 1)] +
+                    beta_gun_hh * Z_overall_gun_collar[(e[i] + age2date[i]):
+					                   (dn[i] - 1 + age2date[i])] + 
+                    beta_ng_hh * Z_overall_ng_collar[(e[i] + age2date[i]):
+					                   (dn[i] - 1 + age2date[i])] +
                     period_effect_surv[(e[i] + age2date[i]):
 					                   (dn[i] - 1 + age2date[i])] +
                     beta_male)
                 # survival hazard while infected
                 lam_inf[dn1[i]:(s[i] - 1)] <- exp(beta0_inf +
                     age_effect_surv[dn1[i]:(s[i] - 1)] +
+                    beta_gun_hh * Z_overall_gun_collar[(dn1[i] + age2date[i]):
+                    				   (s[i] - 1 + age2date[i])] + 
+                    beta_ng_hh * Z_overall_ng_collar[(dn1[i] + age2date[i]):
+                    				   (s[i] - 1 + age2date[i])] +
                     period_effect_surv[(dn1[i] + age2date[i]):
                     				   (s[i] - 1 + age2date[i])] +
                     beta_male)
@@ -2221,7 +2451,7 @@ dRecPosMort <- nimble::nimbleFunction(
 
 nimble::registerDistributions(list(
     dRecPosMort = list(
-        BUGSdist = "dRecPosMort(n_samples,e,r,s,dn1,dn,sex,age2date,beta_male,beta0_sus,beta0_inf,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup_foi,space,sect)",
+        BUGSdist = "dRecPosMort(n_samples,e,r,s,dn1,dn,sex,age2date,beta_male,beta0_sus,beta0_inf,beta_gun_hh,beta_ng_hh,Z_overall_gun_collar,Z_overall_ng_collar,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup_foi,space,sect)",
         types = c(
             "value = integer(0)",
             "n_samples = integer(0)",
@@ -2235,6 +2465,10 @@ nimble::registerDistributions(list(
             "beta_male = double(0)",
             "beta0_sus = double(0)",
             "beta0_inf = double(0)",
+            "beta_gun_hh = double(0)",
+            "beta_ng_hh = double(0)",
+            "Z_overall_gun_collar = double(1)",
+            "Z_overall_ng_collar = double(1)",
             "age_effect_surv = double(1)",
             "period_effect_surv = double(1)",
             "f_age_foi = double(1)",
@@ -2312,6 +2546,10 @@ dRecPosCens <- nimble::nimbleFunction(
                    beta_male = double(0),
                    beta0_sus = double(0),
                    beta0_inf = double(0),
+                   beta_gun_hh = double(0),
+                   beta_ng_hh = double(0),
+                   Z_overall_gun_collar = double(1),
+                   Z_overall_ng_collar = double(1),
                    age_effect_surv = double(1),
                    period_effect_surv = double(1),
                    f_age_foi = double(1),
@@ -2337,11 +2575,17 @@ dRecPosCens <- nimble::nimbleFunction(
             # survival hazard for susceptible deer
             lam_sus[e:(dn - 1)] <- exp(beta0_sus +
                 age_effect_surv[e:(dn - 1)] +
+                beta_gun_hh * Z_overall_gun_collar[(e + age2date):(dn - 1 + age2date)] +
+                beta_ng_hh * Z_overall_ng_collar[(e + age2date):(dn - 1 + age2date)] +
                 period_effect_surv[(e + age2date):(dn - 1 + age2date)])
 
             # survival hazard while infected
             lam_inf[dn1:(r - 1)] <- exp(beta0_inf +
                 age_effect_surv[dn1:(r - 1)] +
+                beta_gun_hh * Z_overall_gun_collar[(dn1 + age2date):
+                				   (r - 1 + age2date)] + 
+                beta_ng_hh * Z_overall_ng_collar[(dn1 + age2date):
+                				   (r - 1 + age2date)] +
                 period_effect_surv[(dn1 + age2date):
                 				   (r - 1 + age2date)])
             # force of infection infection hazard
@@ -2353,13 +2597,19 @@ dRecPosCens <- nimble::nimbleFunction(
             # survival hazard for susceptible deer
             lam_sus[e:(dn - 1)] <- exp(beta0_sus +
                 age_effect_surv[e:(dn - 1)] +
+                beta_gun_hh * Z_overall_gun_collar[(e + age2date):(dn - 1 + age2date)] +
+                beta_ng_hh * Z_overall_ng_collar[(e + age2date):(dn - 1 + age2date)] +
                 period_effect_surv[(e + age2date):(dn - 1 + age2date)] +
                 beta_male)
             # survival hazard while infected
             lam_inf[dn1:(r - 1)] <- exp(beta0_inf +
                 age_effect_surv[dn1:(r - 1)] +
+                beta_gun_hh * Z_overall_gun_collar[(dn1 + age2date):
+                                                   (r - 1 + age2date)] +
+                beta_ng_hh * Z_overall_ng_collar[(dn1 + age2date):
+                                                 (r - 1 + age2date)] +
                 period_effect_surv[(dn1 + age2date):
-                (r - 1 + age2date)] +
+                                   (r - 1 + age2date)] +
                 beta_male)
             # force of infection infection hazard
             lam_foi[1:(dn - 1)] <- exp(space +
@@ -2397,7 +2647,7 @@ dRecPosCens <- nimble::nimbleFunction(
 
 nimble::registerDistributions(list(
     dRecPosCens = list(
-        BUGSdist = "dRecPosCens(e,r,dn1,dn,sex,age2date,beta_male,beta0_sus,beta0_inf,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup_foi,space)",
+        BUGSdist = "dRecPosCens(e,r,dn1,dn,sex,age2date,beta_male,beta0_sus,beta0_inf,beta_gun_hh,beta_ng_hh,Z_overall_gun_collar,Z_overall_ng_collar,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup_foi,space)",
         types = c(
             "value = integer(0)",
             "e = double(0)",
@@ -2409,6 +2659,10 @@ nimble::registerDistributions(list(
             "beta_male = double(0)",
             "beta0_inf = double(0)",
             "beta0_sus = double(0)",
+            "beta_gun_hh = double(0)",
+            "beta_ng_hh = double(0)",
+            "Z_overall_gun_collar = double(1)",
+            "Z_overall_ng_collar = double(1)",
             "age_effect_surv = double(1)",
             "period_effect_surv = double(1)",
             "f_age_foi = double(1)",
@@ -2484,6 +2738,10 @@ dNegCapPosMort <- nimble::nimbleFunction(
                    beta_male = double(0),
                    beta0_sus = double(0),
                    beta0_inf = double(0),
+                   beta_gun_hh = double(0),
+                   beta_ng_hh = double(0),
+                   Z_overall_gun_collar = double(1),
+                   Z_overall_ng_collar = double(1),
                    age_effect_surv = double(1),
                    period_effect_surv = double(1),
                    f_age_foi = double(1),
@@ -2510,11 +2768,19 @@ dNegCapPosMort <- nimble::nimbleFunction(
                 # survival hazard for susceptible deer
                 lam_sus[e[i]:(dn[i] - 1)] <- exp(beta0_sus +
                     age_effect_surv[e[i]:(dn[i] - 1)] +
+                    beta_gun_hh * Z_overall_gun_collar[(e[i] + age2date[i]):
+					                   (dn[i] - 1 + age2date[i])] + 
+                    beta_ng_hh * Z_overall_ng_collar[(e[i] + age2date[i]):
+					                   (dn[i] - 1 + age2date[i])] +
                     period_effect_surv[(e[i] + age2date[i]):
 					                   (dn[i] - 1 + age2date[i])])
                 # survival hazard while infected
                 lam_inf[dn1[i]:(s[i] - 1)] <- exp(beta0_inf +
                     age_effect_surv[dn1[i]:(s[i] - 1)] +
+                    beta_gun_hh * Z_overall_gun_collar[(dn1[i] + age2date[i]):
+					                   (s[i] - 1 + age2date[i])] + 
+                    beta_ng_hh * Z_overall_ng_collar[(dn1[i] + age2date[i]):
+					                   (s[i] - 1 + age2date[i])] +
                     period_effect_surv[(dn1[i] + age2date[i]):
 					                   (s[i] - 1 + age2date[i])])
                 # force of infection infection hazard
@@ -2526,12 +2792,20 @@ dNegCapPosMort <- nimble::nimbleFunction(
                 # survival hazard for susceptible deer
                 lam_sus[e[i]:(dn[i] - 1)] <- exp(beta0_sus +
                     age_effect_surv[e[i]:(dn[i] - 1)] +
-                    period_effect_surv[(e[i] + age2date[i]):
-					                   (dn[i] - 1 + age2date[i])] +
+                    beta_gun_hh * Z_overall_gun_collar[(dn1[i] + age2date[i]):
+					                   (s[i] - 1 + age2date[i])] + 
+                    beta_ng_hh * Z_overall_ng_collar[(dn1[i] + age2date[i]):
+					                   (s[i] - 1 + age2date[i])] +
+                    period_effect_surv[(dn1[i] + age2date[i]):
+					                   (s[i] - 1 + age2date[i])] +
                     beta_male)
                 # survival hazard while infected
                 lam_inf[dn1[i]:(s[i] - 1)] <- exp(beta0_inf +
                     age_effect_surv[dn1[i]:(s[i] - 1)] +
+                    beta_gun_hh * Z_overall_gun_collar[(dn1[i] + age2date[i]):
+					                   (s[i] - 1 + age2date[i])] + 
+                    beta_ng_hh * Z_overall_ng_collar[(dn1[i] + age2date[i]):
+					                   (s[i] - 1 + age2date[i])] +
                     period_effect_surv[(dn1[i] + age2date[i]):
 					                   (s[i] - 1 + age2date[i])] +
                     beta_male)
@@ -2595,7 +2869,7 @@ dNegCapPosMort <- nimble::nimbleFunction(
 
 nimble::registerDistributions(list(
     dNegCapPosMort = list(
-        BUGSdist = "dNegCapPosMort(n_samples,e,r,s,dn1,dn,sex,age2date,beta_male,beta0_sus,beta0_inf,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup_foi,space,sect)",
+        BUGSdist = "dNegCapPosMort(n_samples,e,r,s,dn1,dn,sex,age2date,beta_male,beta0_sus,beta0_inf,beta_gun_hh,beta_ng_hh,Z_overall_gun_collar,Z_overall_ng_collar,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup_foi,space,sect)",
         types = c(
             "value = integer(0)",
             "n_samples = integer(0)",
@@ -2609,6 +2883,10 @@ nimble::registerDistributions(list(
             "beta_male = double(0)",
             "beta0_sus = double(0)",
             "beta0_inf = double(0)",
+            "beta_gun_hh = double(0)",
+            "beta_ng_hh = double(0)",
+            "Z_overall_gun_collar = double(1)",
+            "Z_overall_ng_collar = double(1)",
             "age_effect_surv = double(1)",
             "period_effect_surv = double(1)",
             "f_age_foi = double(1)",
@@ -2679,6 +2957,10 @@ dAAH <- nimble::nimbleFunction(
                    beta_male = double(0),
                    beta0_sus = double(0),
                    beta0_inf = double(0),
+                   beta_gun_hh = double(0),
+                   beta_ng_hh = double(0),
+                   Z_overall_gun_collar = double(1),
+                   Z_overall_ng_collar = double(1),
                    age_effect_surv = double(1),
                    period_effect_surv = double(1),
                    f_age_foi = double(1),
@@ -2707,11 +2989,15 @@ dAAH <- nimble::nimbleFunction(
             # survival hazard for susceptible deer
             lam_sus[1:a[i]] <- exp(beta0_sus +
                 age_effect_surv[1:a[i]] +
+                beta_gun_hh * Z_overall_gun_collar[(1 + age2date[i]):(a[i] + age2date[i])] + 
+                beta_ng_hh * Z_overall_ng_collar[(1 + age2date[i]):(a[i] + age2date[i])] +
                 period_effect_surv[(1 + age2date[i]):(a[i] + age2date[i])])
 
             # survival hazard while infected
             lam_inf[1:a[i]] <- exp(beta0_inf +
                 age_effect_surv[1:a[i]] +
+                beta_gun_hh * Z_overall_gun_collar[(1 + age2date[i]):(a[i] + age2date[i]] + 
+                beta_ng_hh * Z_overall_ng_collar[(1 + age2date[i]):(a[i] + age2date[i]] +
                 period_effect_surv[(1 + age2date[i]):(a[i] + age2date[i])])
 
             # force of infection infection hazard
@@ -2723,12 +3009,16 @@ dAAH <- nimble::nimbleFunction(
             # survival hazard for susceptible deer
             lam_sus[1:a[i]] <- exp(beta0_sus +
                 age_effect_surv[1:a[i]] +
+                beta_gun_hh * Z_overall_gun_collar[(1 + age2date[i]):(a[i] + age2date[i])] + 
+                beta_ng_hh * Z_overall_ng_collar[(1 + age2date[i]):(a[i] + age2date[i])] +
                 period_effect_surv[(1 + age2date[i]):(a[i] + age2date[i])] +
                 beta_male)
 
             # survival hazard while infected
             lam_inf[1:a[i]] <- exp(beta0_inf +
                 age_effect_surv[1:a[i]] +
+                beta_gun_hh * Z_overall_gun_collar[(1 + age2date[i]):(a[i] + age2date[i])] + 
+                beta_ng_hh * Z_overall_ng_collar[(1 + age2date[i]):(a[i] + age2date[i])] +
                 period_effect_surv[(1 + age2date[i]):(a[i] + age2date[i])] +
                 beta_male)
 
@@ -2776,7 +3066,7 @@ dAAH <- nimble::nimbleFunction(
 
 nimble::registerDistributions(list(
     dAAH = list(
-        BUGSdist = "dAAH(n_samples,a,sex,age2date,n_cases,beta_male,beta0_sus,beta0_inf,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup_foi,space,sect)",
+        BUGSdist = "dAAH(n_samples,a,sex,age2date,n_cases,beta_male,beta0_sus,beta0_inf,beta_gun_hh,beta_ng_hh,Z_overall_gun_collar,Z_overall_ng_collar,age_effect_surv,period_effect_surv,f_age_foi,m_age_foi,age_lookup_f,age_lookup_m,f_period_foi,m_period_foi,period_lookup_foi,space,sect)",
         types = c(
             "n_samples = double(0)",
             "a = double(1)",
@@ -2786,6 +3076,10 @@ nimble::registerDistributions(list(
             "beta_male = double(0)",
             "beta0_sus = double(0)",
             "beta0_inf = double(0)",
+            "beta_gun_hh = double(0)",
+            "beta_ng_hh = double(0)",
+            "Z_overall_gun_collar = double(1)",
+            "Z_overall_ng_collar = double(1)",
             "age_effect_surv = double(1)",
             "period_effect_surv = double(1)",
             "f_age_foi = double(1)",
@@ -2806,11 +3100,11 @@ nimble::registerDistributions(list(
 ### for a user-defined distribution
 assign("dAAH", dAAH, envir = .GlobalEnv)
 
-n_samples= nrow(d_fit_notest)
-      a = d_fit_notest$ageweeks
-        sex = d_fit_notest$sexnum
-        age2date = d_fit_notest$age2date_weeks
-        n_cases = d_fit_notest$n
+n_samples= nrow(d_fit_aah)
+      a = d_fit_aah$ageweeks
+        sex = d_fit_aah$sexnum
+        age2date = d_fit_aah$age2date_weeks
+        n_cases = d_fit_aah$n
         beta_male = beta_male
         beta0_sus = beta0_survival_sus
         beta0_inf = beta0_survival_inf
@@ -2824,14 +3118,14 @@ n_samples= nrow(d_fit_notest)
         f_period_foi = f_period_foi
         m_period_foi = m_period_foi
         space = c(0,-.55)
-        sect = d_fit_notest$study_area
+        sect = d_fit_aah$study_area
 # # i=73
 dAAH(x = 1,
-      a = d_fit_notest$ageweeks,
-        sex = d_fit_notest$sexnum,
-        age2date = d_fit_notest$age2date_weeks,
-        n_samples = nrow(d_fit_notest),
-        n_cases = d_fit_notest$n,
+      a = d_fit_aah$ageweeks,
+        sex = d_fit_aah$sexnum,
+        age2date = d_fit_aah$age2date_weeks,
+        n_samples = nrow(d_fit_aah),
+        n_cases = d_fit_aah$n,
         beta_male = beta_male,
         beta0_sus = beta0_survival_sus,
         beta0_inf = beta0_survival_inf,
@@ -2845,16 +3139,16 @@ dAAH(x = 1,
         f_period_foi = f_period_foi,
         m_period_foi = m_period_foi,
         space = c(0,-.55),
-        sect = d_fit_notest$study_area,
+        sect = d_fit_aah$study_area,
         log = TRUE
         )
 
 # test <- dAAH(x = 1,
-#             n_samples = nrow(d_fit_notest),
-#             a = d_fit_notest$ageweeks,
-#             sex = d_fit_notest$sexnum,
-#             age2date = d_fit_notest$age2date_weeks,
-#             n_cases = d_fit_notest$n,
+#             n_samples = nrow(d_fit_aah),
+#             a = d_fit_aah$ageweeks,
+#             sex = d_fit_aah$sexnum,
+#             age2date = d_fit_aah$age2date_weeks,
+#             n_cases = d_fit_aah$n,
 #             beta_male = beta_male,
 #             beta0_sus = beta0_survival_sus,
 #             beta0_inf = beta0_survival_inf,
@@ -2868,7 +3162,7 @@ dAAH(x = 1,
 #             f_period_foi = f_period_foi,
 #             m_period_foi = m_period_foi,
 #             space = c(0,-.55),
-#             sect =  d_fit_notest$study_area,
+#             sect =  d_fit_aah$study_area,
 #             log = TRUE
 #             )
 # test

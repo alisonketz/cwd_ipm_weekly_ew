@@ -177,6 +177,16 @@ for(i in 1:n_year){
     Z_overall_gun[(d_fit_season$gun_start[i]:d_fit_season$gun_end[i]) + nT_period_prestudy_ext] <- 1
 }
 
+###
+### this should be used in the likelihoods to ensure use 
+### the time varying hunterharvest only collar data to estimate the 
+### 
+
+Z_overall_gun_collar <- Z_overall_gun
+Z_overall_gun_collar[1:nT_period_precollar_ext] <- 0
+
+Z_overall_ng_collar <- Z_overall_ng
+Z_overall_ng_collar[1:nT_period_precollar_ext] <- 0
 
 ################################################################
 ###
