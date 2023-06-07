@@ -493,21 +493,28 @@ set_period_effects_constant <- nimble::nimbleFunction(
     run = function(
         ### argument type declarations
         n_year_precollar = double(0),
+        n_year_precollar_ext = double(0),
+        n_year_prestudy_ext = double(0),
+        nT_period_precollar_ext = double(0),
         nT_period_precollar = double(0),
         nT_period_collar = double(0),
         nT_period_overall = double(0),
+        nT_period_overall_ext = double(0),
+        nT_period_prestudy_ext = double(0),
         yr_start = double(1),
         yr_end = double(1),
         period_effect_surv = double(1),
-        period_annual_survival = double(1)
-        ) {
+        period_annual_survival = double(1)) {
 
-  period_effect_survival_temp <- nimNumeric(nT_period_overall)
-  period_effect_survival <- nimNumeric(nT_period_overall)
+  period_effect_survival_temp <- nimNumeric(nT_period_overall_ext)
+  period_effect_survival <- nimNumeric(nT_period_overall_ext)
 
-  for(i in 1:n_year_precollar) {
-    period_effect_survival_temp[yr_start[i]:
-                                yr_end[i]] <- period_annual_survival[i]
+  for(i in 1:nT_period_prestudy_ext) {
+    period_effect_survival_temp[i] <- period_annual_survival[1]
+  }
+
+  for(i in 1:n_year_precollar_ext) {
+    period_effect_survival_temp[(yr_start[i] + n_year_prestudy_ext):(yr_end[i] + n_year_prestudy_ext)] <- period_annual_survival[i]
   }
 
   ### for the year of the study when switching from
@@ -515,30 +522,39 @@ set_period_effects_constant <- nimble::nimbleFunction(
   ### versus estimating from aah data
 
   period_effect_survival_temp[
-          yr_start[n_year_precollar]:nT_period_precollar] <-
+          (yr_start[n_year_precollar] + nT_period_prestudy_ext):nT_period_precollar_ext] <-
       period_annual_survival[n_year_precollar + 1]
 
   ############################################################
   ## incorporating period effects from collar data
   ############################################################
 
-  period_effect_survival_temp[(nT_period_precollar + 1):
-                               nT_period_overall] <-
+  period_effect_survival_temp[(nT_period_precollar_ext + 1):
+                               nT_period_overall_ext] <-
                                period_effect_surv[1:nT_period_collar]
 
   #making the period effects sum to zero using centering
-  mu_period <- mean(period_effect_survival_temp[1:nT_period_overall])
-  period_effect_survival[1:nT_period_overall] <-
+  mu_period <- mean(period_effect_survival_temp[1:nT_period_overall_ext])
+  period_effect_survival[1:nT_period_overall_ext] <-
       period_effect_survival_temp -
       mu_period
 
   returnType(double(1))
-  return(period_effect_survival[1:nT_period_overall])
+  return(period_effect_survival[1:nT_period_overall_ext])
 })
 
 Cset_period_effects_constant <- compileNimble(set_period_effects_constant)
 
 assign("set_period_effects_constant", set_period_effects_constant, envir = .GlobalEnv)
+
+
+yr_start = d_fit_season$yr_start
+yr_end = d_fit_season$yr_end
+
+period_effect_surv
+
+
+
 
 
 #######################################################################
