@@ -357,7 +357,7 @@ parameters <- c(
 ###
 #############################################################
 
-reps  <- 10
+reps  <- 1000
 bin <- reps * .5
 n_thin <- 1
 n_chains <- 3
@@ -440,19 +440,6 @@ mcmcout1 <-  mcmc.list(clusterEvalQ(cl, {
 # save(runtime1, file = "runtime1.Rdata")
 # save(endtime_rmodel_compile, file = "endtime_rmodel_compile.Rdata")
 # save(endtime_mcmc, file = "endtime_mcmc.Rdata")
-
-#not calculating waic, because too many params would need to be traced
-# posteriorSamplesMatrix <- rbind(mcmcout[[1]], mcmcout[[2]], mcmcout[[3]])
-# CnimMCMC$run(5)   ## non-zero number of iterations
-# nimble:::matrix2mv(posteriorSamplesMatrix, CnimMCMC$mvSamples)
-# # CnimMCMC$enableWAIC <- TRUE
-# waic_spline <- calculateWAIC(posteriorSamplesMatrix,Rmodel)
-
-
-# waic_spline_covs <- mcmcout$WAIC
-# save(waic_spline, file = "waic_spline.Rdata")
-
-
 
 ###
 ### save model run
