@@ -30,18 +30,17 @@ n_age_lookup_m <- length(age_lookup_m)
 
 #this is the same as study_start_foi
 birth_start <- min(cwd_df$birth_date)
-study_start_foi <- "1985-05-15"
+study_start_ext <- "1985-05-15"
 death_end <- "2022-05-15"
-cwd_df$birthweek <- (interval(birth_start,
+cwd_df$birthweek <- (interval(study_start_ext,
                             cwd_df$birth_date) %/% weeks(1)) + 1
-cwd_df$weekkill <- interval(study_start_foi,
+cwd_df$weekkill <- interval(study_start_ext,
                             cwd_df$kill_date) %/% weeks(1)
-cwd_df$yearkill <- cwd_df$kill_year - year(study_start_foi)
+cwd_df$yearkill <- cwd_df$kill_year - year(study_start_foi) + 1
 
 period_lookup_foi <- c(rep(1, nT_period_prestudy_ext),
                    rep(1:n_year, each = intvl_step_yr_weekly))
 
-n_period <- n_year
 n_period_lookup <- length(period_lookup_foi)
 
 #############################################################################################
@@ -52,13 +51,13 @@ n_period_lookup <- length(period_lookup_foi)
 #############################################################################################
 
 #create num vector
-num_period <- c(1, rep(2, n_period - 2), 1)
+num_period <- c(1, rep(2, n_year - 2), 1)
 
 #create adjacency vector along both years
-temp <- as.matrix(bandSparse(n = n_period, k = c(1), symmetric = T))
-temp2 <- matrix(0, n_period, n_period)
+temp <- as.matrix(bandSparse(n = n_year, k = c(1), symmetric = T))
+temp2 <- matrix(0, n_year, n_year)
 for (i in 1:nrow(temp2)) {
-  temp2[i, ] <- temp[i, ] * c(1:n_period)
+  temp2[i, ] <- temp[i, ] * c(1:n_year)
 }
 adj_period <- t(temp2)[which(t(temp2) != 0)]
 n_adj_period <- length(adj_period)
