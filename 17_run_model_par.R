@@ -358,7 +358,8 @@ parameters <- c(
 #############################################################
 
 reps  <- 1000
-bin <- reps * .5
+nb <- .5
+bin <- reps * nb
 n_thin <- 1
 n_chains <- 3
 starttime <- Sys.time()
@@ -381,7 +382,7 @@ for (j in seq_along(cl)) {
 for (i in 1:10) {beepr::beep(1)}
 
 starttime <- Sys.time()
-mcmcout1 <-  mcmc.list(clusterEvalQ(cl, {
+mcmcmcmcout1 <-  mcmc.list(clusterEvalQ(cl, {
   library(nimble)
   library(coda)
 
@@ -414,29 +415,97 @@ mcmcout1 <-  mcmc.list(clusterEvalQ(cl, {
 }))
 (runtime1 <- difftime(Sys.time(), starttime, units = "min"))
 
-# for(chn in 1:nc) { # nc must be > 1
-#   ind.keep <- c()
-#   for(p in 1:length(parameters)) ind.keep <-
-#       c(ind.keep, which(str_detect(dimnames(out1[[chn]])[[2]], parameters[p]))) %>% unique()
-#   out1[[chn]] <- out1[[chn]][,ind.keep]
+for(chn in 1:n_chains) { # n_chains must be > 1
+  ind_keep <- c()
+  for(p in 1:length(parameters)) ind_keep <-
+      c(ind_keep, which(str_detect(dimnames(mcmcout1[[chn]])[[2]], parameters[p]))) %>% unique()
+  mcmcout1[[chn]] <- mcmcout1[[chn]][,ind_keep]
+}
+
+## Check convergence ##
+out1 <- mcmcout1
+ni_saved <- nrow(out1[[1]])
+for(chn in 1:n_chains) { # n_chains must be > 1
+  
+  if(nb < 1) {
+    nb_real <- (round(ni_saved * nb)+1)
+  } else {
+    nb_real <- (round(nb/n_thin)+1)
+  }
+  out1[[chn]] <- out1[[chn]][nb_real:ni_saved,]
+}
+out_mcmc1 <- coda::as.mcmc.list(lapply(out1, coda::as.mcmc))
+mod <- mcmcOutput::mcmcOutput(out_mcmc1)
+sumTab <- summary(mod,
+                  MCEpc = FALSE,
+                  Rhat = TRUE,
+                  n.eff = TRUE, 
+                  f = TRUE,
+                  overlap0 = TRUE,
+                  verbose = FALSE)
+
+sumTab <- sumTab %>%
+      as_tibble() %>%
+      mutate(Parameter = row.names(sumTab)) %>%
+      select(Parameter, mean:f)
+
+sumTab
+
+mcmcout2 <- clusterEvalQ(cl, {
+  CnimMCMC$run(reps*.1, reset = FALSE, resetMV = TRUE) # Resume sampling.
+  return(as.mcmc(as.matrix(CnimMCMC$mvSamples)))
+  gc(verbose = F)
+})
+
+for(chn in 1:n_chains) { # n_chains must be > 1
+  ind.keep <- c()
+  for(p in 1:length(parameters)) ind.keep <-
+      c(ind.keep, which(str_detect(dimnames(mcmcout2[[chn]])[[2]], parameters[p]))) %>% unique()
+  mcmcout2[[chn]] <- mcmcout2[[chn]][,ind.keep]
+}
+mod.nam = "mod"
+n.runs <- 1
+R.utils::saveObject(mcmcout2, str_c(mod.nam, "_chunk", n.runs)) # Save samples from previous run to drive.
+
+
+
+# par.ignore.Rht=c()
+# if(length(par.ignore.Rht) == 0) {
+#       mxRht <- sumTab %>% pull(Rhat) %>% max(na.rm = T)
+#       mn.neff <- sumTab %>% pull(n.eff) %>% min(na.rm = T)
+# } else {
+#     ind.ignore <- c()
+#     for(p in 1:length(par.ignore.Rht)) ind.ignore <-
+#         c(ind.ignore, which(str_detect(sumTab$Parameter, par.ignore.Rht[p]))) %>%
+#         unique()
+#     if(length(ind.ignore) > 0) {
+#         mxRht <- sumTab %>% slice(-ind.ignore) %>% pull(Rhat) %>% max(na.rm = T)
+#         mn.neff <- sumTab %>% slice(-ind.ignore) %>% pull(n.eff) %>% min(na.rm = T)
+#     } else {
+#         mxRht <- sumTab %>% pull(Rhat) %>% max(na.rm = T)
+#         mn.neff <- sumTab %>% pull(n.eff) %>% min(na.rm = T)
+#     }
 # }
 
-# ## Check convergence ##
-# out2 <- out1
-# ni.saved <- nrow(out2[[1]])
-# for(chn in 1:nc) { # nc must be > 1
-  
-#   if(nb < 1) {
-#     nb.real <- (round(ni.saved * nb)+1)
-#   } else {
-#     nb.real <- (round(nb/nt)+1)
-#   }
-#   out2[[chn]] <- out2[[chn]][nb.real:ni.saved,]
-# }
-# out.mcmc <- coda::as.mcmc.list(lapply(out2, coda::as.mcmc))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # stopCluster(cl)
 
-# save(mcmcout1, file = "mcmcout1.Rdata")
+# save(mcmcmcmcout1, file = "mcmcmcmcout1.Rdata")
 # save(runtime1, file = "runtime1.Rdata")
 # save(endtime_rmodel_compile, file = "endtime_rmodel_compile.Rdata")
 # save(endtime_mcmc, file = "endtime_mcmc.Rdata")
