@@ -16,7 +16,7 @@ modelcode <- nimbleCode({
   ### Priors
   ##############################
   
-  beta_male ~ dnorm(0, .01)
+  beta_male ~ dnorm(0, .1)
 
   ##############################
   ### Force of infection model
@@ -175,7 +175,7 @@ modelcode <- nimbleCode({
                   beta0_sus = beta0_survival_sus,
                   beta0_inf = beta0_survival_inf,
                   age_effect_surv = age_effect_survival[1:nT_age_surv],
-                  period_effect_surv = period_effect_survival[1:nT_period_overall],
+                  period_effect_surv = period_effect_survival[1:nT_period_overall_ext],
                   f_age_foi = f_age_foi[1:n_ageclassf],
                   m_age_foi = m_age_foi[1:n_ageclassm],
                   age_lookup_f = age_lookup_f[1:n_age_lookup_f],
@@ -205,7 +205,7 @@ modelcode <- nimbleCode({
                   beta_male = beta_male,
                   beta0_sus = beta0_survival_sus,
                   age_effect_surv = age_effect_survival[1:nT_age_surv],
-                  period_effect_surv = period_effect_survival[1:nT_period_overall],
+                  period_effect_surv = period_effect_survival[1:nT_period_overall_ext],
                   f_age_foi = f_age_foi[1:n_ageclassf],
                   m_age_foi = m_age_foi[1:n_ageclassm],
                   age_lookup_f = age_lookup_f[1:n_age_lookup_f],
@@ -238,7 +238,7 @@ modelcode <- nimbleCode({
         beta_male = beta_male,
         beta0_sus = beta0_survival_sus,
         age_effect_surv = age_effect_survival[1:nT_age_surv],
-        period_effect_surv = period_effect_survival[1:nT_period_overall],
+        period_effect_surv = period_effect_survival[1:nT_period_overall_ext],
         f_age_foi = f_age_foi[1:n_ageclassf],
         m_age_foi = m_age_foi[1:n_ageclassm],
         age_lookup_f = age_lookup_f[1:n_age_lookup_f],
@@ -249,8 +249,6 @@ modelcode <- nimbleCode({
         space = space[1:n_study_area],
         sect_sus_cens_posttest[1:nSusCensTest]
         )
-
-
 
 #######################################################################
 ###
@@ -275,7 +273,7 @@ modelcode <- nimbleCode({
         beta0_sus = beta0_survival_sus,
         beta0_inf = beta0_survival_inf,
         age_effect_surv = age_effect_survival[1:nT_age_surv],
-        period_effect_surv = period_effect_survival[1:nT_period_overall],
+        period_effect_surv = period_effect_survival[1:nT_period_overall_ext],
         f_age_foi = f_age_foi[1:n_ageclassf],
         m_age_foi = m_age_foi[1:n_ageclassm],
         age_lookup_f = age_lookup_f[1:n_age_lookup_f],
@@ -309,7 +307,7 @@ modelcode <- nimbleCode({
       beta_male = beta_male,
       beta0_sus = beta0_survival_sus,
       age_effect_surv = age_effect_survival[1:nT_age_surv],
-      period_effect_surv = period_effect_survival[1:nT_period_overall],
+      period_effect_surv = period_effect_survival[1:nT_period_overall_ext],
       f_age_foi = f_age_foi[1:n_ageclassf],
       m_age_foi = m_age_foi[1:n_ageclassm],
       age_lookup_f = age_lookup_f[1:n_age_lookup_f],
@@ -346,7 +344,7 @@ modelcode <- nimbleCode({
       beta0_sus = beta0_survival_sus,
       beta0_inf = beta0_survival_inf,
       age_effect_surv = age_effect_survival[1:nT_age_surv],
-      period_effect_surv = period_effect_survival[1:nT_period_overall],
+      period_effect_surv = period_effect_survival[1:nT_period_overall_ext],
       f_age_foi = f_age_foi[1:n_ageclassf],
       m_age_foi = m_age_foi[1:n_ageclassm],
       age_lookup_f = age_lookup_f[1:n_age_lookup_f],
@@ -380,7 +378,7 @@ modelcode <- nimbleCode({
     beta0_sus = beta0_survival_sus,
     beta0_inf = beta0_survival_inf,
     age_effect_surv = age_effect_survival[1:nT_age_surv],
-    period_effect_surv = period_effect_survival[1:nT_period_overall],
+    period_effect_surv = period_effect_survival[1:nT_period_overall_ext],
     f_age_foi = f_age_foi[1:n_ageclassf],
     m_age_foi = m_age_foi[1:n_ageclassm],
     age_lookup_f = age_lookup_f[1:n_age_lookup_f],
@@ -415,7 +413,7 @@ modelcode <- nimbleCode({
     beta0_sus = beta0_survival_sus,
     beta0_inf = beta0_survival_inf,
     age_effect_surv = age_effect_survival[1:nT_age_surv],
-    period_effect_surv = period_effect_survival[1:nT_period_overall],
+    period_effect_surv = period_effect_survival[1:nT_period_overall_ext],
     f_age_foi = f_age_foi[1:n_ageclassf],
     m_age_foi = m_age_foi[1:n_ageclassm],
     age_lookup_f = age_lookup_f[1:n_age_lookup_f],
@@ -449,7 +447,7 @@ modelcode <- nimbleCode({
       beta_male = beta_male,
       beta0_sus = beta0_survival_sus,
       age_effect_surv = age_effect_survival[1:nT_age_surv],
-      period_effect_surv = period_effect_survival[1:nT_period_overall],
+      period_effect_surv = period_effect_survival[1:nT_period_overall_ext],
       f_age_foi = f_age_foi[1:n_ageclassf],
       m_age_foi = m_age_foi[1:n_ageclassm],
       age_lookup_f = age_lookup_f[1:n_age_lookup_f],
@@ -485,7 +483,7 @@ modelcode <- nimbleCode({
       beta_male = beta_male,
       beta0_sus = beta0_survival_sus,
       age_effect_surv = age_effect_survival[1:nT_age_surv],
-      period_effect_surv = period_effect_survival[1:nT_period_overall],
+      period_effect_surv = period_effect_survival[1:nT_period_overall_ext],
       f_age_foi = f_age_foi[1:n_ageclassf],
       m_age_foi = m_age_foi[1:n_ageclassm],
       age_lookup_f = age_lookup_f[1:n_age_lookup_f],
@@ -523,7 +521,7 @@ modelcode <- nimbleCode({
       beta0_sus = beta0_survival_sus,
       beta0_inf = beta0_survival_inf,
       age_effect_surv = age_effect_survival[1:nT_age_surv],
-      period_effect_surv = period_effect_survival[1:nT_period_overall],
+      period_effect_surv = period_effect_survival[1:nT_period_overall_ext],
       f_age_foi = f_age_foi[1:n_ageclassf],
       m_age_foi = m_age_foi[1:n_ageclassm],
       age_lookup_f = age_lookup_f[1:n_age_lookup_f],
@@ -559,7 +557,7 @@ modelcode <- nimbleCode({
       beta0_sus = beta0_survival_sus,
       beta0_inf = beta0_survival_inf,
       age_effect_surv = age_effect_survival[1:nT_age_surv],
-      period_effect_surv = period_effect_survival[1:nT_period_overall],
+      period_effect_surv = period_effect_survival[1:nT_period_overall_ext],
       f_age_foi = f_age_foi[1:n_ageclassf],
       m_age_foi = m_age_foi[1:n_ageclassm],
       age_lookup_f = age_lookup_f[1:n_age_lookup_f],
@@ -596,7 +594,7 @@ modelcode <- nimbleCode({
       beta0_sus = beta0_survival_sus,
       beta0_inf = beta0_survival_inf,
       age_effect_surv = age_effect_survival[1:nT_age_surv],
-      period_effect_surv = period_effect_survival[1:nT_period_overall],
+      period_effect_surv = period_effect_survival[1:nT_period_overall_ext],
       f_age_foi = f_age_foi[1:n_ageclassf],
       m_age_foi = m_age_foi[1:n_ageclassm],
       age_lookup_f = age_lookup_f[1:n_age_lookup_f],
@@ -630,7 +628,7 @@ modelcode <- nimbleCode({
       beta0_sus = beta0_survival_sus,
       beta0_inf = beta0_survival_inf,
       age_effect_surv = age_effect_survival[1:nT_age_surv],
-      period_effect_surv = period_effect_survival[1:nT_period_overall],
+      period_effect_surv = period_effect_survival[1:nT_period_overall_ext],
       f_age_foi = f_age_foi[1:n_ageclassf],
       m_age_foi = m_age_foi[1:n_ageclassm],
       age_lookup_f = age_lookup_f[1:n_age_lookup_f],
@@ -781,7 +779,8 @@ modelcode <- nimbleCode({
           beta0 = beta0_survival_sus,
           beta_male = beta_male,
           age_effect = age_effect_survival[1:nT_age_surv],
-          period_effect = period_effect_survival[1:nT_period_overall],
+          period_effect = period_effect_survival[(nT_period_prestudy_ext + 1):
+                                                  nT_period_overall_ext],
           yr_start = yr_start[1:n_year],
           yr_end = yr_end[1:n_year],
           intvl_step_yr = intvl_step_yr,
@@ -803,7 +802,8 @@ modelcode <- nimbleCode({
           beta0 = beta0_survival_inf,
           beta_male = beta_male,
           age_effect = age_effect_survival[1:nT_age_surv],
-          period_effect = period_effect_survival[1:nT_period_overall],
+          period_effect = period_effect_survival[(nT_period_prestudy_ext + 1):
+                                                  nT_period_overall_ext],
           yr_start = yr_start[1:n_year],
           yr_end = yr_end[1:n_year],
           intvl_step_yr = intvl_step_yr,
@@ -825,7 +825,8 @@ modelcode <- nimbleCode({
           beta0 = beta0_survival_sus,
           beta_male = beta_male,
           age_effect = age_effect_survival[1:nT_age_surv],
-          period_effect = period_effect_survival[1:nT_period_overall],
+          period_effect = period_effect_survival[(nT_period_prestudy_ext + 1):
+                                                  nT_period_overall_ext],
           intvl_step_yr = intvl_step_yr,
           n_year = n_year,
           n_agef = n_agef,
@@ -852,11 +853,12 @@ modelcode <- nimbleCode({
           nT_age_surv_aah_m = nT_age_surv_aah_m,
           nT_age_short_f = nT_age_short_f,
           nT_age_short_m = nT_age_short_m,
-          nT_period = nT_period_overall,
+          nT_period = nT_period_overall_ext,
           beta0 = beta0_survival_inf,
           beta_male = beta_male,
           age_effect = age_effect_survival[1:nT_age_surv],
-          period_effect = period_effect_survival[1:nT_period_overall],
+          period_effect = period_effect_survival[(nT_period_prestudy_ext + 1):
+                                                  nT_period_overall_ext],
           intvl_step_yr = intvl_step_yr,
           n_year = n_year,
           n_agef = n_agef,
