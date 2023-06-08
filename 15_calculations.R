@@ -498,7 +498,6 @@ set_period_effects_constant <- nimble::nimbleFunction(
         nT_period_precollar_ext = double(0),
         nT_period_precollar = double(0),
         nT_period_collar = double(0),
-        nT_period_overall = double(0),
         nT_period_overall_ext = double(0),
         nT_period_prestudy_ext = double(0),
         yr_start = double(1),
@@ -513,8 +512,8 @@ set_period_effects_constant <- nimble::nimbleFunction(
     period_effect_survival_temp[i] <- period_annual_survival[1]
   }
 
-  for(i in 1:n_year_precollar_ext) {
-    period_effect_survival_temp[(yr_start[i] + n_year_prestudy_ext):(yr_end[i] + n_year_prestudy_ext)] <- period_annual_survival[i]
+  for(i in 1:(n_year_precollar+1)) {
+    period_effect_survival_temp[(yr_start[i] + nT_period_prestudy_ext):(yr_end[i] + nT_period_prestudy_ext)] <- period_annual_survival[i]
   }
 
   ### for the year of the study when switching from
@@ -548,11 +547,20 @@ Cset_period_effects_constant <- compileNimble(set_period_effects_constant)
 assign("set_period_effects_constant", set_period_effects_constant, envir = .GlobalEnv)
 
 
-# yr_start = d_fit_season$yr_start
-# yr_end = d_fit_season$yr_end
-
-# period_effect_surv
-
+#test <- set_period_effects_constant(
+#         n_year_precollar = n_year_precollar,
+#         n_year_precollar_ext = n_year_precollar_ext,
+#         n_year_prestudy_ext = n_year_prestudy_ext,
+#         nT_period_precollar_ext = nT_period_precollar_ext,
+#         nT_period_precollar = nT_period_precollar,
+#         nT_period_collar = nT_period_collar,
+#         nT_period_overall = nT_period_overall,
+#         nT_period_overall_ext = nT_period_overall_ext,
+#         nT_period_prestudy_ext = nT_period_prestudy_ext,
+#         yr_start = d_fit_season$yr_start,
+#         yr_end = d_fit_season$yr_end,
+#         period_effect_surv = period_effect_survival_test[(nT_period_precollar_ext + 1):nT_period_overall_ext],
+#         period_annual_survival = period_annual_survival)
 
 
 

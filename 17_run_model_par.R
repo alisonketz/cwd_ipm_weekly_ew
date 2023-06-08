@@ -464,7 +464,7 @@ for(chn in 1:n_chains) { # n_chains must be > 1
   mcmcout2[[chn]] <- mcmcout2[[chn]][,ind.keep]
 }
 mod.nam = "mod"
-n.runs <- 1
+n.runs <- 2
 R.utils::saveObject(mcmcout2, str_c(mod.nam, "_chunk", n.runs)) # Save samples from previous run to drive.
 
 

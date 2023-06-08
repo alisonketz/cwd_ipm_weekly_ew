@@ -15,21 +15,21 @@
 # load("results/mcmcout.Rdata")
 # load("results/runperiod.Rdata")
 out <- mcmcout$samples
-# fit_sum <- mcmcout$summary
-fit_sum <- mcmcout$summary$all.chains
+fit_sum <- mcmcout$summary
+# fit_sum <- mcmcout$summary$all.chains
 
 # load("results/fit_sum.Rdata")
 # load("results/gd.Rdata")
 # load("results/ess.Rdata")
-parameters
-gd <- gelman.diag(out)
-gd
-save(gd, file = "results/gd.Rdata")
+# parameters
+# gd <- gelman.diag(out)
+# gd
+# save(gd, file = "results/gd.Rdata")
 
-es <- effectiveSize(out)
-save(es, file = "results/es.Rdata")
-gd
-es
+# es <- effectiveSize(out)
+# save(es, file = "results/es.Rdata")
+# gd
+# es
 pdf("figures/traceplots.pdf")
 traceplot(out[, "beta_male"], ylab = "beta_male")
 traceplot(out[, "tau_age_foi_female"], ylab = "tau_age_foi_female")
