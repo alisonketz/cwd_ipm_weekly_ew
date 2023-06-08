@@ -703,7 +703,6 @@ modelcode <- nimbleCode({
     for(i in 1:2){
       tau_pop[i] ~ dgamma(1,1)
   }
-  
   for(k in 1:n_study_area){
     for (a in 1:n_agef) {
 
@@ -715,10 +714,9 @@ modelcode <- nimbleCode({
       llpop_inf[k, 1, a, 1] ~ dnorm(f_logpop_inf[k, a], tau_pop[1])
       pop_inf[k, 1, a, 1] <- exp(llpop_inf[k, 1, a, 1])
     }
-
     for (a in 1:n_agem) {
-        ### East
-        #Initial population structure pop[year=1,sex=i,age=a] for susceptible deer
+        ### Initial population structure pop
+        ### [study_area,sex,age,period(year)] for susceptible deer
         llpop_sus[k, 2, a, 1] ~ dnorm(m_logpop_sus[k, a], tau_pop[2])
         pop_sus[k, 2, a, 1] <- exp(llpop_sus[k, 2, a, 1])
 
