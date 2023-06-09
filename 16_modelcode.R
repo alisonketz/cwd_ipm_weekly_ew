@@ -877,8 +877,6 @@ modelcode <- nimbleCode({
       calc_infect_prob(
             age_lookup_f = age_lookup_f[1:nT_age_surv],
             age_lookup_m = age_lookup_m[1:nT_age_surv],
-            Nage_lookup_f = nT_age_surv,
-            Nage_lookup_m = nT_age_surv,
             n_agef = n_agef,
             n_agem = n_agem,
             yr_end = yr_end[1:n_year],
@@ -889,7 +887,8 @@ modelcode <- nimbleCode({
             n_year = n_year,
             n_sex = n_sex,
             n_study_area = n_study_area,
-            space = space[n_study_area]
+            space = space[n_study_area],
+            intvl_step_yr = intvl_step_yr
             )
 
 
