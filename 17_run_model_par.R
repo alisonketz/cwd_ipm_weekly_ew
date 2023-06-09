@@ -145,8 +145,6 @@ nimConsts <- list(n_year = n_year,
     nknots_period = nknots_period,
     n_period_lookup = n_period_lookup,
     n_adj_period = n_adj_period,
-    n_age_lookup_f = length(age_lookup_f),
-    n_age_lookup_m = length(age_lookup_m),
     period_lookup_foi = period_lookup_foi,
     ng_start = d_fit_season$ng_start,
     gun_start = d_fit_season$gun_start,
@@ -263,8 +261,8 @@ parameters <- c(
               "beta_male",
               "tau_age_foi_male",
               "tau_age_foi_female",
-              "tau1_age_foi_male",
-              "tau1_age_foi_female",
+              # "tau1_age_foi_male",
+              # "tau1_age_foi_female",
               "m_age_foi",
               "f_age_foi",
               "m_age_foi_mu",
@@ -357,7 +355,7 @@ parameters <- c(
 ###
 #############################################################
 
-reps  <- 1000
+reps  <- 100
 nb <- .5
 bin <- reps * nb
 n_thin <- 1
