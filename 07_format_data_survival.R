@@ -20,7 +20,6 @@ nT_period_overall <- interval("1994-05-15", "2022-05-14") %/% weeks(1)
 nT_period_precollar <- nT_period_overall - nT_period_collar
 nT_period_prestudy_ext <- nT_period_overall_ext - nT_period_overall
 nT_period_precollar_ext <- nT_period_overall_ext - nT_period_collar
-
 nT_period_prestudy_ext + nT_period_overall
 
 nT_period_overall_ext_monthly <- interval("1985-05-15",
@@ -347,7 +346,7 @@ d_surv$left_period_e <- d_surv$left_period_e + nT_period_precollar_ext
 d_surv$right_period_r <- d_surv$right_period_r + nT_period_precollar_ext
 d_surv$right_period_s <- d_surv$right_period_s + nT_period_precollar_ext
 d_surv$periodweek_recap[d_surv$periodweek_recap != 0] <- 
-          d_surv$periodweek_recap[d_surv$periodweek_recap != 0] + 
+          d_surv$periodweek_recap[d_surv$periodweek_recap != 0] +
           nT_period_precollar_ext
 
 #monthly adjustment
@@ -358,3 +357,6 @@ d_surv$periodmonth_recap[d_surv$periodmonth_recap != 0] <-
           d_surv$periodmonth_recap[d_surv$periodmonth_recap != 0] + 
           nT_period_precollar_ext_monthly
 
+
+
+interval("1985-05-15",df_cap$date_cap)%/%weeks(1)

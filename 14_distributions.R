@@ -225,7 +225,6 @@ assign("dInfHarvest",
 # (end <- Sys.time() - starttime)
 # test
 
-
 #######################################################################
 ###
 ###   User defined distribution for likelihood for
@@ -525,8 +524,8 @@ assign("dSusCensTest", dSusCensTest, envir = .GlobalEnv)
         # period_effect_surv = period_effect_survival_test
         # f_age_foi = f_age_foi
         # m_age_foi = m_age_foi
-        # age_lookup_f = age_lookup_col_f
-        # age_lookup_m = age_lookup_col_m
+        # age_lookup_f = age_lookup_f
+        # age_lookup_m = age_lookup_m
         # period_lookup_foi = period_lookup_foi
         # f_period_foi = f_period_foi
         # m_period_foi = m_period_foi
@@ -547,8 +546,8 @@ assign("dSusCensTest", dSusCensTest, envir = .GlobalEnv)
 #         period_effect_surv = period_effect_survival_test,
 #         f_age_foi = f_age_foi,
 #         m_age_foi = m_age_foi,
-#         age_lookup_f = age_lookup_col_f,
-#         age_lookup_m = age_lookup_col_m,
+#         age_lookup_f = age_lookup_f,
+#         age_lookup_m = age_lookup_m,
 #         period_lookup_foi = period_lookup_foi,
 #         f_period_foi = f_period_foi,
 #         m_period_foi = m_period_foi,
@@ -799,8 +798,8 @@ assign("dSusCensNo", dSusCensNo, envir = .GlobalEnv)
 #         period_effect_surv = period_effect_survival_test
 #         f_age_foi = f_age_foi
 #         m_age_foi = m_age_foi
-#         age_lookup_f = age_lookup_col_f
-#         age_lookup_m = age_lookup_col_m
+#         age_lookup_f = age_lookup_f
+#         age_lookup_m = age_lookup_m
 #         period_lookup_foi = period_lookup_foi
 #         f_period_foi = f_period_foi
 #         m_period_foi = m_period_foi
@@ -823,8 +822,8 @@ assign("dSusCensNo", dSusCensNo, envir = .GlobalEnv)
 #         period_effect_surv = period_effect_survival_test,
 #         f_age_foi = f_age_foi,
 #         m_age_foi = m_age_foi,
-#         age_lookup_f = age_lookup_col_f,
-#         age_lookup_m = age_lookup_col_m,
+#         age_lookup_f = age_lookup_f,
+#         age_lookup_m = age_lookup_m,
 #         period_lookup_foi = period_lookup_foi,
 #         f_period_foi = f_period_foi,
 #         m_period_foi = m_period_foi,
@@ -850,8 +849,8 @@ assign("dSusCensNo", dSusCensNo, envir = .GlobalEnv)
 #         period_effect_surv = period_effect_survival_test,
 #         f_age_foi = f_age_foi,
 #         m_age_foi = m_age_foi,
-#         age_lookup_f = age_lookup_col_f,
-#         age_lookup_m = age_lookup_col_m,
+#         age_lookup_f = age_lookup_f,
+#         age_lookup_m = age_lookup_m,
 #         period_lookup_foi = period_lookup_foi,
 #         f_period_foi = f_period_foi,
 #         m_period_foi = m_period_foi,
@@ -1022,8 +1021,8 @@ assign("dSusMortTest", dSusMortTest, envir = .GlobalEnv)
 #         period_effect_surv = period_effect_survival_test,
 #         f_age_foi = f_age_foi,
 #         m_age_foi = m_age_foi,
-#         age_lookup_f = age_lookup_col_f,
-#         age_lookup_m = age_lookup_col_m,
+#         age_lookup_f = age_lookup_f,
+#         age_lookup_m = age_lookup_m,
 #         period_lookup_foi = period_lookup_foi,
 #         f_period_foi = f_period_foi,
 #         m_period_foi = m_period_foi,
@@ -1213,8 +1212,8 @@ assign("dSusMortNoTest", dSusMortNoTest, envir = .GlobalEnv)
 #         period_effect_surv = period_effect_survival_test,
 #         f_age_foi = f_age_foi,
 #         m_age_foi = m_age_foi,
-#         age_lookup_f = age_lookup_col_f,
-#         age_lookup_m = age_lookup_col_m,
+#         age_lookup_f = age_lookup_f,
+#         age_lookup_m = age_lookup_m,
 #         period_lookup_foi = period_lookup_foi,
 #         f_period_foi = f_period_foi,
 #         m_period_foi = m_period_foi,
@@ -1408,8 +1407,8 @@ assign("dIcapCens", dIcapCens, envir = .GlobalEnv)
 #         period_effect_surv = period_effect_survival_test,
 #         f_age_foi = f_age_foi,
 #         m_age_foi = m_age_foi,
-#         age_lookup_f = age_lookup_col_f,
-#         age_lookup_m = age_lookup_col_m,
+#         age_lookup_f = age_lookup_f,
+#         age_lookup_m = age_lookup_m,
 #         period_lookup_foi = period_lookup_foi,
 #         f_period_foi = f_period_foi,
 #         m_period_foi = m_period_foi,
@@ -1472,19 +1471,19 @@ dIcapMort <- nimble::nimbleFunction(
                 # sum up infected hazard from 1 to e-1
                 for (j in 1:(e[i] - 1)) {
                     lam_inf <- lam_inf +
-					           exp(beta0_inf +
-							       age_effect_surv[j] +
-								   period_effect_surv[age2date[i] + j])
+                               exp(beta0_inf +
+                                   age_effect_surv[j] +
+                                   period_effect_surv[age2date[i] + j])
                 }
                 # now accumulate the other sums up to e-1
                 for (j in 1:(e[i] - 1)) {
                     # sum up foi hazard from 1  to j
                     lam_foij <- exp(space[sect[i]] +
-					                f_age_foi[age_lookup_f[j]] +
-									f_period_foi[period_lookup_foi[age2date[i] + j]])
+                        f_age_foi[age_lookup_f[j]] +
+                        f_period_foi[period_lookup_foi[age2date[i] + j]])
                     # sum up like_temp (no sus hazard when j=1)
                     lik_temp <- lik_temp +
-					            lam_foij *
+                                lam_foij *
                                     exp(-lam_sus) *
                                     exp(-lam_foi) *
                                     exp(-lam_inf)
@@ -1492,37 +1491,37 @@ dIcapMort <- nimble::nimbleFunction(
                     if (j < (e[i] - 1)) {
                         lam_foi <- lam_foi + lam_foij
                         lam_sus <- lam_sus +
-						           exp(beta0_sus +
-								       age_effect_surv[j] +
-									   period_effect_surv[age2date[i] + j])
+                            exp(beta0_sus +
+                                age_effect_surv[j] +
+                                period_effect_surv[age2date[i] + j])
                         lam_inf <- lam_inf -
-						           exp(beta0_inf +
-								       age_effect_surv[j] +
-									   period_effect_surv[age2date[i] + j])
+                            exp(beta0_inf +
+                                age_effect_surv[j] +
+                                period_effect_surv[age2date[i] + j])
                     } else { # now calculate infected hazard for later
                         lam_inf <- sum(exp(beta0_inf +
-						                   age_effect_surv[e[i]:(r[i] - 1)] +
-										   period_effect_surv[age2date[i] + e[i]:(r[i] - 1)]))
+                            age_effect_surv[e[i]:(r[i] - 1)] +
+                            period_effect_surv[age2date[i] + e[i]:(r[i] - 1)]))
                         lam_inf_s <- sum(exp(beta0_inf +
-						                     age_effect_surv[(r[i]):(s[i] - 1)] +
-											 period_effect_surv[age2date[i] + (r[i]):(s[i] - 1)]))
+                            age_effect_surv[(r[i]):(s[i] - 1)] +
+                            period_effect_surv[age2date[i] + (r[i]):(s[i] - 1)]))
                     }
                 }
             } else {
                 # sum up infected hazard from 1 to e-1
                 for (j in 1:(e[i] - 1)) {
                     lam_inf <- lam_inf +
-					           exp(beta0_inf +
-							   age_effect_surv[j] +
-							   period_effect_surv[age2date[i] + j] +
-							   beta_male)
+                               exp(beta0_inf +
+                               age_effect_surv[j] +
+                               period_effect_surv[age2date[i] + j] +
+                               beta_male)
                 }
                 # now accumulate the other sums up to e-1
                 for (j in 1:(e[i] - 1)) {
                     # sum up foi hazard from 1  to j
                     lam_foij <- exp(space[sect[i]] +
-					                m_age_foi[age_lookup_m[j]] +
-									m_period_foi[period_lookup_foi[age2date[i] + j]])
+                                    m_age_foi[age_lookup_m[j]] +
+                                    m_period_foi[period_lookup_foi[age2date[i] + j]])
                     # sum up like_temp (no sus hazard when j=1)
                     lik_temp <- lik_temp + lam_foij *
                         exp(-lam_sus) *
@@ -1532,24 +1531,24 @@ dIcapMort <- nimble::nimbleFunction(
                     if (j < (e[i] - 1)) {
                         lam_foi <- lam_foi + lam_foij
                         lam_sus <- lam_sus +
-						           exp(beta0_sus +
-								       age_effect_surv[j] +
-									   period_effect_surv[age2date[i] + j] +
-									   beta_male)
+                                   exp(beta0_sus +
+                                       age_effect_surv[j] +
+                                       period_effect_surv[age2date[i] + j] +
+                                       beta_male)
                         lam_inf <- lam_inf -
-						           exp(beta0_inf +
-								       age_effect_surv[j] +
-									   period_effect_surv[age2date[i] + j] +
-									   beta_male)
+                                    exp(beta0_inf +
+                                       age_effect_surv[j] +
+                                       period_effect_surv[age2date[i] + j] +
+                                       beta_male)
                     } else { # now calculate infected hazard for later
                         lam_inf <- sum(exp(beta0_inf +
-						                   age_effect_surv[e[i]:(r[i] - 1)] +
-										   period_effect_surv[age2date[i] + e[i]:(r[i] - 1)] +
-										   beta_male))
+                                           age_effect_surv[e[i]:(r[i] - 1)] +
+                                           period_effect_surv[age2date[i] + e[i]:(r[i] - 1)] +
+                                           beta_male))
                         lam_inf_s <- sum(exp(beta0_inf +
-						                     age_effect_surv[r[i]:(s[i] - 1)] +
-											 period_effect_surv[age2date[i] + r[i]:(s[i] - 1)] +
-											 beta_male))
+                                             age_effect_surv[r[i]:(s[i] - 1)] +
+                                             period_effect_surv[age2date[i] + r[i]:(s[i] - 1)] +
+                                             beta_male))
                     }
                 }
             }
@@ -1558,9 +1557,9 @@ dIcapMort <- nimble::nimbleFunction(
             #######################################
 
             sumllik <- sumllik -
-			           lam_inf +
-					   log(1 - exp(-lam_inf_s)) +
-					   log(lik_temp)
+                       lam_inf +
+                       log(1 - exp(-lam_inf_s)) +
+                       log(lik_temp)
         }
         returnType(double(0))
         if (log) {
@@ -1609,7 +1608,7 @@ assign("dIcapMort", dIcapMort, envir = .GlobalEnv)
 # start <- Sys.time()
 # test <- dIcapMort(
 #         x = 1,
-# 		  n_samples = nrow(d_fit_icap_mort),
+#         n_samples = nrow(d_fit_icap_mort),
 #         e = d_fit_icap_mort$left_age_e,
 #         r = d_fit_icap_mort$right_age_r,
 #         s = d_fit_icap_mort$right_age_s,
@@ -1622,19 +1621,18 @@ assign("dIcapMort", dIcapMort, envir = .GlobalEnv)
 #         period_effect_surv = period_effect_survival_test,
 #         f_age_foi = f_age_foi,
 #         m_age_foi = m_age_foi,
-#         age_lookup_f = age_lookup_col_f,
-#         age_lookup_m = age_lookup_col_m,
+#         age_lookup_f = age_lookup_f,
+#         age_lookup_m = age_lookup_m,
 #         period_lookup_foi = period_lookup_foi,
 #         f_period_foi = f_period_foi,
 #         m_period_foi = m_period_foi,
-#         space = c(0,-.55),
-#   	    sect = d_fit_icap_mort$study_area,
+#         space = c(0, -.55),
+#         sect = d_fit_icap_mort$study_area,
 #         log = TRUE
 #         )
-# (end <- Sys.time()-start)
+# (end <- Sys.time() - start)
 # test
 # end
-
 
 #######################################################################
 ###
@@ -1769,8 +1767,8 @@ assign("dRecNegCensTest", dRecNegCensTest, envir = .GlobalEnv)
 #         period_effect_surv = period_effect_survival_test,
 #         f_age_foi = f_age_foi,
 #         m_age_foi = m_age_foi,
-#         age_lookup_f = age_lookup_col_f,
-#         age_lookup_m = age_lookup_col_m,
+#         age_lookup_f = age_lookup_f,
+#         age_lookup_m = age_lookup_m,
 #         period_lookup_foi = period_lookup_foi,
 #         f_period_foi = f_period_foi,
 #         m_period_foi = m_period_foi,
@@ -1937,8 +1935,8 @@ assign("dRecNegCensPostNo", dRecNegCensPostNo, envir = .GlobalEnv)
 #         period_effect_surv = period_effect_survival_test,
 #         f_age_foi = f_age_foi,
 #         m_age_foi = m_age_foi,
-#         age_lookup_f = age_lookup_col_f,
-#         age_lookup_m = age_lookup_col_m,
+#         age_lookup_f = age_lookup_f,
+#         age_lookup_m = age_lookup_m,
 #         period_lookup_foi = period_lookup_foi,
 #         f_period_foi = f_period_foi,
 #         m_period_foi = m_period_foi,
@@ -2094,8 +2092,8 @@ assign("dRecNegMort", dRecNegMort, envir = .GlobalEnv)
 #         period_effect_surv = period_effect_survival_test,
 #         f_age_foi = f_age_foi,
 #         m_age_foi = m_age_foi,
-#         age_lookup_f = age_lookup_col_f,
-#         age_lookup_m = age_lookup_col_m,
+#         age_lookup_f = age_lookup_f,
+#         age_lookup_m = age_lookup_m,
 #         period_lookup_foi = period_lookup_foi,
 #         f_period_foi = f_period_foi,
 #         m_period_foi = m_period_foi,
@@ -2273,8 +2271,8 @@ assign("dRecPosMort", dRecPosMort, envir = .GlobalEnv)
 #         period_effect_surv = period_effect_survival_test,
 #         f_age_foi = f_age_foi,
 #         m_age_foi = m_age_foi,
-#         age_lookup_f = age_lookup_col_f,
-#         age_lookup_m = age_lookup_col_m,
+#         age_lookup_f = age_lookup_f,
+#         age_lookup_m = age_lookup_m,
 #         period_lookup_foi = period_lookup_foi,
 #         f_period_foi = f_period_foi,
 #         m_period_foi = m_period_foi,
@@ -2446,8 +2444,8 @@ assign("dRecPosCens", dRecPosCens, envir = .GlobalEnv)
 #         period_effect_surv = period_effect_survival_test,
 #         f_age_foi = f_age_foi,
 #         m_age_foi = m_age_foi,
-#         age_lookup_f = age_lookup_col_f,
-#         age_lookup_m = age_lookup_col_m,
+#         age_lookup_f = age_lookup_f,
+#         age_lookup_m = age_lookup_m,
 #         period_lookup_foi = period_lookup_foi,
 #         f_period_foi = f_period_foi,
 #         m_period_foi = m_period_foi,
@@ -2647,8 +2645,8 @@ assign("dNegCapPosMort", dNegCapPosMort, envir = .GlobalEnv)
 #         period_effect_surv = period_effect_survival_test,
 #         f_age_foi = f_age_foi,
 #         m_age_foi = m_age_foi,
-#         age_lookup_f = age_lookup_col_f,
-#         age_lookup_m = age_lookup_col_m,
+#         age_lookup_f = age_lookup_f,
+#         age_lookup_m = age_lookup_m,
 #         period_lookup_foi = period_lookup_foi,
 #         f_period_foi = f_period_foi,
 #         m_period_foi = m_period_foi,
@@ -2861,8 +2859,8 @@ assign("dAAH", dAAH, envir = .GlobalEnv)
 #             period_effect_surv = period_effect_survival_test,
 #             f_age_foi = f_age_foi,
 #             m_age_foi = m_age_foi,
-#             age_lookup_f = age_lookup_col_f,
-#             age_lookup_m = age_lookup_col_m,
+#             age_lookup_f = age_lookup_f,
+#             age_lookup_m = age_lookup_m,
 #             period_lookup_foi = period_lookup_foi,
 #             f_period_foi = f_period_foi,
 #             m_period_foi = m_period_foi,
