@@ -28,15 +28,14 @@ n_age_lookup_m <- length(age_lookup_m)
 ### age to date conversion within model
 ###################################################################################
 
-#this is the same as study_start_foi
-birth_start <- min(cwd_df$birth_date)
+# birth_start <- min(cwd_df$birth_date)
 study_start_ext <- "1985-05-15"
 death_end <- "2022-05-15"
 cwd_df$birthweek <- (interval(study_start_ext,
                             cwd_df$birth_date) %/% weeks(1)) + 1
 cwd_df$weekkill <- interval(study_start_ext,
                             cwd_df$kill_date) %/% weeks(1)
-cwd_df$yearkill <- cwd_df$kill_year - year(study_start_foi) + 1
+cwd_df$yearkill <- cwd_df$kill_year - year(study_start_ext) + 1
 
 period_lookup_foi <- c(rep(1, nT_period_prestudy_ext),
                    rep(1:n_year, each = intvl_step_yr_weekly))
