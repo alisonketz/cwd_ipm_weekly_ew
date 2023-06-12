@@ -304,7 +304,7 @@ parameters <- c(
               # "sn_sus",
               # "sh_inf",
               # "sh_sus",
-              "mu_obs",
+            #   "mu_obs",
               "tau_obs",
               "tau_pop"
                )
@@ -322,7 +322,7 @@ for(i in 1:10){beepr::beep(1)}
 set.seed(1001)
 starttime <- Sys.time()
 mcmcout <- runMCMC(CnimMCMC,
-                  niter = 30,
+                  niter = 200,
                   nburnin = 0,
                   nchains = 1,
                   inits = initsFun,
@@ -334,7 +334,7 @@ runtime <- difftime(Sys.time(),
                     units = "min")
 for (i in 1:10) {beepr::beep(1)}
 
-
+mcmcout$summary
 # end_Rmodel
 # endtime_rmodel_compile
 # endtime_mcmc

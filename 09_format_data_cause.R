@@ -8,23 +8,23 @@
 
 d_fit_hh <- d_surv[d_surv$censored == 0,]
 d_fit_hh[,1:3] <- d_fit_hh[,1:3] - nT_period_precollar_ext
-age_class_indx <- c(intvl_step_yr_weekly,#fawns
-                    intvl_step_yr_weekly * 2,#1
-                    intvl_step_yr_weekly * 3,#2
-                    intvl_step_yr_weekly * 4,#3
-                    intvl_step_yr_weekly * 6,#4-5
-                    intvl_step_yr_weekly * 9#6-8
-                    )#9.5+
+# age_class_indx <- c(intvl_step_yr_weekly,#fawns
+#                     intvl_step_yr_weekly * 2,#1
+#                     intvl_step_yr_weekly * 3,#2
+#                     intvl_step_yr_weekly * 4,#3
+#                     intvl_step_yr_weekly * 6,#4-5
+#                     intvl_step_yr_weekly * 9#6-8
+#                     )#9.5+
 
-d_fit_hh$ageclassmort <- c()
-for(i in 1:nrow(d_fit_hh)) {
-    if(d_fit_hh$right_age_s[i] > intvl_step_yr_weekly * 9) {
-        d_fit_hh$ageclassmort[i] <- 7
-    }else{
-        d_fit_hh$ageclassmort[i] <- 
-            min(which(d_fit_hh$right_age_s[i] < age_class_indx))
-    }
-}
+# d_fit_hh$ageclassmort <- c()
+# for(i in 1:nrow(d_fit_hh)) {
+#     if(d_fit_hh$right_age_s[i] > intvl_step_yr_weekly * 9) {
+#         d_fit_hh$ageclassmort[i] <- 7
+#     }else{
+#         d_fit_hh$ageclassmort[i] <- 
+#             min(which(d_fit_hh$right_age_s[i] < age_class_indx))
+#     }
+# }
 
 #females are 0
 #males are 1
@@ -32,12 +32,12 @@ for(i in 1:nrow(d_fit_hh)) {
 #mort_h == 0 means that deer are not hunter harvest
 #mort_h == 1 means that deer are hunter harvested 
 d_fit_hh$mort_h <- 0
-d_fit_hh$mort_h[d_fit_hh$p1 == 1] <- 1
+d_fit_hh$mort_h[d_fit_hh$p4 == 1] <- 1
 
 records_cause <- nrow(d_fit_hh)
 
 #change the sex for antlerless males (i.e. male fawns) to sex == 0
-d_fit_hh$sex[d_fit_hh$sex==0 & d_fit_hh$ageclassmort == 1] <- 0
+# d_fit_hh$sex[d_fit_hh$sex==0 & d_fit_hh$ageclassmort == 1] <- 0
 
 ###########################################
 ###
@@ -56,7 +56,7 @@ d_season <- read_xlsx(paste0(filepath,"Hunting_SeasonDates.xlsx"),1)
 d_season <- d_season %>% filter(Year > 1993)
 
 
-startdate <- min(df_cap$date_cap)
+startdate <- "2017-01-09"
 n_year <- length(unique(d_season$Year))
 n_year_collar <- 5
 
@@ -67,32 +67,37 @@ endgun <- c()
 for (i in 1:n_year_collar) {
     startng[i] <- interval(startdate,
         min(d_huntseason$OpenDate[d_huntseason$Year ==
-                                  (i + 2016)])) %/% weeks(1) + 1
+                                  (i + 2016)])) %/% weeks(1)
     endng[i] <- interval(startdate,
         max(d_huntseason$CloseDate[d_huntseason$Year ==
-                                  (i + 2016)])) %/% weeks(1) + 1
+                                  (i + 2016)])) %/% weeks(1)
     startgun[i] <- interval(startdate,
         d_huntseason$OpenDate[d_huntseason$Year ==
                               (i + 2016) &
-        d_huntseason$SeasonType == "nineday"]) %/% weeks(1) + 1
+        d_huntseason$SeasonType == "nineday"]) %/% weeks(1)
     endgun[i] <- interval(startdate,
         d_huntseason$CloseDate[d_huntseason$Year ==
                                 (i + 2016) &
-        d_huntseason$SeasonType == "nineday"]) %/% weeks(1) + 1
+        d_huntseason$SeasonType == "nineday"]) %/% weeks(1)
 }
 
+startgun[1] <- startgun[1]-1
+endgun[1] <- endgun[1]-1
+startgun[4] <- startgun[4]-1
+endgun[4] <- endgun[4]-1
+
 study_start <- "1994-05-15"
+# study_start <- "1985-05-15"
 season_ng_start <- c()
 season_ng_end <- c()
 for (i in 1:length(unique(d_season$Year))) {
-    season_ng_start[i] <- 
-        ceiling(as.duration(ymd("1994-05-15") %--%
-                ymd(min(d_season$OpenDate[d_season$Year ==
-                            (i + 1993)])))/dweeks(1))
-    season_ng_end[i] <- 
-        ceiling(as.duration(ymd("1994-05-15") %--%
-            ymd(max(d_season$CloseDate[d_season$Year ==
-            (i + 1993)])))/dweeks(1))
+    season_ng_start[i] <- interval(study_start,
+        min(d_season$OpenDate[d_season$Year ==
+                                  (i + 1993)])) %/% weeks(1)
+
+    season_ng_end[i] <- interval(study_start,
+        max(d_season$CloseDate[d_season$Year ==
+                                  (i + 1993)])) %/% weeks(1)
 }
 
 # pulling out approximate 9 day gun season
@@ -111,13 +116,16 @@ temp <- temp[order(temp$Year),]
 season_gun_start <- c()
 season_gun_end <- c()
 for (i in 1:length(unique(temp$Year))) {
-    season_gun_start[i] <- 
-        ceiling(as.duration(ymd("1994-05-15") %--%
-            ymd(temp$OpenDate[temp$Year == (i + 1993)]))/dweeks(1))
-    season_gun_end[i] <- 
-        ceiling(as.duration(ymd("1994-05-15") %--%
-        ymd(temp$CloseDate[temp$Year == (i + 1993)]))/dweeks(1))
+    season_gun_start[i] <- interval(study_start,
+          temp$OpenDate[temp$Year == (i + 1993)]) %/% weeks(1)
+
+    season_gun_end[i] <-  interval(study_start,
+          temp$CloseDate[temp$Year == (i + 1993)]) %/% weeks(1)
 }
+season_gun_start[n_year_precollar + 1] <-
+        season_gun_start[n_year_precollar + 1] - 1
+season_gun_end[n_year_precollar + 4] <- 
+        season_gun_end[n_year_precollar + 4] - 1
 
 ### need 8 start/end points throughout year
 ### for the season indexing which corresponds to 
@@ -142,7 +150,7 @@ for(t in 1:n_year) {
                           season_ng_end[t] + 1,
                           intvl_step_yr_weekly * t)
 }
-d_fit_season[n_year_precollar, 6] <- d_fit_season[n_year_precollar, 6] - 1
+# d_fit_season[n_year_precollar, 6] <- d_fit_season[n_year_precollar, 6] - 1
 
 d_fit_season <- data.frame(d_fit_season)
 colnames(d_fit_season) <- c("yr_start",
@@ -156,12 +164,23 @@ colnames(d_fit_season) <- c("yr_start",
 
 #saving for aah_disease test
 save(d_fit_season, file = paste0(filepath, "d_fit_season.Rdata"))
+tail(d_fit_season)
 
 d_fit_season$year <- 1994:2021
 
 ###
 ### Preliminaries gun season
 ###
+# Z_cause_ng <- rep(0,nT_period_collar)
+# Z_cause_gun <- rep(0,nT_period_collar)
+# for(i in 1:5){
+#     Z_cause_ng[startng[i]:endng[i]] <- 1
+#     Z_cause_gun[startgun[i]:endgun[i]] <- 1
+# }
+# Z_cause_ng[which(Z_cause_gun == 1)] <- 0
+
+
+
 Z_cause_ng <- rep(0,nT_period_collar)
 Z_cause_gun <- rep(0,nT_period_collar)
 for(i in 1:5){
@@ -173,9 +192,12 @@ for(i in 1:5){
 Z_overall_ng <- rep(0,nT_period_overall_ext)
 Z_overall_gun <- rep(0,nT_period_overall_ext)
 for(i in 1:n_year){
-    Z_overall_ng[(d_fit_season$ng_start[i]:d_fit_season$ng_end[i]) + nT_period_prestudy_ext] <- 1
-    Z_overall_gun[(d_fit_season$gun_start[i]:d_fit_season$gun_end[i]) + nT_period_prestudy_ext] <- 1
+    Z_overall_ng[(d_fit_season$ng_start[i]:
+                  d_fit_season$ng_end[i]) + nT_period_prestudy_ext] <- 1
+    Z_overall_gun[(d_fit_season$gun_start[i]:
+                   d_fit_season$gun_end[i]) + nT_period_prestudy_ext] <- 1
 }
+# Z_overall_ng[which(Z_overall_gun == 1)] <- 0
 
 ###
 ### this should be used in the likelihoods to ensure use 
@@ -237,3 +259,48 @@ Z_overall_ng_collar[1:nT_period_precollar_ext] <- 0
 
 # Z_ng
 # Z_gun
+
+mort_h <- d_fit_hh$mort_h
+interval_cause <- d_fit_hh$right_period_s-1
+table(interval_cause[d_fit_hh$mort_h==1])
+which(Z_cause_gun==1)
+interval_cause[which(Z_cause_gun==1)]
+
+length(interval_cause[which(interval_cause %in% which(Z_cause_gun==1))])
+sum(mort_h[which(interval_cause %in% which(Z_cause_gun==1))])
+110/130
+
+length(interval_cause[which(interval_cause %in% which(Z_cause_ng==1))])
+sum(mort_h[which(interval_cause %in% which(Z_cause_ng==1))])
+192/301
+
+length(interval_cause[which(interval_cause %in% which(Z_cause_gun==1))])
+
+interval_cause[which(interval_cause %in% which(Z_cause_ng==1))]
+
+table(d_mort$weapon)
+low_gun <- d_mort$lowtag[d_mort$weapon == "rifle"]
+low_gun <- low_gun[!is.na(low_gun)]
+low_bow <- d_mort$lowtag[d_mort$weapon == "bow" |
+                         d_mort$weapon == "crossbow" |
+                         d_mort$weapon == "compound bow" |
+                         d_mort$weapon == "long bow" |
+                         d_mort$weapon == "shotgun"]
+low_bow <- low_bow[!is.na(low_gun)]
+
+d_fit_hh$gun[d_fit_hh$lowtag %in% low_gun] <- 1
+d_fit_hh$bow[d_fit_hh$lowtag %in% low_bow] <- 1
+d_fit_hh$gun[which(interval_cause %in% which(Z_cause_gun==1))]
+
+# names(d_fit_hh)
+# which(apply(d_fit_hh[d_fit_hh$mort_h==1,7:8],1,sum)==0)
+# d_fit_hh[d_fit_hh$mort_h==1,][c(5,85),]
+# 5736
+# 6915
+# d_fit_hh[d_fit_hh$mort_h,]
+# names(d_fit_hh)
+# table(interval_cause[d_fit_hh$gun==1])
+# table(interval_cause[d_fit_hh$bow==1])
+# which(Z_cause_gun==1)
+# startgun
+# endgun
