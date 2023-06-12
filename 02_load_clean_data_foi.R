@@ -51,14 +51,9 @@ cwd_df <- cwd_df[order(cwd_df$kill_date),]
 cwd_df <- cwd_df[!is.na(cwd_df$kill_date),]
 
 #removing surveillence data with no town, range, range direction, or section
-cwd_df <- cwd_df[!is.na(cwd_df$sect),]
-cwd_df <- cwd_df[!is.na(cwd_df$town),]
-cwd_df <- cwd_df[!is.na(cwd_df$range),]
-cwd_df <- cwd_df[!is.na(cwd_df$range_dir),]
 cwd_df$trs <- paste0(cwd_df$town,"-",cwd_df$range,"-",cwd_df$sect)
 cwd_df <- cwd_df[order(cwd_df$kill_date),]
 cwd_df <- cwd_df[!is.na(cwd_df$kill_date),]
-
 
 source("cleanData_foi.R")
 
@@ -93,13 +88,16 @@ for(i in 1:nrow(study_df)){
 # head(cwd_df$ew)
 cwd_df$ew <- as.numeric(as.factor(cwd_df$ew))#east ==1, west == 2
 
+#there's 57 deer that have positive==N, negative == N and has_results==Y
+cwd_df[cwd_df$negative=="N" & cwd_df$positive=="N" & cwd_df$has_results=="Y",]
+nrow(cwd_df[cwd_df$negative=="N" & cwd_df$positive=="N" & cwd_df$has_results=="Y",])
 
 ######################################################
 # Aggregate Oldest Age Class of Males
 ######################################################
 
 male6 <- cwd_df %>% filter(age_num == 6 & sex == 0)
-cwd_df$agedays[cwd_df$age_num==9 & cwd_df$sex == 0] <- max(male6$agedays)
+cwd_df$agedays[cwd_df$age_num == 9 & cwd_df$sex == 0] <- max(male6$agedays)
 
 #######################################################
 ### setting these to the maximum number of 
