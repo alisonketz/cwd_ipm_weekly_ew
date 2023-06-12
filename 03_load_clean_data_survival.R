@@ -139,12 +139,12 @@ d_cap$year[month(d_cap$date) == 12 & d_cap$year == 2017] <- 2018
 #start of the study (in weeks)
 start_week <- week(ymd('2017-01-09'))
 
-#year of capture
-d_cap$year <- NA
-d_cap$year[d_cap$date < "2017-12-01"] <- 2017
-d_cap$year[d_cap$date > "2017-12-01" & d_cap$date < "2018-12-01"] <- 2018
-d_cap$year[d_cap$date > "2018-12-01" & d_cap$date < "2019-12-01"] <- 2019
-d_cap$year[d_cap$date > "2019-12-01" & d_cap$date < "2020-12-01"] <- 2020
+# #year of capture
+# d_cap$year <- NA
+# d_cap$year[d_cap$date < "2017-12-01"] <- 2017
+# d_cap$year[d_cap$date > "2017-12-01" & d_cap$date < "2018-12-01"] <- 2018
+# d_cap$year[d_cap$date > "2018-12-01" & d_cap$date < "2019-12-01"] <- 2019
+# d_cap$year[d_cap$date > "2019-12-01" & d_cap$date < "2020-12-01"] <- 2020
 
 #######################################################################
 ###
@@ -179,7 +179,7 @@ d_fawncap$year <- year(d_fawncap$date)
 
 #there are 2 fawns w/o sex info. These sexes will be randomly drawn an assigned.
 set.seed(5179999)
-d_fawncap$sex[d_fawncap$sex == ""] <- sample(c("Female", "Male"),
+d_fawncap$sex[d_fawncap$sex == "" | is.na(d_fawncap$sex)] <- sample(c("Female", "Male"),
                                              size = 2,
                                              prob = rep(.5, 2))
 d_fawncap$sex <- as.factor(as.character(d_fawncap$sex))
@@ -197,7 +197,7 @@ d_tooth[is.na(d_tooth$age), ]$age <- "NOAGE"
 d_tooth$age[d_tooth$age == "0-1"] <- "1.5"
 d_tooth$age[d_tooth$age == "1-2"] <- "1.5"
 d_tooth$age[d_tooth$age == "2-3"] <- "2.5"
-
+table(d_tooth$age)
 d_tooth$age <- as.factor(d_tooth$age)
 levels(d_tooth$age)
 levels(d_tooth$age) <- c("",
@@ -228,7 +228,7 @@ levels(d_tooth$age) <- c("",
                           "NOAGE")
 
 d_tooth$age <- as.character(d_tooth$age)
-# table(d_tooth$age)
+table(d_tooth$age)
 
 #all deer that did not have a tooth pulled are either fawns or yearlings
 #they do not have cementum annuli age results
@@ -408,7 +408,7 @@ d_fawncap$cwdstatus3 <- d_fawncap$cwdstatus4 <- 0
 d_fawncap$girthcm <- d_fawncap$bodycondition <- d_fawncap$bodyconditionscore110 <- NA
 d_fawncap$recapdate <- d_fawncap$recapage <- d_fawncap$recap2date <- d_fawncap$recap2age <- NA
 d_fawncap$ageatcap <- 0
-d_fawncap$ageweek <- d_fawncap$agemonth <- 1
+d_fawncap$agemonth <- d_fawncap$ageweek <- 1
 df_use_fawncap <- d_fawncap[,c(2,3,8,9,32,10,
                                11,13,39,38,37,
                                43:40,34,33,36,35,
@@ -518,7 +518,7 @@ for(i in 1:nrow(temp)){
 }
 df_cap$recap_cwd[which(!is.na(df_cap$recapdate_cap) &
                         df_cap$year_cap == 2019)] <- yr3recap_cwd
-df_cap$recap_cwd_date <- df_cap$recap
+df_cap$recap_cwd_date <- df_cap$recap_cwd
 
 #there was one deer that was recaptured twice and was CWD+,
 #it tested CWD+ upon first recapture, and not retested upon
@@ -613,7 +613,7 @@ cbind(d_mort[d_mort$lowtag %in% check,c(2,55)],d_cens[d_cens$lowtag %in% check,1
 d_mort$mortdate[d_mort$lowtag %in% check] <- d_mort$estmortdate[d_mort$lowtag %in% check]
 check2 <- low_cens_inmort[!(d_mort$mortdate[d_mort$lowtag %in% low_cens_inmort] > d_cens$censordate[d_cens$lowtag%in% low_cens_inmort])]
 
-#6402 should stay as a censor, 6872 should also stay as a censor
+#6402 should stay as a censor
 d_mort <- d_mort[d_mort$lowtag != check2, ]
 low_cens_inmort <- d_cens$lowtag[d_cens$lowtag %in% d_mort$lowtag]
 
@@ -809,9 +809,9 @@ for (i in 1:nrow(d_mort)) {
   p_ls[[i]] <- p
 }
 # check_case
-#setting the 2 cases that are not adding to 1, to make them sum to 1
+#setting the 1 case that did not add to 1, to make them sum to 1
 #numeric summation problem, just setting to what it was with a numeric vector
-p_ls[[check_case[1]]] <- c(0,.9, .1,0, 0,0, 0)
+p_ls[[check_case[1]]] <- c(0, .9, .1, 0, 0, 0, 0)
 # p_ls[[check_case[2]]] <- c(0,.9, 0,0, 0,.1, 0)
 check_case <- NULL
 
@@ -837,9 +837,9 @@ d_mort$pc7 <- p_cause_obs[, 7]
 start_week <- week(ymd('2017-01-09'))
 start_month <- month(ymd('2017-01-09'))
 
-df_cap <- df_cap[order(df_cap$date),]
-df_cap$eweek <- (week(ymd(df_cap$date)) - start_week + 1)
-df_cap$emonth <- (month(ymd(df_cap$date)) - start_month + 1)
+df_cap <- df_cap[order(df_cap$date_cap),]
+df_cap$eweek <- (week(ymd(df_cap$date_cap)) - start_week + 1)
+df_cap$emonth <- (month(ymd(df_cap$date_cap)) - start_month + 1)
 
 #adding weeks to make each year a continuous time step from the very first year
 df_cap$eweek[df_cap$year == 2018 & month(df_cap$date) != 12] <- df_cap$eweek[df_cap$year == 2018 & month(df_cap$date) != 12] + intvl_step_yr_weekly#=df_cap$eweek[df_cap$year==2018]+51
@@ -848,8 +848,6 @@ df_cap$eweek[df_cap$year == 2019 & month(df_cap$date) != 12] <- df_cap$eweek[df_
 df_cap$eweek[df_cap$year == 2020 & month(df_cap$date) == 12] <- df_cap$eweek[df_cap$year == 2020 & month(df_cap$date) == 12] + 2 * intvl_step_yr_weekly
 df_cap$eweek[df_cap$year == 2020 & month(df_cap$date) != 12] <- df_cap$eweek[df_cap$year == 2020 & month(df_cap$date) != 12] + 3 * intvl_step_yr_weekly
 
-
-
 #adding weeks to make each year a continuous time step from the very first year
 df_cap$emonth[df_cap$year == 2018 & month(df_cap$date) != 12] <- df_cap$emonth[df_cap$year == 2018 & month(df_cap$date) != 12] + 12#=df_cap$emonth[df_cap$year==2018]+51
 df_cap$emonth[df_cap$year == 2019 & month(df_cap$date) == 12] <- df_cap$emonth[df_cap$year == 2019 & month(df_cap$date) == 12] + 12
@@ -857,12 +855,8 @@ df_cap$emonth[df_cap$year == 2019 & month(df_cap$date) != 12] <- df_cap$emonth[d
 df_cap$emonth[df_cap$year == 2020 & month(df_cap$date) == 12] <- df_cap$emonth[df_cap$year == 2020 & month(df_cap$date) == 12] + 2*12
 df_cap$emonth[df_cap$year == 2020 & month(df_cap$date) != 12] <- df_cap$emonth[df_cap$year == 2020 & month(df_cap$date) != 12] + 3*12
 
-
-
-####################################################################################
-###
-### r = minimum of discrete estimated mortality date, collarfound date
-###
+##################################################################################### 
+### d_mort setting up last known alive
 #####################################################################################
 
 d_mort$sweek <- c()
@@ -874,14 +868,15 @@ for(i in 1:nrow(d_mort)){
 #recalibrating mortality weeks by study intervals in weeks
 #to account for different years
 for(i in 1:5){
-  d_mort$sweek[d_mort$year == (i + 2017)] <- d_mort$sweek[d_mort$year == (i + 2017)] + (intvl_step_yr_weekly *i)
+  d_mort$sweek[d_mort$year == (i + 2017)] <- d_mort$sweek[d_mort$year == (i + 2017)] +
+                                              (intvl_step_yr_weekly *i)
 }
 
 # pdf("figures/mortality_hist_weeks.pdf")
   # hist(d_mort$sweek,breaks=100)
 # dev.off()
 
-d_mort$rweek <- d_mort$sweek -1
+d_mort$rweek <- d_mort$sweek - 1
 
 d_mort$smonth <- c()
 for(i in 1:nrow(d_mort)){
@@ -892,7 +887,8 @@ for(i in 1:nrow(d_mort)){
 #recalibrating mortality weeks by study intervals in weeks
 #to account for different years
 for(i in 1:5){
-  d_mort$smonth[d_mort$year == (i + 2017)] <- d_mort$smonth[d_mort$year == (i + 2017)] + (intvl_step_yr_monthly * i)
+  d_mort$smonth[d_mort$year == (i + 2017)] <- d_mort$smonth[d_mort$year == (i + 2017)] +
+                                               (intvl_step_yr_monthly * i)
 }
 
 # pdf("figures/mortality_hist_month.pdf")
@@ -914,8 +910,10 @@ d_cens$rmonth <- month(d_cens$censordate_use) - start_month + 1
 # table(d_cens$year)
 yrs <- 2018:2022
 for(i in 1:length(yrs)){
-  d_cens$rweek[d_cens$year==yrs[i]] <- d_cens$rweek[d_cens$year==yrs[i]] + i*intvl_step_yr_weekly
-  d_cens$rmonth[d_cens$year==yrs[i]] <- d_cens$rmonth[d_cens$year==yrs[i]] + i*intvl_step_yr_monthly
+  d_cens$rweek[d_cens$year==yrs[i]] <- d_cens$rweek[d_cens$year==yrs[i]] +
+                                            i * intvl_step_yr_weekly
+  d_cens$rmonth[d_cens$year==yrs[i]] <- d_cens$rmonth[d_cens$year==yrs[i]] +
+                                            i * intvl_step_yr_monthly
 }
 # hist(d_cens$rweek,breaks=200)
 # hist(d_cens$rmonth,breaks=200)
@@ -923,7 +921,7 @@ for(i in 1:length(yrs)){
 ##########################################################################
 ###
 ### calculating the discrete intervals of period/age of recapture
-### for the 8 that were recaptured
+### for the 48 that were recaptured
 ###
 #########################################################################
 
@@ -964,12 +962,19 @@ low_recap_pos <- low_recap[!(low_recap %in% low_recap_neg)]
 ###
 ##########################################################################
 
-d_post_cwd$cwdresult[d_post_cwd$cwdresult=='Inconclusive'] <- "Negative"
-d_post_cwd$cwdresult[d_post_cwd$cwdresult=='Pending'] <- "Negative"
-d_post_cwd$cwdresult[d_post_cwd$cwdresult=='Not tested'] <- "Negative"
+# d_post_cwd$cwdresult[d_post_cwd$cwdresult=='Inconclusive'] <- "Negative"
+# d_post_cwd$cwdresult[d_post_cwd$cwdresult=='Pending'] <- "Negative"
+# d_post_cwd$cwdresult[d_post_cwd$cwdresult=='Not tested'] <- "Negative"
+# d_post_cwd$cwdresult <- as.character(d_post_cwd$cwdresult)
+
+d_post_cwd <- d_post_cwd[!(d_post_cwd$cwdresult == 'Pending'|
+      d_post_cwd$cwdresult == 'Inconclusive'|
+      d_post_cwd$cwdresult == 'Not tested'),]
+
 d_post_cwd$cwdresult <- as.character(d_post_cwd$cwdresult)
 
-
+### these deer should have no post test because 
+### they were tested after the study ended
 rm <- which(d_post_cwd$lowtag %in% c(6847,5119))
 d_post_cwd <- d_post_cwd[-rm,]
 n_postcwd <- nrow(d_post_cwd)
