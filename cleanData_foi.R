@@ -17,6 +17,7 @@ cleanData <- function(x){
 
   #removing cases where there were no cwd results
   x <- x[x$has_results == "Y",]
+  x <- x[!(x$positive == "N" & x$negative == "N"),]
 
   #cleaning kill types that are not harvest
   x$kill_type[is.na(x$kill_type)] <- "HUNTER"
