@@ -5,14 +5,12 @@
 ###
 ####################################################################
 
-
 home_section <- read_csv("datafiles/home_section.csv")
 
 df_cap$home_section <- c()
 for(i in 1:nrow(home_section)){
   df_cap$home_section[df_cap$lowtag %in% home_section$lowtag[i]] <-  home_section$sect[i]
 }
-
 
 ####################################################################
 ###
@@ -22,7 +20,7 @@ for(i in 1:nrow(home_section)){
 ####################################################################
 
 ###
-### no homerange sections for these deer,
+### no homerange sections for many deer,
 ### lets check see if they are ever CWD +
 ###
 # df_cap[is.na(df_cap$home_section),1]
@@ -32,13 +30,13 @@ for(i in 1:nrow(home_section)){
 df_mort_loc <- d_mort[d_mort$lowtag %in% df_cap$lowtag[is.na(df_cap$home_section)],c(2,19:20)]
 
 # all but 5 of these deer without GPS fix home range sections 
-# were captured as 0 age fawns. 
-# table(df_cap$ageclass_cap[df_cap$lowtag %in% df_mort_loc$lowtag])
+# were captured as 0 age neonate fawns. 
+table(df_cap$ageclass_cap[df_cap$lowtag %in% df_mort_loc$lowtag])
 # df_cap[df_cap$lowtag %in% df_mort_loc$lowtag & df_cap$ageclass_cap != "Fawn",]
 
 #there are 9 deer for which we don't have a home range section from mortality data
 #several of these overlap with the 
-# sum(is.na(df_mort_loc$long))
+sum(is.na(df_mort_loc$long))
 
 low_home_tofind <-  df_mort_loc$lowtag[is.na(df_mort_loc$long)]
 
@@ -110,7 +108,6 @@ points_poly_joined <- sf::st_join(points_proj, study_df) %>%  # spatial join to 
 # ggsave(paste0("figures/mortalities_gps_sections_nohome_clean.png"),outplot, height = 2.5,width = 6)
 
 #assigning each of these mortality sections to be the home range section
-
 for(i in 1:nrow(points_poly_joined)){
   df_cap$home_section[df_cap$lowtag %in% points_poly_joined$lowtag[i]] <- points_poly_joined$dsection[i]
 }
@@ -122,7 +119,7 @@ for(i in 1:nrow(points_poly_joined)){
 ###
 #################################################################################
 
-#how many? 179
+#how many? 178 remaining
 # sum(is.na(df_cap$home_section))
 # table(df_cap$ageclass_cap[is.na(df_cap$home_section)])
 # #what is the censor sheet gps location for the deer without a homerange?
@@ -136,16 +133,11 @@ points <- st_as_sf(df_cens_loc,
             )
 points_proj <- points %>% st_transform(crs = 3071)
 
-# # set CRS for points to be NAD83, same as study section polygon
-st_crs(points_proj) <-  st_crs(study_df)
-
+points_poly_joined <- sf::st_join(points_proj, study_df) 
 
 ##############################################
 ### ploting home ranges with sections
 ##############################################
-
-points_poly_joined <- sf::st_join(points_proj, study_df) #%>%  # spatial join to get intersection of points and poly
-            # filter(!is.na(dsection)) #filtering only for points that fall within the study area
 
 # outplot <- ggplot() + geom_sf(data = study_df) + 
 #           geom_sf(data = points_proj,aes(color = lowtag)) + 
@@ -154,8 +146,7 @@ points_poly_joined <- sf::st_join(points_proj, study_df) #%>%  # spatial join to
 
 # ggsave(paste0("figures/censor_gps_sections_nomort_nohome.png"),outplot, height = 2.5,width = 6)
 
-
-###filtering out those deer, we must then also look at whether 
+###filtering out the deer that have censor locations outside the study area
 low_home_tofind_censorwide <- points_poly_joined %>% filter(is.na(dsection)) %>% pull(lowtag)
 
 #extracting the points for all the individuals with mortalities within the study area
@@ -181,22 +172,18 @@ for(i in 1:nrow(points_poly_joined)){
 
 ####################################################################
 ###
-### Home range sections for deer still missing? 
-### GPS location fixes from collars, mortalities, or censor events
+### Home range sections for fawns are based on 
+### GPS location / section of fawn capture
 ###
 ####################################################################
 
-#there's still 98 deer without home range sections
+#there's still 96 deer without home range sections that are fawns
 sum(is.na(df_cap$home_section))
 table(df_cap$ageclass_cap[is.na(df_cap$home_section)])
 
-#filling in the missing long/lat in the fawn capture data
-d_fawncap$long[is.na(d_fawncap$long)] <- 89.50818
-d_fawncap$lat[is.na(d_fawncap$lat)] <- 43.02643
-d_fawncap$long <- d_fawncap$long * -1
-
 low_fawn_tohome <- df_cap$lowtag[is.na(df_cap$home_section) & df_cap$ageclass_cap == "Fawn"]
 fawncap_home <- d_fawncap[d_fawncap$lowtag %in% low_fawn_tohome,c(2,8:9)]
+fawncap_home$long <- fawncap_home$long * -1 
 
 points <- st_as_sf(fawncap_home,
             coords = c("long","lat"),
@@ -215,12 +202,6 @@ points_poly_joined <- sf::st_join(points_proj, study_df) #%>%  # spatial join to
 
 # ggsave(paste0("figures/fawncap_gps_sections_nomort_nohome.png"),outplot, height = 2.5,width = 6)
 
-### this fawn was captured outside the study area
-# d_fawncap[d_fawncap$lowtag==5764,]
-# points_poly_joined[points_poly_joined$lowtag==5764,]
-# d_cens[d_cens$lowtag==5764,]
-# d_surv[d_surv$lowtag==5764,]
-
 #extracting the points for all the individuals with fawncaptures within the study area
 points_poly_joined <- sf::st_join(points_proj, study_df) %>%  # spatial join to get intersection of points and poly
             filter(!is.na(dsection)) #filtering only for points that fall within the study area
@@ -238,33 +219,6 @@ for(i in 1:nrow(points_poly_joined)){
   df_cap$home_section[df_cap$lowtag %in% points_poly_joined$lowtag[i]] <- points_poly_joined$dsection[i]
 }
 
-
-####################################################################
-###
-### Home range sections for fawns are based on 
-### GPS location / section of fawn capture
-###
-####################################################################
-
-
-points <- st_as_sf(d_fawncap,
-            coords = c("long","lat"),
-            agr = "constant"
-            )
-st_crs(points) <- 4326
-points_proj <- points %>% st_transform(crs = 3071)
-
-points_poly_joined <- sf::st_join(points_proj, study_df) #%>%  # spatial join to get intersection of points and poly
-            # filter(!is.na(dsection)) #filtering only for points that fall within the study area
-
-# outplot <- ggplot() + geom_sf(data = study_df) + 
-#           geom_sf(data = points_proj,aes(color = lowtag)) + 
-#           ggtitle ("GPS fix locations of fawn captures")
-# outplot
-
-# ggsave(paste0("figures/fawn_capture_gps_sections.png"),outplot, height = 2.5,width = 6)
-
-
 ####################################################################
 ###
 ### Home range sections for remaining deer without 
@@ -273,14 +227,14 @@ points_poly_joined <- sf::st_join(points_proj, study_df) #%>%  # spatial join to
 ####################################################################
 
 #there's 2 that we don't have home range section references for
-sum(is.na(df_cap$home_section))
-table(df_cap$ageclass_cap[is.na(df_cap$home_section)])
-#retaining the one that was a recapture
+# sum(is.na(df_cap$home_section))
+# table(df_cap$ageclass_cap[is.na(df_cap$home_section)])
+# df_cap[is.na(df_cap$home_section) & df_cap$ageclass_cap==">2yrs",]
+# df_cap[is.na(df_cap$home_section) & df_cap$ageclass_cap=="8mo",]
 
 low_check_nohome <- df_cap$lowtag[is.na(df_cap$home_section)]
-#6876 is 
 
-#These 3 deer are totally suspect, so just removing them. 
+#These 2 deer are totally suspect, so just removing them. 
 df_cap <- df_cap[!(df_cap$lowtag %in% low_check_nohome),]
 
 #the fawn is the one captured and collared outside of the study area
@@ -317,11 +271,7 @@ df_cap <- df_cap[!(df_cap$lowtag %in% low_check_nohome),]
 
 
 #for the 1 that are not fawns, we could use the capture lat/long for now
-
-d_cap_loc_temp <- d_cap[d_cap$lowtag %in% low_check_nohome,c(4,10:11)]
-d_cap_loc_recap <- d_cap[d_cap$lowtag %in% low_check_nohome[1],c(4,62:63)]
-d_cap_loc <- d_cap_loc_temp
-d_cap_loc[2,] <- d_cap_loc_recap
+d_cap_loc <- d_cap[d_cap$lowtag %in% low_check_nohome,c(4,10:11)]
 d_cap_loc$long <- d_cap_loc$long * -1
 
 points <- st_as_sf(d_cap_loc,
@@ -334,7 +284,8 @@ points_proj <- points %>% st_transform(crs = 3071)
 points_poly_joined <- sf::st_join(points_proj, study_df) %>%  # spatial join to get intersection of points and poly
             filter(!is.na(dsection)) #filtering only for points that fall within the study area
 
-points_poly_joined$lowtag <- as.factor(points_poly_joined$lowtag)
+# points_poly_joined$lowtag <- as.factor(points_poly_joined$lowtag)
+
 # outplot <- ggplot() + geom_sf(data = study_df) + 
 #           geom_sf(data = points_poly_joined,aes(color = lowtag)) + 
 #           ggtitle ("GPS fix locations of 1 deer w/o homerange sections")
@@ -351,9 +302,6 @@ for(i in 1:nrow(points_poly_joined)){
 n_cap <- nrow(df_cap)
 n_mort <- nrow(d_mort)
 n_cens <- nrow(d_cens)
-n_cap
-n_mort
-n_cens
 
 ##################################################################
 ###
@@ -366,3 +314,4 @@ df_cap$ew <- c()
 for(i in 1:n_cap){
     df_cap$ew[i] <- study_df$ew[which(study_df$dsection %in% df_cap$home_section[i])]
 }
+
