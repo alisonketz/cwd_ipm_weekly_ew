@@ -361,7 +361,7 @@ nimble::registerDistributions(list(
 # for a user-defined distribution
 assign("dSusHarvest", dSusHarvest, envir = .GlobalEnv)
 
-# start <- Sys.time()
+# starttime <- Sys.time()
 #  <-  <- dSusHarvest(
 #     x = 1,
 #     n_cases = d_fit_hunt_neg$n_cases,
@@ -384,7 +384,7 @@ assign("dSusHarvest", dSusHarvest, envir = .GlobalEnv)
 #     sect = d_fit_hunt_neg$ew,
 #     log = TRUE
 # )
-# (end <- Sys.time() - start)
+# (end <- Sys.time() - starttime)
 # test
 
 
@@ -422,7 +422,7 @@ dSusCensTest <- nimble::nimbleFunction(
                    space = double(1),
                    log = double()) {
 
-        # start the loop through individuals
+        # starttime the loop through individuals
         sumllik <- 0
         for (i in 1:n_samples) {
             # intitialize vectors
@@ -531,7 +531,7 @@ assign("dSusCensTest", dSusCensTest, envir = .GlobalEnv)
 #         sect = d_fit_sus_cens_posttest$study_area
 #         space = c(0,-.55)
 
-# start <- Sys.time()
+# starttime <- Sys.time()
 # test <- dSusCensTest(
 #         x = 1,
 # 		n_samples = nrow(d_fit_sus_cens_posttest),
@@ -554,7 +554,7 @@ assign("dSusCensTest", dSusCensTest, envir = .GlobalEnv)
 #         space = c(0,-.55),
 #         log = TRUE
 #         )
-# (end<- Sys.time()-start)
+# (end<- Sys.time()-starttime)
 # test
 
 
@@ -742,7 +742,6 @@ dSusCensNo <- nimble::nimbleFunction(
             sumllik <- sumllik +
                        log(lik_temp * lik_temp_e +
                        exp(-(lam_sus + lam_sus_e)) * exp(-lam_foi))
-            # if(is.na(sumllik)){stop("ack")}
         }
         returnType(double(0))
         if (log) {
@@ -807,7 +806,7 @@ assign("dSusCensNo", dSusCensNo, envir = .GlobalEnv)
 #         sect = d_fit_sus_cens_postno$study_area
 
 
-# start <- Sys.time()
+# starttime <- Sys.time()
 # test <- dSusCensNo(
 #         x = 1,
 #         n_samples = nrow(d_fit_sus_cens_postno),
@@ -831,10 +830,10 @@ assign("dSusCensNo", dSusCensNo, envir = .GlobalEnv)
 #         sect = d_fit_sus_cens_postno$study_area,
 #         log = TRUE
 #         )
-# (end<- Sys.time()-start)
+# (end<- Sys.time()-starttime)
 # test
 
-# start <- Sys.time()
+# starttime <- Sys.time()
 # test2 <- dSusCensNo(
 #         x = 1,
 # 		n_samples = nrow(d_fit_endlive),
@@ -858,7 +857,7 @@ assign("dSusCensNo", dSusCensNo, envir = .GlobalEnv)
 # 		sect = d_fit_endlive$study_area,
 #         log = TRUE
 #         )
-# (end<- Sys.time()-start)
+# (end<- Sys.time()-starttime)
 # test2
 
 #######################################################################
@@ -1005,7 +1004,7 @@ nimble::registerDistributions(list(
 assign("dSusMortTest", dSusMortTest, envir = .GlobalEnv)
 
 
-# start <- Sys.time()
+# starttime <- Sys.time()
 # test <- dSusMortTest(
 #         x = 1,
 # 		n_samples = nrow(d_fit_sus_mort_posttest),
@@ -1029,7 +1028,7 @@ assign("dSusMortTest", dSusMortTest, envir = .GlobalEnv)
 # 		sect = d_fit_sus_mort_posttest$study_area,
 #         log = TRUE
 #         )
-# (end<- Sys.time()-start)
+# (end<- Sys.time()-starttime)
 # test
 
 
@@ -1194,7 +1193,7 @@ nimble::registerDistributions(list(
 ### for a user-defined distribution
 assign("dSusMortNoTest", dSusMortNoTest, envir = .GlobalEnv)
 
-# start <- Sys.time()
+# starttime <- Sys.time()
 # test <-  dSusMortNoTest(
 #         x = 1,
 #         n_samples = nrow(d_fit_sus_mort_postno),
@@ -1220,7 +1219,7 @@ assign("dSusMortNoTest", dSusMortNoTest, envir = .GlobalEnv)
 #         space = c(0,-.55),
 #         log = TRUE
 #         )
-# (end<- Sys.time()-start)
+# (end<- Sys.time()-starttime)
 # test
 
 
@@ -1392,6 +1391,7 @@ nimble::registerDistributions(list(
 # for a user-defined distribution
 assign("dIcapCens", dIcapCens, envir = .GlobalEnv)
 
+# starttime <- Sys.time()
 # test <-  dIcapCens(
 #         x = 1,
 #         n_samples = nrow(d_fit_icap_cens),
@@ -1415,6 +1415,7 @@ assign("dIcapCens", dIcapCens, envir = .GlobalEnv)
 #         sect = d_fit_icap_cens$study_area,
 #         log = TRUE
 #         )
+# (endtime <- Sys.time() - starttime)
 # test
 
 
@@ -1604,7 +1605,7 @@ nimble::registerDistributions(list(
 ### for a user-defined distribution
 assign("dIcapMort", dIcapMort, envir = .GlobalEnv)
 
-# start <- Sys.time()
+# starttime <- Sys.time()
 # test <- dIcapMort(
 #         x = 1,
 #         n_samples = nrow(d_fit_icap_mort),
@@ -1629,9 +1630,8 @@ assign("dIcapMort", dIcapMort, envir = .GlobalEnv)
 #         sect = d_fit_icap_mort$study_area,
 #         log = TRUE
 #         )
-# (end <- Sys.time() - start)
+# (end <- Sys.time() - starttime)
 # test
-# end
 
 #######################################################################
 ###
@@ -1752,7 +1752,7 @@ nimble::registerDistributions(list(
 ## for a user-defined distribution
 assign("dRecNegCensTest", dRecNegCensTest, envir = .GlobalEnv)
 
-# start <- Sys.time()
+# starttime <- Sys.time()
 # test <- dRecNegCensTest(
 #         x = 1,
 #         n_samples = nrow(d_fit_rec_neg_cens_posttest),
@@ -1775,7 +1775,7 @@ assign("dRecNegCensTest", dRecNegCensTest, envir = .GlobalEnv)
 #         space = c(0,-.55),
 #         log = TRUE
 #         )
-# (end<- Sys.time()-start)
+# (end<- Sys.time()-starttime)
 # test
 
 
@@ -2077,7 +2077,7 @@ nimble::registerDistributions(list(
 # ###for a user-defined distribution
 assign("dRecNegMort", dRecNegMort, envir = .GlobalEnv)
 
-# start <- Sys.time()
+# starttime <- Sys.time()
 # test <-  dRecNegMort(
 #         x = 1,
 #         n_samples = nrow(d_fit_rec_neg_mort),
@@ -2101,7 +2101,7 @@ assign("dRecNegMort", dRecNegMort, envir = .GlobalEnv)
 #         space = c(0,-.55),
 #         log = TRUE
 #         )
-# (end<- Sys.time()-start)
+# (end<- Sys.time()-starttime)
 # test
 
 
@@ -2253,7 +2253,7 @@ nimble::registerDistributions(list(
 ### Global Declaration so Nimble can access
 assign("dRecPosMort", dRecPosMort, envir = .GlobalEnv)
 
-# start <- Sys.time()
+# starttime <- Sys.time()
 # test <-  dRecPosMort(
 #         x = 1,
 #         n_samples = nrow(d_fit_rec_pos_mort),
@@ -2280,7 +2280,7 @@ assign("dRecPosMort", dRecPosMort, envir = .GlobalEnv)
 #         space = c(0,-.55),
 #         log = TRUE
 #         )
-# (end<- Sys.time()-start)
+# (end<- Sys.time()-starttime)
 # test
 
 
@@ -2427,7 +2427,7 @@ nimble::registerDistributions(list(
 ### for a user-defined distribution
 assign("dRecPosCens", dRecPosCens, envir = .GlobalEnv)
 
-# start <- Sys.time()
+# starttime <- Sys.time()
 # test <-  dRecPosCens(
 #         x = 1,
 #         #n_samples = nrow(d_fit_rec_pos_cens),
@@ -2453,7 +2453,7 @@ assign("dRecPosCens", dRecPosCens, envir = .GlobalEnv)
 #         # sect = d_fit_rec_pos_cens$study_area,
 #         log = TRUE
 #         )
-# (end<- Sys.time()-start)
+# (end<- Sys.time()-starttime)
 # test
 
 #######################################################################
@@ -2627,7 +2627,7 @@ nimble::registerDistributions(list(
 ### for a user-defined distribution
 assign("dNegCapPosMort", dNegCapPosMort, envir = .GlobalEnv)
 
-# start <- Sys.time()
+# starttime <- Sys.time()
 # test <-  dNegCapPosMort(
 #         x = 1,
 #         n_samples = nrow(d_fit_idead),
@@ -2654,7 +2654,7 @@ assign("dNegCapPosMort", dNegCapPosMort, envir = .GlobalEnv)
 #         sect = d_fit_idead$study_area,
 #         log = TRUE
 #         )
-# (end<- Sys.time()-start)
+# (end<- Sys.time()-starttime)
 # test
 
 #######################################################################
