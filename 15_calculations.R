@@ -458,21 +458,21 @@ assign("calc_infect_prob", calc_infect_prob, envir = .GlobalEnv)
 # space <- space[2]
 # ##testing state.transition function as R function
 # starttime <- Sys.time()
-psi <- calc_infect_prob(age_lookup_f = age_lookup_f,
-                        age_lookup_m = age_lookup_m,
-                        n_agef = n_agef,
-                        n_agem = n_agem,
-                        yr_end = d_fit_season$yr_end,
-                        f_age = f_age_foi-.5,
-                        m_age = m_age_foi-.5,
-                        f_period = f_period_foi-.5,
-                        m_period = m_period_foi-.5,
-                        n_year = n_year,
-                        n_sex = n_sex,
-                        n_study_area = n_study_area, 
-                        space = -.55,
-                        intvl_step_yr = intvl_step_yr_weekly
-                        )
+# psi <- calc_infect_prob(age_lookup_f = age_lookup_f,
+#                         age_lookup_m = age_lookup_m,
+#                         n_agef = n_agef,
+#                         n_agem = n_agem,
+#                         yr_end = d_fit_season$yr_end,
+#                         f_age = f_age_foi-.5,
+#                         m_age = m_age_foi-.5,
+#                         f_period = f_period_foi-.5,
+#                         m_period = m_period_foi-.5,
+#                         n_year = n_year,
+#                         n_sex = n_sex,
+#                         n_study_area = n_study_area, 
+#                         space = -.55,
+#                         intvl_step_yr = intvl_step_yr_weekly
+#                         )
 # (endtime5 <- Sys.time() - starttime)
 # psi[1,,,]
 

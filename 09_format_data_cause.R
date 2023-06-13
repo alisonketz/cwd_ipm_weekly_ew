@@ -8,6 +8,7 @@
 
 d_fit_hh <- d_surv[d_surv$censored == 0,]
 d_fit_hh[,1:3] <- d_fit_hh[,1:3] - nT_period_precollar_ext
+
 # age_class_indx <- c(intvl_step_yr_weekly,#fawns
 #                     intvl_step_yr_weekly * 2,#1
 #                     intvl_step_yr_weekly * 3,#2
@@ -31,14 +32,35 @@ d_fit_hh[,1:3] <- d_fit_hh[,1:3] - nT_period_precollar_ext
 #creating the response for the cause-specific likelihood
 #mort_h == 0 means that deer are not hunter harvest
 #mort_h == 1 means that deer are hunter harvested 
+
 d_fit_hh$mort_h <- 0
 d_fit_hh$mort_h[d_fit_hh$p4 == 1] <- 1
-
 records_cause <- nrow(d_fit_hh)
 
 #change the sex for antlerless males (i.e. male fawns) to sex == 0
 # d_fit_hh$sex[d_fit_hh$sex==0 & d_fit_hh$ageclassmort == 1] <- 0
 
+# table(d_fit_hh$right_period_s[d_fit_hh$mort_h==1])
+# d_fit_hh$right_period_s[d_fit_hh$mort_h==1]
+
+# checkhh1 <- sort(d_fit_hh$lowtag[d_fit_hh$right_period_s==45])
+# d_mort[d_mort$lowtag %in% checkhh1,]
+# d_fit_hh[d_fit_hh$lowtag %in% checkhh1,]
+# interval(startdate,"2017-11-18") %/% weeks(1)
+# interval(startdate,"2017-11-21") %/% weeks(1)
+
+# checkhh2 <- sort(d_fit_hh$lowtag[d_fit_hh$right_period_s==202 & d_fit_hh$mort_h == 1])
+# d_mort[d_mort$lowtag %in% checkhh2,]
+# d_fit_hh[d_fit_hh$lowtag %in% checkhh2,]
+# interval(startdate,"2017-11-18") %/% weeks(1)
+# interval(startdate,"2017-11-21") %/% weeks(1)
+
+# d_mort$estmortdate[d_mort$lowtag %in% checkhh2]
+
+# d_mort[d_mort$lowtag %in% checkhh2,]
+# d_mort$mortdate[d_mort$lowtag %in% checkhh2]
+# interval(startdate,"2020-11-21") %/% weeks(1)
+# interval(startdate,"2020-11-23") %/% weeks(1)
 ###########################################
 ###
 ### Read data - hunting season dates
@@ -81,10 +103,22 @@ for (i in 1:n_year_collar) {
         d_huntseason$SeasonType == "nineday"]) %/% weeks(1)
 }
 
-startgun[1] <- startgun[1]-1
-endgun[1] <- endgun[1]-1
-startgun[4] <- startgun[4]-1
-endgun[4] <- endgun[4]-1
+#########################################################################
+### these seasons are not quite right and are 1 week too late based on 
+### when then hunted deer in the survival collar 
+### data were dying from hunter harvest
+#########################################################################
+
+# startgun[1] <- startgun[1]-1
+# endgun[1] <- endgun[1]-1
+# startgun[4] <- startgun[4]-1
+# endgun[4] <- endgun[4]-1
+
+#########################################################################
+### 
+### Season indexing across full study timeline
+### 
+#########################################################################
 
 study_start <- "1994-05-15"
 # study_start <- "1985-05-15"
@@ -122,11 +156,22 @@ for (i in 1:length(unique(temp$Year))) {
     season_gun_end[i] <-  interval(study_start,
           temp$CloseDate[temp$Year == (i + 1993)]) %/% weeks(1)
 }
-season_gun_start[n_year_precollar + 1] <-
-        season_gun_start[n_year_precollar + 1] - 1
-season_gun_end[n_year_precollar + 4] <- 
-        season_gun_end[n_year_precollar + 4] - 1
 
+#########################################################################
+### these seasons are not quite right and are 1 week too late based on 
+### when then hunted deer in the survival collar 
+### data were dying from hunter harvest
+#########################################################################
+
+# season_gun_start[n_year_precollar + 1] <-
+#         season_gun_start[n_year_precollar + 1] - 1
+# season_gun_end[n_year_precollar + 4] <- 
+#         season_gun_end[n_year_precollar + 4] - 1
+
+#########################################################################
+###
+### Setup dataframe for seasons across full study time
+###
 ### need 8 start/end points throughout year
 ### for the season indexing which corresponds to 
 ### start of birth pulse period
@@ -137,6 +182,8 @@ season_gun_end[n_year_precollar + 4] <-
 ### ng harvest end
 ### postharvest start
 ### end of aah annual year, expressed in period effects
+###
+#########################################################################
 
 # n_year_precollar <- 23
 d_fit_season <- matrix(NA, nrow = n_year, ncol = 8)

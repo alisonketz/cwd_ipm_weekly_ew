@@ -55,6 +55,9 @@ cwd_df$trs <- paste0(cwd_df$town,"-",cwd_df$range,"-",cwd_df$sect)
 cwd_df <- cwd_df[order(cwd_df$kill_date),]
 cwd_df <- cwd_df[!is.na(cwd_df$kill_date),]
 
+
+# nrow(cwd_df[cwd_df$negative=="N" & cwd_df$positive=="N" & cwd_df$has_results=="Y",])
+
 source("cleanData_foi.R")
 
 cwd_df <- cleanData(cwd_df)

@@ -104,6 +104,19 @@ d_fit_rec_neg_cens_posttest <- d_fit_rec_neg_cens[!is.na(d_fit_rec_neg_cens$cwd_
 d_fit_rec_neg_cens_postno <- d_fit_rec_neg_cens[is.na(d_fit_rec_neg_cens$cwd_mort), ]
 
 
+############################################
+### adjusting data frames for the 
+### deer that enter the study as fawns and 
+### die within the first month are assumed to 
+### be test negative at mortality
+############################################
+
+adj_indx <- which(d_fit_sus_mort_postno$right_age_s - 1 < 5)
+
+d_fit_sus_mort_posttest <- rbind(d_fit_sus_mort_posttest,
+                                 d_fit_sus_mort_postno[adj_indx, ])
+d_fit_sus_mort_postno <- d_fit_sus_mort_postno[-adj_indx, ]
+
 ####################################################
 ### separating infected at capture deer
 ### that were born before or after start of study
