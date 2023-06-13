@@ -129,22 +129,22 @@ d_cap$cwdstatus4 <- as.numeric(d_cap$cwdstatus4)-1
 
 
 #calculating study year for the capture
-d_cap$year <- year(d_cap$date)
+d_cap$year <- year(d_cap$date_cap)
 
 #deer captured in December are lumped into the study year based on the subsequent calendar year
-d_cap$year[month(d_cap$date) == 12 & d_cap$year == 2019] <- 2020
-d_cap$year[month(d_cap$date) == 12 & d_cap$year == 2018] <- 2019
-d_cap$year[month(d_cap$date) == 12 & d_cap$year == 2017] <- 2018
+d_cap$year[month(d_cap$date_cap) == 12 & d_cap$year == 2019] <- 2020
+d_cap$year[month(d_cap$date_cap) == 12 & d_cap$year == 2018] <- 2019
+d_cap$year[month(d_cap$date_cap) == 12 & d_cap$year == 2017] <- 2018
 
 #start of the study (in weeks)
 start_week <- week(ymd('2017-01-09'))
 
 # #year of capture
 # d_cap$year <- NA
-# d_cap$year[d_cap$date < "2017-12-01"] <- 2017
-# d_cap$year[d_cap$date > "2017-12-01" & d_cap$date < "2018-12-01"] <- 2018
-# d_cap$year[d_cap$date > "2018-12-01" & d_cap$date < "2019-12-01"] <- 2019
-# d_cap$year[d_cap$date > "2019-12-01" & d_cap$date < "2020-12-01"] <- 2020
+# d_cap$year[d_cap$date_cap < "2017-12-01"] <- 2017
+# d_cap$year[d_cap$date_cap > "2017-12-01" & d_cap$date_cap < "2018-12-01"] <- 2018
+# d_cap$year[d_cap$date_cap > "2018-12-01" & d_cap$date_cap < "2019-12-01"] <- 2019
+# d_cap$year[d_cap$date_cap > "2019-12-01" & d_cap$date_cap < "2020-12-01"] <- 2020
 
 #######################################################################
 ###
@@ -842,18 +842,18 @@ df_cap$eweek <- (week(ymd(df_cap$date_cap)) - start_week + 1)
 df_cap$emonth <- (month(ymd(df_cap$date_cap)) - start_month + 1)
 
 #adding weeks to make each year a continuous time step from the very first year
-df_cap$eweek[df_cap$year == 2018 & month(df_cap$date) != 12] <- df_cap$eweek[df_cap$year == 2018 & month(df_cap$date) != 12] + intvl_step_yr_weekly#=df_cap$eweek[df_cap$year==2018]+51
-df_cap$eweek[df_cap$year == 2019 & month(df_cap$date) == 12] <- df_cap$eweek[df_cap$year == 2019 & month(df_cap$date) == 12] + intvl_step_yr_weekly
-df_cap$eweek[df_cap$year == 2019 & month(df_cap$date) != 12] <- df_cap$eweek[df_cap$year == 2019 & month(df_cap$date) != 12] + 2 * intvl_step_yr_weekly
-df_cap$eweek[df_cap$year == 2020 & month(df_cap$date) == 12] <- df_cap$eweek[df_cap$year == 2020 & month(df_cap$date) == 12] + 2 * intvl_step_yr_weekly
-df_cap$eweek[df_cap$year == 2020 & month(df_cap$date) != 12] <- df_cap$eweek[df_cap$year == 2020 & month(df_cap$date) != 12] + 3 * intvl_step_yr_weekly
+df_cap$eweek[df_cap$year == 2018 & month(df_cap$date_cap) != 12] <- df_cap$eweek[df_cap$year == 2018 & month(df_cap$date_cap) != 12] + intvl_step_yr_weekly#=df_cap$eweek[df_cap$year==2018]+51
+df_cap$eweek[df_cap$year == 2019 & month(df_cap$date_cap) == 12] <- df_cap$eweek[df_cap$year == 2019 & month(df_cap$date_cap) == 12] + intvl_step_yr_weekly
+df_cap$eweek[df_cap$year == 2019 & month(df_cap$date_cap) != 12] <- df_cap$eweek[df_cap$year == 2019 & month(df_cap$date_cap) != 12] + 2 * intvl_step_yr_weekly
+df_cap$eweek[df_cap$year == 2020 & month(df_cap$date_cap) == 12] <- df_cap$eweek[df_cap$year == 2020 & month(df_cap$date_cap) == 12] + 2 * intvl_step_yr_weekly
+df_cap$eweek[df_cap$year == 2020 & month(df_cap$date_cap) != 12] <- df_cap$eweek[df_cap$year == 2020 & month(df_cap$date_cap) != 12] + 3 * intvl_step_yr_weekly
 
 #adding weeks to make each year a continuous time step from the very first year
-df_cap$emonth[df_cap$year == 2018 & month(df_cap$date) != 12] <- df_cap$emonth[df_cap$year == 2018 & month(df_cap$date) != 12] + 12#=df_cap$emonth[df_cap$year==2018]+51
-df_cap$emonth[df_cap$year == 2019 & month(df_cap$date) == 12] <- df_cap$emonth[df_cap$year == 2019 & month(df_cap$date) == 12] + 12
-df_cap$emonth[df_cap$year == 2019 & month(df_cap$date) != 12] <- df_cap$emonth[df_cap$year == 2019 & month(df_cap$date) != 12] + 2*12
-df_cap$emonth[df_cap$year == 2020 & month(df_cap$date) == 12] <- df_cap$emonth[df_cap$year == 2020 & month(df_cap$date) == 12] + 2*12
-df_cap$emonth[df_cap$year == 2020 & month(df_cap$date) != 12] <- df_cap$emonth[df_cap$year == 2020 & month(df_cap$date) != 12] + 3*12
+df_cap$emonth[df_cap$year == 2018 & month(df_cap$date_cap) != 12] <- df_cap$emonth[df_cap$year == 2018 & month(df_cap$date_cap) != 12] + 12#=df_cap$emonth[df_cap$year==2018]+51
+df_cap$emonth[df_cap$year == 2019 & month(df_cap$date_cap) == 12] <- df_cap$emonth[df_cap$year == 2019 & month(df_cap$date_cap) == 12] + 12
+df_cap$emonth[df_cap$year == 2019 & month(df_cap$date_cap) != 12] <- df_cap$emonth[df_cap$year == 2019 & month(df_cap$date_cap) != 12] + 2*12
+df_cap$emonth[df_cap$year == 2020 & month(df_cap$date_cap) == 12] <- df_cap$emonth[df_cap$year == 2020 & month(df_cap$date_cap) == 12] + 2*12
+df_cap$emonth[df_cap$year == 2020 & month(df_cap$date_cap) != 12] <- df_cap$emonth[df_cap$year == 2020 & month(df_cap$date_cap) != 12] + 3*12
 
 ##################################################################################### 
 ### d_mort setting up last known alive
