@@ -69,6 +69,7 @@ cwd_df <- cleanData(cwd_df)
 #######################################
 
 study_df <- sf::st_read("datafiles/study_df.shp")
+study_df <- study_df %>% st_transform(crs = 3071)
 
 #creating sections that account for range_direction first
 study_df$dsection <- paste0(study_df$dir,"-",study_df$sectionid)
@@ -90,10 +91,6 @@ for(i in 1:nrow(study_df)){
 #table(cwd_df$ew)
 # head(cwd_df$ew)
 cwd_df$ew <- as.numeric(as.factor(cwd_df$ew))#east ==1, west == 2
-
-#there's 57 deer that have positive==N, negative == N and has_results==Y
-cwd_df[cwd_df$negative=="N" & cwd_df$positive=="N" & cwd_df$has_results=="Y",]
-nrow(cwd_df[cwd_df$negative=="N" & cwd_df$positive=="N" & cwd_df$has_results=="Y",])
 
 ######################################################
 # Aggregate Oldest Age Class of Males
