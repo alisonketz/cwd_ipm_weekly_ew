@@ -129,22 +129,22 @@ d_cap$cwdstatus4 <- as.numeric(d_cap$cwdstatus4)-1
 
 
 #calculating study year for the capture
-d_cap$year <- year(d_cap$date_cap)
+d_cap$year <- year(d_cap$date)
 
 #deer captured in December are lumped into the study year based on the subsequent calendar year
-d_cap$year[month(d_cap$date_cap) == 12 & d_cap$year == 2019] <- 2020
-d_cap$year[month(d_cap$date_cap) == 12 & d_cap$year == 2018] <- 2019
-d_cap$year[month(d_cap$date_cap) == 12 & d_cap$year == 2017] <- 2018
+d_cap$year[month(d_cap$date) == 12 & d_cap$year == 2019] <- 2020
+d_cap$year[month(d_cap$date) == 12 & d_cap$year == 2018] <- 2019
+d_cap$year[month(d_cap$date) == 12 & d_cap$year == 2017] <- 2018
 
 #start of the study (in weeks)
 start_week <- week(ymd('2017-01-09'))
 
 # #year of capture
 # d_cap$year <- NA
-# d_cap$year[d_cap$date_cap < "2017-12-01"] <- 2017
-# d_cap$year[d_cap$date_cap > "2017-12-01" & d_cap$date_cap < "2018-12-01"] <- 2018
-# d_cap$year[d_cap$date_cap > "2018-12-01" & d_cap$date_cap < "2019-12-01"] <- 2019
-# d_cap$year[d_cap$date_cap > "2019-12-01" & d_cap$date_cap < "2020-12-01"] <- 2020
+# d_cap$year[d_cap$date < "2017-12-01"] <- 2017
+# d_cap$year[d_cap$date > "2017-12-01" & d_cap$date < "2018-12-01"] <- 2018
+# d_cap$year[d_cap$date > "2018-12-01" & d_cap$date < "2019-12-01"] <- 2019
+# d_cap$year[d_cap$date > "2019-12-01" & d_cap$date < "2020-12-01"] <- 2020
 
 #######################################################################
 ###
