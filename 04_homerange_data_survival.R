@@ -64,9 +64,6 @@ points <- st_as_sf(df_mort_loc,
             )
 points_proj <- points %>% st_transform(crs = 3071)
 
-# set CRS for points to be UTMs (NAD83), same as study section polygon
-st_crs(points_proj) <-  st_crs(study_df)
-
 points_poly_joined <- sf::st_join(points_proj, study_df) #%>%  # spatial join to get intersection of points and poly
             # filter(!is.na(dsection)) #filtering only for points that fall within the study area
 
@@ -137,7 +134,7 @@ points <- st_as_sf(df_cens_loc,
             crs = 4326,
             agr = "constant"
             )
-points_proj <- points %>% st_transform("+proj=tmerc +lat_0=0 +lon_0=-90 +k=0.9996 +x_0=520000 +y_0=-4480000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
+points_proj <- points %>% st_transform(crs = 3071)
 
 # # set CRS for points to be NAD83, same as study section polygon
 st_crs(points_proj) <-  st_crs(study_df)
@@ -208,9 +205,6 @@ points <- st_as_sf(fawncap_home,
             )
 points_proj <- points %>% st_transform(crs = 3071)
 
-# set CRS for points to be NAD83, same as study section polygon
-st_crs(points_proj) <-  st_crs(study_df)
-
 points_poly_joined <- sf::st_join(points_proj, study_df) #%>%  # spatial join to get intersection of points and poly
             # filter(!is.na(dsection)) #filtering only for points that fall within the study area
 
@@ -259,9 +253,6 @@ points <- st_as_sf(d_fawncap,
             )
 st_crs(points) <- 4326
 points_proj <- points %>% st_transform(crs = 3071)
-
-# set CRS for points to be NAD83, same as study section polygon
-st_crs(points_proj) <-  st_crs(study_df)
 
 points_poly_joined <- sf::st_join(points_proj, study_df) #%>%  # spatial join to get intersection of points and poly
             # filter(!is.na(dsection)) #filtering only for points that fall within the study area
@@ -339,9 +330,6 @@ points <- st_as_sf(d_cap_loc,
             agr = "constant"
             )
 points_proj <- points %>% st_transform(crs = 3071)
-
-# # set CRS for points to be NAD83, same as study section polygon
-st_crs(points_proj) <-  st_crs(study_df)
 
 points_poly_joined <- sf::st_join(points_proj, study_df) %>%  # spatial join to get intersection of points and poly
             filter(!is.na(dsection)) #filtering only for points that fall within the study area
