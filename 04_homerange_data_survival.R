@@ -64,7 +64,7 @@ points <- st_as_sf(df_mort_loc,
             )
 points_proj <- points %>% st_transform(crs = 3071)
 
-# set CRS for points to be NAD83, same as study section polygon
+# set CRS for points to be UTMs (NAD83), same as study section polygon
 st_crs(points_proj) <-  st_crs(study_df)
 
 points_poly_joined <- sf::st_join(points_proj, study_df) #%>%  # spatial join to get intersection of points and poly
