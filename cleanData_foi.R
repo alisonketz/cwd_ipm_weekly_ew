@@ -70,11 +70,10 @@ cleanData <- function(x){
   x$sex <- as.factor(x$sex)
   levels(x$sex) <- c(0,1)#females = 0,"males=1"
   x$sex <- as.numeric(as.character(x$sex))
- 
+
   x$agedays <- as.integer(x$agedays)
   x$ageweeks <- as.integer(x$ageweeks)
   x$agemonths <- as.integer(x$agemonths)
   x
-  
-}
 
+}
