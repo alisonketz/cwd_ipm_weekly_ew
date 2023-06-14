@@ -1051,11 +1051,15 @@ modelcode <- nimbleCode({
   ### Observation Model
   ######################################################################
 
+  for (i in 1:n_sex) {
+    tau_obs[i] ~ dgamma(1, 1)
+  }#end i
+
   for(k in 1:n_study_area){
 
-      for (i in 1:n_sex) {
-        tau_obs[k, i] ~ dgamma(1, 1)
-      }#end i
+      # for (i in 1:n_sex) {
+      #   tau_obs[k, i] ~ dgamma(1, 1)
+      # }#end i
 
       for (t in 1:n_year) {
         for (a in 1:n_agef) {
@@ -1087,7 +1091,7 @@ modelcode <- nimbleCode({
         ###################################
 
         for (j in 1:n_sex) {
-          O[k, j, t] ~ dnorm(mu_obs[k, j, t], tau_obs[k, j])
+          O[k, j, t] ~ dnorm(mu_obs[k, j, t], tau_obs[j])
         }#end i
 
       #   ###################################
