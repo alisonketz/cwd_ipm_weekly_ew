@@ -239,6 +239,10 @@ initsFun <- function()list(beta_male = rnorm(1, -.5, .01),
     )
 nimInits <- initsFun()
 
+########################################################
+### Build and compile model in R
+########################################################
+
 # start_Rmodel <- Sys.time()
 Rmodel <- nimbleModel(code = modelcode,
                       constants = nimConsts,

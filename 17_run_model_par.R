@@ -226,7 +226,8 @@ initsFun <- function()list(beta_male = rnorm(1, -.5, .01),
     beta_cause_male = rnorm(1, 0, 1),
     beta_cause_gun = rnorm(1, 1.5, .1),
     beta_cause_ng = rnorm(1, 3, .1),
-    tau_obs = matrix(runif(4, 1, 3), 2, 2),
+    # tau_obs = matrix(runif(4, 1, 3), 2, 2),
+    tau_obs = runif(2, .01, 3),
     tau_pop = runif(2, .05, 1),
     report_overall = report_overall_init,
     report = report_init,
@@ -237,6 +238,10 @@ initsFun <- function()list(beta_male = rnorm(1, -.5, .01),
     space_mix = 1
     )
 nimInits <- initsFun()
+
+########################################################
+### Build and compile model in R
+########################################################
 
 # start_Rmodel <- Sys.time()
 # Rmodel <- nimbleModel(code = modelcode,
@@ -355,22 +360,22 @@ parameters <- c(
 ###
 #############################################################
 
-reps  <- 100
+ni  <- 2000
 nb <- .5
-bin <- reps * nb
-n_thin <- 1
-n_chains <- 3
+bin <- ni * nb
+nt <- 1
+nc <- 3
 starttime <- Sys.time()
-cl <- makeCluster(n_chains, timeout = 5184000)
+cl <- makeCluster(nc, timeout = 5184000)
 
 clusterExport(cl, c("modelcode",
                     "initsFun",
                     "nimData",
                     "nimConsts",
                     "parameters",
-                    "reps",
+                    "ni",
                     "bin",
-                    "n_thin"
+                    "nt"
                     ))
 for (j in seq_along(cl)) {
   set.seed(j + 1000)
@@ -380,7 +385,7 @@ for (j in seq_along(cl)) {
 for (i in 1:10) {beepr::beep(1)}
 
 starttime <- Sys.time()
-mcmcmcmcout1 <-  mcmc.list(clusterEvalQ(cl, {
+mcmcout1 <-  mcmc.list(clusterEvalQ(cl, {
   library(nimble)
   library(coda)
 
@@ -401,19 +406,19 @@ mcmcmcmcout1 <-  mcmc.list(clusterEvalQ(cl, {
   Cnim <- compileNimble(Rmodel)
   confMCMC <- configureMCMC(Rmodel,
                             monitors = parameters,
-                            thin = n_thin,
+                            thin = nt,
                             useConjugacy = FALSE)
   nimMCMC <- buildMCMC(confMCMC)
   CnimMCMC <- compileNimble(nimMCMC,
                             project = Rmodel)
 
-  CnimMCMC$run(reps, reset = FALSE)
+  CnimMCMC$run(ni, reset = FALSE)
 
   return(as.mcmc(as.matrix(CnimMCMC$mvSamples)))
 }))
 (runtime1 <- difftime(Sys.time(), starttime, units = "min"))
 
-for(chn in 1:n_chains) { # n_chains must be > 1
+for(chn in 1:nc) { # nc must be > 1
   ind_keep <- c()
   for(p in 1:length(parameters)) ind_keep <-
       c(ind_keep, which(str_detect(dimnames(mcmcout1[[chn]])[[2]], parameters[p]))) %>% unique()
@@ -423,12 +428,12 @@ for(chn in 1:n_chains) { # n_chains must be > 1
 ## Check convergence ##
 out1 <- mcmcout1
 ni_saved <- nrow(out1[[1]])
-for(chn in 1:n_chains) { # n_chains must be > 1
+for(chn in 1:nc) { # nc must be > 1
   
   if(nb < 1) {
     nb_real <- (round(ni_saved * nb)+1)
   } else {
-    nb_real <- (round(nb/n_thin)+1)
+    nb_real <- (round(nb/nt)+1)
   }
   out1[[chn]] <- out1[[chn]][nb_real:ni_saved,]
 }
@@ -450,12 +455,12 @@ sumTab <- sumTab %>%
 sumTab
 
 mcmcout2 <- clusterEvalQ(cl, {
-  CnimMCMC$run(reps*.1, reset = FALSE, resetMV = TRUE) # Resume sampling.
+  CnimMCMC$run(ni*.1, reset = FALSE, resetMV = TRUE) # Resume sampling.
   return(as.mcmc(as.matrix(CnimMCMC$mvSamples)))
   gc(verbose = F)
 })
 
-for(chn in 1:n_chains) { # n_chains must be > 1
+for(chn in 1:nc) { # nc must be > 1
   ind.keep <- c()
   for(p in 1:length(parameters)) ind.keep <-
       c(ind.keep, which(str_detect(dimnames(mcmcout2[[chn]])[[2]], parameters[p]))) %>% unique()
