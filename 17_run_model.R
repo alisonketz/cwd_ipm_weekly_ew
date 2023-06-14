@@ -226,7 +226,8 @@ initsFun <- function()list(beta_male = rnorm(1, -.5, .01),
     beta_cause_male = rnorm(1, 0, 1),
     beta_cause_gun = rnorm(1, 1.5, .1),
     beta_cause_ng = rnorm(1, 3, .1),
-    tau_obs = matrix(runif(4, 1, 3), 2, 2),
+    # tau_obs = matrix(runif(4, 1, 3), 2, 2),
+    tau_obs = runif(2, .01, 3),
     tau_pop = runif(2, .05, 1),
     report_overall = report_overall_init,
     report = report_init,
@@ -317,13 +318,13 @@ confMCMC <- configureMCMC(Rmodel,
 nimMCMC <- buildMCMC(confMCMC)
 CnimMCMC <- compileNimble(nimMCMC,
                          project = Rmodel)
-for(i in 1:10){beepr::beep(1)}
+# for(i in 1:10){beepr::beep(1)}
 
 set.seed(1001)
 starttime <- Sys.time()
 mcmcout <- runMCMC(CnimMCMC,
-                  niter = 200,
-                  nburnin = 0,
+                  niter = 1000,
+                  nburnin = 500,
                   nchains = 1,
                   inits = initsFun,
                   samplesAsCodaMCMC = TRUE,
