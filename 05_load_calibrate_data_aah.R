@@ -142,10 +142,10 @@ df_age_cwdneg <- cwd_df %>%
                     summarise(n = n())
 
 df_age_cwdpos$sex <- as.factor(df_age_cwdpos$sex)
-levels(df_age_cwdpos$sex) <- c("Male", "Female")
+levels(df_age_cwdpos$sex) <- c("Female", "Male")
 
 df_age_cwdneg$sex <- as.factor(df_age_cwdneg$sex)
-levels(df_age_cwdneg$sex) <- c("Male", "Female")
+levels(df_age_cwdneg$sex) <- c("Female", "Male")
 
 #####################################################################
 ###
@@ -206,45 +206,45 @@ df_harv_total_dmu86$antlered_harv_tot <- c()
 df_harv_total_dmu86$antlerless_harv_tot <- c()
 df_harv_total_dmu86$study_area <- c()
 
-df_harv_total_dmu86$antlered_harv_tot[df_harv_total_dmu86$dmu == "73"]  <- 
+df_harv_total_dmu86$antlered_harv_tot[df_harv_total_dmu86$dmu == "73"]  <-
     df_harv_total_dmu86$antleredHarvest[df_harv_total_dmu86$dmu == "73"] *
     dmu86_73_w_correct
 
-df_harv_total_dmu86$antlered_harv_tot[df_harv_total_dmu86$dmu == "73C"]  <- 
+df_harv_total_dmu86$antlered_harv_tot[df_harv_total_dmu86$dmu == "73C"]  <-
     df_harv_total_dmu86$antleredHarvest[df_harv_total_dmu86$dmu == "73C"] *
     dmu86_73c_w_correct
 
-df_harv_total_dmu86$antlered_harv_tot[df_harv_total_dmu86$dmu == "70D"]  <- 
+df_harv_total_dmu86$antlered_harv_tot[df_harv_total_dmu86$dmu == "70D"]  <-
     df_harv_total_dmu86$antleredHarvest[df_harv_total_dmu86$dmu == "70D"] *
     dmu86_70d_e_correct
 
-df_harv_total_dmu86$antlered_harv_tot[df_harv_total_dmu86$dmu == "70C"]  <- 
+df_harv_total_dmu86$antlered_harv_tot[df_harv_total_dmu86$dmu == "70C"]  <-
     df_harv_total_dmu86$antleredHarvest[df_harv_total_dmu86$dmu == "70C"] *
     dmu86_70c_e_correct
 
-df_harv_total_dmu86$antlered_harv_tot[df_harv_total_dmu86$dmu == "70A"]  <-    
+df_harv_total_dmu86$antlered_harv_tot[df_harv_total_dmu86$dmu == "70A"]  <-
     df_harv_total_dmu86$antleredHarvest[df_harv_total_dmu86$dmu == "70A"] *
     dmu86_70a_e_correct
 
 ### antlerless
 
-df_harv_total_dmu86$antlerless_harv_tot[df_harv_total_dmu86$dmu == "73"]  <- 
+df_harv_total_dmu86$antlerless_harv_tot[df_harv_total_dmu86$dmu == "73"]  <-
     df_harv_total_dmu86$antlerlessHarvest[df_harv_total_dmu86$dmu == "73"] *
     dmu86_73_w_correct
 
-df_harv_total_dmu86$antlerless_harv_tot[df_harv_total_dmu86$dmu == "73C"]  <- 
+df_harv_total_dmu86$antlerless_harv_tot[df_harv_total_dmu86$dmu == "73C"]  <-
     df_harv_total_dmu86$antlerlessHarvest[df_harv_total_dmu86$dmu == "73C"] *
     dmu86_73c_w_correct
 
-df_harv_total_dmu86$antlerless_harv_tot[df_harv_total_dmu86$dmu == "70D"]  <- 
+df_harv_total_dmu86$antlerless_harv_tot[df_harv_total_dmu86$dmu == "70D"]  <-
     df_harv_total_dmu86$antlerlessHarvest[df_harv_total_dmu86$dmu == "70D"] *
     dmu86_70d_e_correct
 
-df_harv_total_dmu86$antlerless_harv_tot[df_harv_total_dmu86$dmu == "70C"]  <- 
+df_harv_total_dmu86$antlerless_harv_tot[df_harv_total_dmu86$dmu == "70C"]  <-
     df_harv_total_dmu86$antlerlessHarvest[df_harv_total_dmu86$dmu == "70C"] *
     dmu86_70c_e_correct
 
-df_harv_total_dmu86$antlerless_harv_tot[df_harv_total_dmu86$dmu == "70A"]  <-    
+df_harv_total_dmu86$antlerless_harv_tot[df_harv_total_dmu86$dmu == "70A"]  <-
     df_harv_total_dmu86$antlerlessHarvest[df_harv_total_dmu86$dmu == "70A"] *
     dmu86_70a_e_correct
 
@@ -867,10 +867,10 @@ df_age_cwdpos$study_area <- ifelse(df_age_cwdpos$study_area == "1", "east", "wes
 df_age_cwdneg$study_area <- ifelse(df_age_cwdneg$study_area == "1", "east", "west")
 
 df_age_cwdpos$sex <- as.factor(df_age_cwdpos$sex)
-levels(df_age_cwdpos$sex) <- c("Male","Female")
+levels(df_age_cwdpos$sex) <- c("Female","Male")
 
 df_age_cwdneg$sex <- as.factor(df_age_cwdneg$sex)
-levels(df_age_cwdneg$sex) <- c("Male","Female")
+levels(df_age_cwdneg$sex) <- c("Female","Male")
 
 
 ###################################################################
@@ -1486,7 +1486,7 @@ df_age_sus <- rbind(df_age_early,df_age_sus)
 ###
 #####################################################################################
 
-#comining all age-at-harvest data (tested, pos+neg, not tested)
+#combining all age-at-harvest data (tested, pos+neg, not tested)
 d_fit_aah <- df_age_sus
 d_fit_aah$n[d_fit_aah$year>2001] <- df_age_sus$n[df_age_sus$year>2001] + df_age_inf$n
 d_fit_aah$agemonths <- as.factor(d_fit_aah$age)
@@ -1513,7 +1513,6 @@ d_fit_aah$agemonths <- as.numeric(as.character(d_fit_aah$agemonths))
 
 # sex=0=females, sex=1=males
 d_fit_aah$sexnum <- as.factor(d_fit_aah$sex)
-
 levels(d_fit_aah$sexnum) <- c(0,1)
 d_fit_aah$sexnum <- as.numeric(as.character(d_fit_aah$sexnum))
 
@@ -1561,7 +1560,6 @@ d_fit_notest$agemonths <- as.numeric(as.character(d_fit_notest$agemonths))
 
 # sex=0=females, sex=1=males
 d_fit_notest$sexnum <- as.factor(d_fit_notest$sex)
-
 levels(d_fit_notest$sexnum) <- c(0,1)
 d_fit_notest$sexnum <- as.numeric(as.character(d_fit_notest$sexnum))
 
