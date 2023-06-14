@@ -66,9 +66,9 @@ cleanData <- function(x){
 
   x$teststatus <- 0
   x$teststatus[x$positive == "Y"] <- 1
-  
+
   x$sex <- as.factor(x$sex)
-  levels(x$sex) <- c(1,0)#females = 1,"males=0"
+  levels(x$sex) <- c(0,1)#females = 0,"males=1"
   x$sex <- as.numeric(as.character(x$sex))
  
   x$agedays <- as.integer(x$agedays)

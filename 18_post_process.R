@@ -80,20 +80,20 @@ dev.off()
 
 
 
-###############################################
+###################################################
 ###
-### Plots of age effects for mortality hazard
+### Plots of cause-specific mortality probabilities
 ###
-###############################################
+####################################################
 
-p_hunt_indx <- grep("p_hunt",rownames(fit_sum))
+p_hunt_indx <- grep("p_",rownames(fit_sum))
 length(p_hunt_indx)/2
-p_hunt_mean_f <- fit_sum[p_hunt_indx[1:(length(p_hunt_indx)/2)],1]
-p_hunt_mean_m <- fit_sum[p_hunt_indx[(length(p_hunt_indx)/2 + 1):length(p_hunt_indx)],1]
+p_hunt_mean_f <- fit_sum[p_hunt_indx,1][c(1,3)]
+p_hunt_mean_m <- fit_sum[p_hunt_indx,1][c(2,4)]
 
-tail(p_hunt_mean_m)
-
-
+###############################################
+### Plots of age effects for mortality hazard
+###############################################
 
 te_indx <- grep("age_effect",rownames(fit_sum))
 head(fit_sum[te_indx,])

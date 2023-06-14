@@ -73,18 +73,21 @@ study_df <- study_df %>% st_transform(crs = 3071)
 
 #creating sections that account for range_direction first
 study_df$dsection <- paste0(study_df$dir,"-",study_df$sectionid)
-cwd_df$dsection <- do.call(paste, c(cwd_df[c("range_dir","range", "town", "sect")], sep = "-"))
+cwd_df$dsection <- do.call(paste, c(cwd_df[c("range_dir",
+                                             "range",
+                                             "town",
+                                             "sect")], sep = "-"))
 
 cwd_df <- cwd_df[cwd_df$dsection %in% study_df$dsection, ]
 
 cwd_df$year <- lubridate::year(cwd_df$kill_date)
 
 #setting all deer killed in January 2022 to be part of study year 2021
-cwd_df$year[cwd_df$year==2022] <- 2021
+cwd_df$year[cwd_df$year == 2022] <- 2021
 
 #setting up east/west study areas
 cwd_df$ew <- rep(NA,nrow(cwd_df))
-for(i in 1:nrow(study_df)){
+for(i in 1:nrow(study_df)) {
         j <- which(cwd_df$dsection %in% study_df$dsection[i])
             cwd_df$ew[j] <- study_df$ew[i]
         }
@@ -96,8 +99,8 @@ cwd_df$ew <- as.numeric(as.factor(cwd_df$ew))#east ==1, west == 2
 # Aggregate Oldest Age Class of Males
 ######################################################
 
-male6 <- cwd_df %>% filter(age_num == 6 & sex == 0)
-cwd_df$agedays[cwd_df$age_num == 9 & cwd_df$sex == 0] <- max(male6$agedays)
+male6 <- cwd_df %>% filter(age_num == 6 & sex == 1)
+cwd_df$agedays[cwd_df$age_num == 9 & cwd_df$sex == 1] <- max(male6$agedays)
 
 #######################################################
 ### setting these to the maximum number of 
@@ -108,14 +111,14 @@ cwd_df$agedays[cwd_df$age_num == 9 & cwd_df$sex == 0] <- max(male6$agedays)
 
 # hist(cwd_df$ageweeks)
 
-# cwd_df$ageweeks[cwd_df$age_num == 9 & cwd_df$sex == 0] <- 467#max(male6$ageweeks)
-# cwd_df$agemonths[cwd_df$age_num == 9 & cwd_df$sex == 0] <- 107#max(male6$agemonths)
-cwd_df$ageweeks[cwd_df$age_num == 9 & cwd_df$sex == 0] <- 338#max(male6$ageweeks)
-cwd_df$agemonths[cwd_df$age_num == 9 & cwd_df$sex == 0] <- 78#max(male6$agemonths)
-cwd_df$agemonths[cwd_df$agemonths > 78 & cwd_df$sex == 0] <- 78#max(male6$agemonths)
+# cwd_df$ageweeks[cwd_df$age_num == 9 & cwd_df$sex == 1] <- 467#max(male6$ageweeks)
+# cwd_df$agemonths[cwd_df$age_num == 9 & cwd_df$sex == 1] <- 107#max(male6$agemonths)
+cwd_df$ageweeks[cwd_df$age_num == 9 & cwd_df$sex == 1] <- 338#max(male6$ageweeks)
+cwd_df$agemonths[cwd_df$age_num == 9 & cwd_df$sex == 1] <- 78#max(male6$agemonths)
+cwd_df$agemonths[cwd_df$agemonths > 78 & cwd_df$sex == 1] <- 78#max(male6$agemonths)
 
 
-cwd_df$age_num[cwd_df$age_num == 9 & cwd_df$sex == 0] <- 6
+cwd_df$age_num[cwd_df$age_num == 9 & cwd_df$sex == 1] <- 6
 ageclass <- as.numeric(levels(as.factor(cwd_df$age_num)))
 
 # length(c(rep(c(0.5,1.5,2.5,3.5), each = 12),
