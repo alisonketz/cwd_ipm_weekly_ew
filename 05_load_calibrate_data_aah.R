@@ -20,7 +20,7 @@ names(df_harv_total_county) <- tolower(gsub("[[:punct:]]","",
 df_harv_total_county <- df_harv_total_county[df_harv_total_county$yr > 2013,]
 
 #changing NAs to zeros 
-df_harv_total_county[is.na(df_harv_total_county)] <- 0
+# df_harv_total_county[is.na(df_harv_total_county)] <- 0
 
 #summing of landtype, which are just public/private land harvest
 df_harv_total_county <- as.data.frame(df_harv_total_county %>% group_by(yr,cty) %>%
@@ -133,13 +133,13 @@ dmu13_70a_e_correct)
 ########################################################################
 
 df_age_cwdpos <- cwd_df %>%
-                    filter(teststatus == 1) %>% 
+                    filter(teststatus == 1) %>%
                     group_by(year, sex, age) %>%
-                    summarise(n=n())
+                    summarise(n = n())
 df_age_cwdneg <- cwd_df %>%
                     filter(teststatus == 0) %>%
                     group_by(year, sex, age) %>%
-                    summarise(n=n())
+                    summarise(n = n())
 
 df_age_cwdpos$sex <- as.factor(df_age_cwdpos$sex)
 levels(df_age_cwdpos$sex) <- c("Male", "Female")
