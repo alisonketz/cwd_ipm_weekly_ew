@@ -327,8 +327,8 @@ CnimMCMC <- compileNimble(nimMCMC,
 set.seed(1001)
 starttime <- Sys.time()
 mcmcout <- runMCMC(CnimMCMC,
-                  niter = 1000,
-                  nburnin = 500,
+                  niter = 10,
+                  nburnin = 0,
                   nchains = 1,
                   inits = initsFun,
                   samplesAsCodaMCMC = TRUE,
