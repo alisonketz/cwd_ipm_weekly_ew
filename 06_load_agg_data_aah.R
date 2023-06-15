@@ -74,7 +74,7 @@ Ototal_east <- df_harv_overall_total[df_harv_overall_total$year > 1993 &
 Ototal_west <-  df_harv_overall_total[df_harv_overall_total$year > 1993 &
                                      df_harv_overall_total$study_area == "west",]
 
-Ototal <- array(NA,c(n_study_area,ncol(Ototal_west),nrow(Ototal_east)))
+Ototal <- array(NA,c(n_study_area,n_sex,nrow(Ototal_east)))
 Ototal[1,,] <- t(Ototal_east[,4:3])
 Ototal[2,,] <- t(Ototal_west[,4:3])
 
