@@ -18,7 +18,8 @@ out <- mcmcout$samples
 fit_sum <- mcmcout$summary
 # fit_sum <- mcmcout$summary$all.chains
 pdf("figures/traceplots.pdf")
-traceplot(out[, "beta_male"], ylab = "beta_male")
+traceplot(out[, "beta_male_foi"], ylab = "beta_male_foi")
+traceplot(out[, "beta_male_surv"], ylab = "beta_male_surv")
 traceplot(out[, "tau_age_foi_female"], ylab = "tau_age_foi_female")
 traceplot(out[, "tau_age_foi_male"], ylab = "tau_age_foi_male")
 traceplot(out[, "m_age_foi[1]"], ylab = "m_age_foi[1]")
@@ -85,7 +86,8 @@ out <- mcmc.list(mcmc(out1[[1]]),mcmc(out1[[2]]),mcmc(out1[[3]]))
 # es
 
 pdf("figures/traceplots_parallel.pdf")
-traceplot(out[, "beta_male"], ylab = "beta_male")
+traceplot(out[, "beta_male_foi"], ylab = "beta_male_foi")
+traceplot(out[, "beta_male_surv"], ylab = "beta_male_surv")
 traceplot(out[, "tau_age_foi_female"], ylab = "tau_age_foi_female")
 traceplot(out[, "tau_age_foi_male"], ylab = "tau_age_foi_male")
 traceplot(out[, "m_age_foi[1]"], ylab = "m_age_foi[1]")

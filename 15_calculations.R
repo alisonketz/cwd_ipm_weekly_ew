@@ -528,13 +528,13 @@ set_period_effects_constant <- nimble::nimbleFunction(
                                period_effect_surv[1:nT_period_collar]
 
   #making the period effects sum to zero using centering
-  mu_period <- mean(period_effect_survival_temp[1:nT_period_overall_ext])
-  period_effect_survival[1:nT_period_overall_ext] <-
-      period_effect_survival_temp -
-      mu_period
+#   mu_period <- mean(period_effect_survival_temp[1:nT_period_overall_ext])
+#   period_effect_survival[1:nT_period_overall_ext] <-
+#       period_effect_survival_temp -
+#       mu_period
 
   returnType(double(1))
-  return(period_effect_survival[1:nT_period_overall_ext])
+  return(period_effect_survival_temp[1:nT_period_overall_ext])
 })
 
 Cset_period_effects_constant <- compileNimble(set_period_effects_constant)
@@ -636,23 +636,19 @@ set_period_effects_ave <- nimble::nimbleFunction(
     #     period_effect_survival_temp - mu_period
 
     #### centering across all period effects, including years prior to study
-    mu_period <- mean(period_effect_survival_temp[1:nT_period_overall_ext])
+    # mu_period <- mean(period_effect_survival_temp[1:nT_period_overall_ext])
     
-    period_effect_survival[1:nT_period_overall_ext] <- 
-                period_effect_survival_temp[1:nT_period_overall_ext] - 
-                mu_period
-
+    # period_effect_survival[1:nT_period_overall_ext] <- 
+    #             period_effect_survival_temp[1:nT_period_overall_ext] - 
+    #             mu_period
 
     returnType(double(1))
-    return(period_effect_survival[1:(nT_period_overall_ext)])
+    return(period_effect_survival_temp[1:(nT_period_overall_ext)])
 })
 
 Cset_period_effects_ave <- compileNimble(set_period_effects_ave)
 
 assign("set_period_effects_ave", set_period_effects_ave, envir = .GlobalEnv)
-
-
-
 
 
 # set_period_effects_ave(
