@@ -302,9 +302,9 @@ parameters <- c(
               "p_gun_m",
               "report",
               "fec",
-              "mu_fec",
               "fec_prec_eps",
-              "fec_epsilon",
+              # "mu_fec",
+              # "fec_epsilon",
               # "sn_inf",
               # "sn_sus",
               # "sh_inf",
@@ -360,7 +360,7 @@ parameters <- c(
 ###
 #############################################################
 
-ni  <- 2000
+ni  <- 10000
 nb <- .5
 bin <- ni * nb
 nt <- 1
@@ -455,7 +455,7 @@ sumTab <- sumTab %>%
 sumTab
 
 mcmcout2 <- clusterEvalQ(cl, {
-  CnimMCMC$run(ni*.1, reset = FALSE, resetMV = TRUE) # Resume sampling.
+  CnimMCMC$run(ni, reset = FALSE, resetMV = TRUE) # Resume sampling.
   return(as.mcmc(as.matrix(CnimMCMC$mvSamples)))
   gc(verbose = F)
 })

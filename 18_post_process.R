@@ -242,6 +242,23 @@ beta_plot
 ggsave("figures/beta_posteriors.png", beta_plot)
 
 
+###################################################
+###
+### Plots of Space posterior for east study area
+###
+####################################################
+
+
+space_indx <- grep("space",rownames(fit_sum))[2]
+space_out <- data.frame(out[,space_indx])
+names(space_out)="Space_West"
+space_plot <- ggplot(space_out, aes(x = Space_West)) +
+                geom_density() +
+                ylab("Space[2] West") +
+                xlab("Posterior Density") +
+                theme_bw()
+space_plot
+ggsave("figures/space_posterior.png", space_plot)
 
 
 
