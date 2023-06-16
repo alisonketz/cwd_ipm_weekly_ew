@@ -2823,30 +2823,30 @@ assign("dAAH", dAAH, envir = .GlobalEnv)
 #         space = c(0,-.55)
 #         sect = d_fit_notest$study_area
 
-starttime <- Sys.time()
-test <- dAAH(x = 1,
-    n_samples = nrow(d_fit_notest),
-    a = d_fit_notest$ageweeks,
-    sex = d_fit_notest$sexnum,
-    age2date = d_fit_notest$age2date_weeks,
-    n_cases = d_fit_notest$n,
-    beta_male = beta_male,
-    beta0_sus = beta0_survival_sus,
-    beta0_inf = beta0_survival_inf,
-    age_effect_surv = age_effect_survival_test,
-    period_effect_surv = period_effect_survival_test,
-    f_age_foi = f_age_foi,
-    m_age_foi = m_age_foi,
-    age_lookup_f = age_lookup_f,
-    age_lookup_m = age_lookup_m,
-    period_lookup_foi = period_lookup_foi,
-    f_period_foi = f_period_foi,
-    m_period_foi = m_period_foi,
-    space = c(0,-.55),
-    sect =  d_fit_notest$study_area,
-    log = TRUE
-    )
-(endtime <- Sys.time()-starttime)
-test
+# starttime <- Sys.time()
+# test <- dAAH(x = 1,
+#     n_samples = nrow(d_fit_notest),
+#     a = d_fit_notest$ageweeks,
+#     sex = d_fit_notest$sexnum,
+#     age2date = d_fit_notest$age2date_weeks,
+#     n_cases = d_fit_notest$n,
+#     beta_male = beta_male,
+#     beta0_sus = beta0_survival_sus,
+#     beta0_inf = beta0_survival_inf,
+#     age_effect_surv = age_effect_survival_test,
+#     period_effect_surv = period_effect_survival_test,
+#     f_age_foi = f_age_foi,
+#     m_age_foi = m_age_foi,
+#     age_lookup_f = age_lookup_f,
+#     age_lookup_m = age_lookup_m,
+#     period_lookup_foi = period_lookup_foi,
+#     f_period_foi = f_period_foi,
+#     m_period_foi = m_period_foi,
+#     space = c(0,-.55),
+#     sect =  d_fit_notest$study_area,
+#     log = TRUE
+#     )
+# (endtime <- Sys.time()-starttime)
+# test
 
 
