@@ -39,7 +39,8 @@ library(splines)
 library(MetBrewer)
 library(ggforce)
 library(tidyr)
-
+library(ggridges)
+library(ggh4x)
 
 ###########################################################
 ### Source summary function for posteriors

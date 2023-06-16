@@ -71,7 +71,7 @@ modelcode <- nimbleCode({
   ### Susceptibles survival intercept
   ####################################
 
-  beta0_sus_temp ~ dnorm(0, .01)
+  beta0_sus_temp ~ dnorm(-6, .1)
   sus_mix ~ dunif(-1, 1)
   beta0_survival_sus <- beta0_sus_temp * sus_mix
 
@@ -79,7 +79,7 @@ modelcode <- nimbleCode({
   ### Infected survival intercept
   ##################################
 
-  beta0_inf_temp ~ dnorm(0, .01)
+  beta0_inf_temp ~ dnorm(-6, .1)
   inf_mix ~ dunif(-1, 1)
   beta0_survival_inf <- beta0_inf_temp * inf_mix
 

@@ -68,9 +68,11 @@ dev.off()
 
 
 
-
+#############################
 ### from parallel run
-out <- mcmc.list(mcmc(out1[[1]]),mcmc(out1[[2]]),mcmc(out1[[3]]))
+#############################
+out <- mcmc.list(mcmc(mcmcout1[[1]][(nb*ni+1):ni,]),mcmc(mcmcout1[[2]][(nb*ni+1):ni,]),mcmc(mcmcout1[[3]][(nb*ni+1):ni,]))
+fit_sum <- summarize(out)
 
 # load("results/fit_sum.Rdata")
 # load("results/gd.Rdata")
@@ -99,6 +101,8 @@ traceplot(out[, "f_age_foi[3]"], ylab = "f_age_foi[3]")
 traceplot(out[, "tau_period_foi_female"], ylab = "tau_period_foi_female")
 traceplot(out[, "tau_period_foi_male"], ylab = "tau_period_foi_male")
 traceplot(out[, "space[2]"], ylab = "space[2]")
+traceplot(out[, "beta0_sus_temp"], ylab = "beta0_sus_temp")
+traceplot(out[, "beta0_inf_temp"], ylab = "beta0_inf_temp")
 traceplot(out[, "beta0_survival_sus"], ylab = "beta0_survival_sus")
 traceplot(out[, "beta0_survival_inf"], ylab = "beta0_survival_inf")
 traceplot(out[, "tau_age_survival"], ylab = "tau_age_survival")
@@ -135,6 +139,49 @@ traceplot(out[, "tau_pop[2]"], ylab = "tau_pop[2]")
 dev.off()
 
 
+###################################################
+### Burn-in
+####################################################
+
+mcmcout <- mcmcout1[(ni*nb+1):ni,]
+out <- do.call("rbind",mcmcout)
+
+###################################################
+###
+### Plots of mu_obs
+###
+####################################################
+
+mu_obs_indx <- grep("mu_obs",rownames(fit_sum))
+
+mu_obs_out1 <- fit_sum[mu_obs_indx,]
+mu_obs_east <- mu_obs_out1[seq(1,nrow(mu_obs_out1),by=2),]
+mu_obs_west <- mu_obs_out1[seq(2,nrow(mu_obs_out1),by=2),]
+mu_obs_east$study_area <- "East"
+mu_obs_west$study_area <- "West"
+mu_obs_east_f <- mu_obs_east[seq(1,nrow(mu_obs_east),by=2),]
+mu_obs_east_m <- mu_obs_east[seq(2,nrow(mu_obs_east),by=2),]
+mu_obs_west_f <- mu_obs_west[seq(1,nrow(mu_obs_west),by=2),]
+mu_obs_west_m <- mu_obs_west[seq(2,nrow(mu_obs_west),by=2),]
+mu_obs_east_f$sex <- mu_obs_west_f$sex <- "Female"
+mu_obs_east_m$sex <- mu_obs_west_m$sex <- "Male"
+mu_obs_east_f$year <- mu_obs_west_f$year <- 1994:2021
+mu_obs_east_m$year <- mu_obs_west_m$year <- 1994:2021
+mu_obs_out <- rbind(mu_obs_east_f,mu_obs_east_m,mu_obs_west_f,mu_obs_west_m)
+mu_obs_out$sex <- as.factor(mu_obs_out$sex)
+mu_obs_out$study_area <- as.factor(mu_obs_out$study_area)
+
+library(ggh4x)
+mu_obs_plot <- ggplot(data=mu_obs_out, aes(x=year,y=mean)) +
+               geom_ribbon(aes(ymin=lower,ymax=upper),alpha=.2,linetype=0)+
+               geom_line() +
+               geom_point() +
+               facet_nested(study_area ~ sex)+
+               theme_bw()
+mu_obs_plot
+ggsave("figures/mu_obs_plot.png",mu_obs_plot)
+
+
 
 ###################################################
 ###
@@ -143,9 +190,61 @@ dev.off()
 ####################################################
 
 p_hunt_indx <- grep("p_",rownames(fit_sum))
-length(p_hunt_indx)/2
-p_hunt_mean_f <- fit_sum[p_hunt_indx,1][c(1,3)]
-p_hunt_mean_m <- fit_sum[p_hunt_indx,1][c(2,4)]
+# p_hunt_out <- fit_sum[p_hunt_indx,]
+# p_hunt_out$sex <- rep(c("Female","Male"),2)
+# p_hunt_out$hunttype <- c(rep("9day-Gun",2),rep("Non-9day-Gun",2))
+p_hunt_out <- data.frame(out[,p_hunt_indx]) %>% pivot_longer(cols=everything())
+
+p_hunt_plot <- ggplot(p_hunt_out, aes(x = value, y = name)) +
+                geom_density_ridges(scale = .8) +
+                ylab("Condiitonal Probability of Harvest Type") +
+                xlab("Probability") +
+                theme_bw()
+p_hunt_plot
+ggsave("figures/cause_prob_hh.png", p_hunt_plot)
+
+
+###################################################
+###
+### Plots of precision posteriors
+###
+####################################################
+
+tau_indx <- grep("tau",rownames(fit_sum))
+tau_out <- data.frame(out[,tau_indx]) %>% pivot_longer(cols=everything())
+
+tau_plot <- ggplot(tau_out, aes(x = value, y = name)) +
+                geom_density_ridges(scale = .8) +
+                ylab("Precision Parameters") +
+                xlab("Posterior Density") +
+                theme_bw()
+tau_plot
+ggsave("figures/tau_posteriors.png", tau_plot)
+
+
+
+
+###################################################
+###
+### Plots of Beta posteriors
+###
+####################################################
+
+beta_indx <- grep("beta",rownames(fit_sum))
+beta_out <- data.frame(out[,beta_indx]) %>% pivot_longer(cols=everything())
+
+beta_plot <- ggplot(beta_out, aes(x = value, y = name)) +
+                geom_density_ridges(scale = .8) +
+                ylab("Coefficients") +
+                xlab("Posterior Density") +
+                theme_bw()
+beta_plot
+ggsave("figures/beta_posteriors.png", beta_plot)
+
+
+
+
+
 
 ###############################################
 ### Plots of age effects for mortality hazard
