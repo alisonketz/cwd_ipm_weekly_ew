@@ -70,18 +70,20 @@ modelcode <- nimbleCode({
   ####################################
   ### Susceptibles survival intercept
   ####################################
-
-  beta0_sus_temp ~ dnorm(-6, .1)
-  sus_mix ~ dunif(-1, 1)
-  beta0_survival_sus <- beta0_sus_temp * sus_mix
+  
+  beta0_survival_sus~ dnorm(-6, .1)
+  # beta0_sus_temp ~ dnorm(-6, .1)
+  # # sus_mix ~ dunif(-1, 1)
+  # beta0_survival_sus <- beta0_sus_temp * sus_mix
 
   ##################################
   ### Infected survival intercept
   ##################################
 
-  beta0_inf_temp ~ dnorm(-6, .1)
-  inf_mix ~ dunif(-1, 1)
-  beta0_survival_inf <- beta0_inf_temp * inf_mix
+  beta0_survival_inf ~ dnorm(-6, .1)
+  # beta0_inf_temp ~ dnorm(-6, .1)
+  # inf_mix ~ dunif(-1, 1)
+  # beta0_survival_inf <- beta0_inf_temp * inf_mix
 
   ##################################
   ### Priors for Age and Period effects
@@ -649,10 +651,10 @@ modelcode <- nimbleCode({
 
   ### priors
   ### sex-specific hunt probability given mortalities
-  beta0_cause ~ dnorm(0, .01)
-  beta_cause_gun ~ dnorm(0, .01)
-  beta_cause_ng ~ dnorm(0, .01)
-  beta_cause_male ~ dnorm(0, .01)
+  beta0_cause ~ dnorm(0, .1)
+  beta_cause_gun ~ dnorm(0, .1)
+  beta_cause_ng ~ dnorm(0, .1)
+  beta_cause_male ~ dnorm(0, .1)
 
   #######################################################
   ###
@@ -700,10 +702,10 @@ modelcode <- nimbleCode({
   ########################################
 
   #should this be different for pos/neg or m/f for study area?
-    for(i in 1:2){
-      tau_pop[i] ~ dgamma(1,1)
+  for(i in 1:2) {
+    tau_pop[i] ~ dgamma(1, 1)
   }
-  for(k in 1:n_study_area){
+  for(k in 1:n_study_area) {
     for (a in 1:n_agef) {
 
       #Initial population structure pop[sex,age,year] for susceptible deer
@@ -941,11 +943,10 @@ modelcode <- nimbleCode({
         }
 
         #Male: fawn class = total #females * unisex fawns per female/2
-        #(should this be divided by 2?)
-        pop_sus[k, 1, 1, t] <- (sum(pop_sus_proj[k, 1, 1:n_agef, t]) + 
+        pop_sus[k, 1, 1, t] <- ((sum(pop_sus_proj[k, 1, 1:n_agef, t]) + 
                                 sum(pop_inf_proj[k, 1, 1:n_agef, t])) *
                                 fec[t] *
-                                (1 - psi[k, 2, 1, t]) / 2 
+                                (1 - psi[k, 2, 1, t])) / 2 
         ###########
         # Males
         ###########
@@ -971,10 +972,10 @@ modelcode <- nimbleCode({
 
         # Male: fawn class = total #females * unisex fawns per female/2
         # (should this be divided by 2?)
-        pop_sus[k, 2, 1, t] <- (sum(pop_sus_proj[k, 1, 1:n_agef, t]) +
+        pop_sus[k, 2, 1, t] <- ((sum(pop_sus_proj[k, 1, 1:n_agef, t]) +
                                 sum(pop_inf_proj[k, 1, 1:n_agef, t])) *
                                 fec[t] *
-                                (1 - psi[k, 2, 1, t]) / 2 
+                                (1 - psi[k, 2, 1, t])) / 2 
 
         ###################################################
         ### Infected/Infectious
@@ -1007,10 +1008,10 @@ modelcode <- nimbleCode({
         
         #Female: fawn class = total #females * unisex fawns per female/2
         #(should this be divided by 2?)
-        pop_inf[k, 1, 1, t] <- (sum(pop_sus_proj[k, 1, 1:n_agef, t]) +
+        pop_inf[k, 1, 1, t] <- ((sum(pop_sus_proj[k, 1, 1:n_agef, t]) +
                                 sum(pop_inf_proj[k, 1, 1:n_agef, t])) *
                                 fec[t] *
-                                psi[k, 1, 1, t] / 2
+                                psi[k, 1, 1, t]) / 2
 
         ###########
         # Males
@@ -1020,7 +1021,7 @@ modelcode <- nimbleCode({
         for (a in 1:(n_agem - 1)) {
             pop_inf_proj[k, 2, a, t] <- pop_inf[k, 2, a, t - 1] *
                                           sn_inf[2, a, t - 1] +
-                                        pop_sus[k, 2, a, t - 1] *
+                                          pop_sus[k, 2, a, t - 1] *
                                           sn_sus[2, a, t - 1] *
                                           psi[k, 2, a, t - 1]
         }
@@ -1039,10 +1040,10 @@ modelcode <- nimbleCode({
         }
 
         #Male: fawn class = total #females * unisex fawns per female
-        pop_inf[k, 2, 1, t] <- (sum(pop_sus_proj[k, 1, 1:n_agef, t]) +
+        pop_inf[k, 2, 1, t] <- ((sum(pop_sus_proj[k, 1, 1:n_agef, t]) +
                                 sum(pop_inf_proj[k, 1, 1:n_agef, t])) *
                                 fec[t] *
-                                psi[k, 2, 1, t] / 2
+                                psi[k, 2, 1, t]) / 2
 
     }#end t
     }#end study_area
@@ -1065,9 +1066,9 @@ modelcode <- nimbleCode({
         for (a in 1:n_agef) {
           harv_pop[k, 1, a, t] <- (pop_inf[k, 1, a, t] *
                                     (1 - sh_inf[1, a, t]) +
-                                  pop_sus[k, 1, a, t] *
-                                  (1 - sh_sus[1, a, t])) *
-                                  report[t]
+                                    pop_sus[k, 1, a, t] *
+                                    (1 - sh_sus[1, a, t])) *
+                                    report[t]
         }
         for (a in 1:n_agem) {
           harv_pop[k, 2, a, t] <- (pop_inf[k, 2, a, t] *
