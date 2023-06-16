@@ -241,7 +241,7 @@ d_surv$right_age_r <- d_surv$left_age_e + d_surv$right_period_r - d_surv$left_pe
 d_surv$right_age_s <- d_surv$left_age_e + d_surv$right_period_s - d_surv$left_period_e
 
 min_age <- min(d_surv$left_age_e)
-max_ager <- max(d_surv$right_age_r, na.action = TRUE)
+max_ager <- max(d_surv$right_age_r, na.rm = TRUE)
 max_ages <- max(d_surv$right_age_s, na.rm = TRUE)
 
 ###
@@ -275,7 +275,7 @@ d_surv$right_age_s[which(d_surv$right_period_s - d_surv$left_period_e < 1 & d_su
 d_surv$right_period_s[which(d_surv$right_period_s - d_surv$left_period_e < 1 & d_surv$censored == 0)] <- 
   d_surv$right_period_s[which(d_surv$right_period_s - d_surv$left_period_e < 1 & d_surv$censored == 0)] + 1
 
-fix_fast_mortalities_indx <- d_surv$right_age_r == 0
+fix_fast_mortalities_indx <- which(d_surv$right_age_r == 0)
 d_surv$right_period_r[fix_fast_mortalities_indx] <- d_surv$left_period_e[fix_fast_mortalities_indx]
 d_surv$right_age_r[fix_fast_mortalities_indx] <- 1
 
@@ -296,14 +296,9 @@ d_surv$right_age_r[fix_fast_mortalities_nonneonate_indx] <- d_surv$left_age_e[fi
 ##################################################
 
 censor_fix_low <- c(6817,6876,5153)
-d_surv[d_surv$lowtag == 6817,]
-d_surv[d_surv$lowtag == 6876,]
-d_surv[d_surv$lowtag == 5153,]
-
-#these should have the recap ageweek and period week set to 0,
-d_surv$ageweek_recap[d_surv$lowtag %in% censor_fix_low] <- 0
-d_surv$periodweek_recap[d_surv$lowtag %in% censor_fix_low] <- 0
-d_surv$cwd_mort[d_surv$lowtag %in% censor_fix_low] <- 0
+# d_surv[d_surv$lowtag == 6817,]
+# d_surv[d_surv$lowtag == 6876,]
+# d_surv[d_surv$lowtag == 5153,]
 
 #removing these from recaptured deer
 #just using the status at recapture as same as status at right censor
@@ -327,15 +322,15 @@ low_recap_neg <- low_recap_neg[-rm_censor_fix_neg]
 
 low_remove_fast_cens <- c(5052, 6400, 6081, 5257, 7113, 7787)
 
-d_surv <- d_surv[!(d_surv$lowtag %in% low_remove_fast_cens),]
+d_surv <- d_surv[!(d_surv$lowtag %in% low_remove_fast_cens), ]
 n_surv <- nrow(d_surv)
 
 ##########################################################################
 ###
 ### calibrating collar study time with start of harvest study time
 ### rescaling the origin of the  period effects
-### from the collar study start to overall 
-### pop model start 
+### from the collar study start to overall
+### pop model start
 ###
 ##########################################################################
 
@@ -345,7 +340,7 @@ n_surv <- nrow(d_surv)
 d_surv$left_period_e <- d_surv$left_period_e + nT_period_precollar_ext
 d_surv$right_period_r <- d_surv$right_period_r + nT_period_precollar_ext
 d_surv$right_period_s <- d_surv$right_period_s + nT_period_precollar_ext
-d_surv$periodweek_recap[d_surv$periodweek_recap != 0] <- 
+d_surv$periodweek_recap[d_surv$periodweek_recap != 0] <-
           d_surv$periodweek_recap[d_surv$periodweek_recap != 0] +
           nT_period_precollar_ext
 
@@ -353,10 +348,6 @@ d_surv$periodweek_recap[d_surv$periodweek_recap != 0] <-
 d_surv$emonth <- d_surv$emonth + nT_period_precollar_ext_monthly
 d_surv$rmonth <- d_surv$rmonth + nT_period_precollar_ext_monthly
 d_surv$smonth <- d_surv$smonth + nT_period_precollar_ext_monthly
-d_surv$periodmonth_recap[d_surv$periodmonth_recap != 0] <- 
-          d_surv$periodmonth_recap[d_surv$periodmonth_recap != 0] + 
+d_surv$periodmonth_recap[d_surv$periodmonth_recap != 0] <-
+          d_surv$periodmonth_recap[d_surv$periodmonth_recap != 0] +
           nT_period_precollar_ext_monthly
-
-
-
-interval("1985-05-15",df_cap$date_cap)%/%weeks(1)
