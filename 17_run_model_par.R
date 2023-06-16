@@ -193,10 +193,12 @@ nimConsts <- list(n_year = n_year,
 #######################################
 
 initsFun <- function()list(beta_male = rnorm(1, -.5, .01),
-    beta0_sus_temp = rnorm(1, -8.5, 0.0001),
-    sus_mix = 1,
-    beta0_inf_temp = rnorm(1, -8, 0.0001),
-    inf_mix = 1,
+    # beta0_sus_temp = rnorm(1, -8.5, 0.0001),
+    # sus_mix = 1,
+    # beta0_inf_temp = rnorm(1, -8, 0.0001),
+    # inf_mix = 1,
+    beta0_survival_inf = rnorm(1, -6, 0.1),
+    beta0_survival_sus = rnorm(1, -6, 0.1),
     ln_b_age_survival = rnorm(nknots_age) * 10^-4,
     b_period_survival = rnorm(nknots_period) * 10^-4,
     tau_period_survival = runif(1, .1, 1),
@@ -279,8 +281,8 @@ parameters <- c(
               "space",
               "space_temp",
               "space_mix",
-              "beta0_sus_temp",
-              "sus_mix",
+              # "beta0_sus_temp",
+              # "sus_mix",
               "beta0_survival_sus",
               "tau_age_survival",
               "age_effect_survival",
@@ -289,8 +291,8 @@ parameters <- c(
               "tau_period_survival",
               "tau_period_precollar",
               "period_effect_survival",
-              "beta0_inf_temp",
-              "inf_mix",
+              # "beta0_inf_temp",
+              # "inf_mix",
               "beta0_survival_inf",
               "beta0_cause",
               "beta_cause_gun",
@@ -408,6 +410,9 @@ mcmcout1 <-  mcmc.list(clusterEvalQ(cl, {
                             monitors = parameters,
                             thin = nt,
                             useConjugacy = FALSE)
+  confMCMC$removeSamplers(c("beta0_survival_sus", "beta0_survival_inf")) 
+  confMCMC$addSampler(target = "beta0_survival_sus", type = "slice")
+  confMCMC$addSampler(target = "beta0_survival_inf",  type = "slice")
   nimMCMC <- buildMCMC(confMCMC)
   CnimMCMC <- compileNimble(nimMCMC,
                             project = Rmodel)
@@ -417,6 +422,10 @@ mcmcout1 <-  mcmc.list(clusterEvalQ(cl, {
   return(as.mcmc(as.matrix(CnimMCMC$mvSamples)))
 }))
 (runtime1 <- difftime(Sys.time(), starttime, units = "min"))
+
+
+
+
 
 for(chn in 1:nc) { # nc must be > 1
   ind_keep <- c()
