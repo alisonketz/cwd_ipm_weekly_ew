@@ -38,21 +38,36 @@ modelcode <- nimbleCode({
   m_age_foi_mu <- mean(m_age_foi[1:n_ageclassm])
   f_age_foi_mu <- mean(f_age_foi[1:n_ageclassf])
 
-  # Period effects
+  # Period effects 
   tau_period_foi_male  ~ dgamma(1, 1)
   tau_period_foi_female  ~ dgamma(1, 1)
 
-  f_period_foi[1:n_year] ~ dcar_normal(adj = adj_period[1:n_adj_period],
-                                  weights = weights_period[1:n_adj_period],
-                                  num = num_period[1:n_year],
-                                  tau = tau_period_foi_female,
-                                  zero_mean = 1)
+  #CAR specification
+  # f_period_foi[1:n_year] ~ dcar_normal(adj = adj_period[1:n_adj_period],
+  #                                 weights = weights_period[1:n_adj_period],
+  #                                 num = num_period[1:n_year],
+  #                                 tau = tau_period_foi_female,
+  #                                 zero_mean = 1)
   
-  m_period_foi[1:n_year] ~ dcar_normal(adj = adj_period[1:n_adj_period],
-                                  weights = weights_period[1:n_adj_period],
-                                  num = num_period[1:n_year],
-                                  tau = tau_period_foi_male,
-                                  zero_mean = 1)
+  # m_period_foi[1:n_year] ~ dcar_normal(adj = adj_period[1:n_adj_period],
+  #                                 weights = weights_period[1:n_adj_period],
+  #                                 num = num_period[1:n_year],
+  #                                 tau = tau_period_foi_male,
+  #                                 zero_mean = 1)
+  tau1_period_foi_f <- .0000001 * tau_period_foi_female
+  tau1_period_foi_m <- .0000001 * tau_period_foi_male
+  f_period_foi_temp[1] ~ dnorm(0, tau1_period_foi_f)
+  m_period_foi_temp[1] ~ dnorm(0, tau1_period_foi_m)
+  for (t in 2:n_year) {
+    f_period_foi_temp[t] ~ dnorm(f_period_foi_temp[t - 1], tau_period_foi_female)
+    m_period_foi_temp[t] ~ dnorm(m_period_foi_temp[t - 1], tau_period_foi_male)
+  }
+  f_period_foi_mu <- mean(f_period_foi_temp[1:n_year])
+  m_period_foi_mu <- mean(m_period_foi_temp[1:n_year])
+  for (t in 1:n_year) {
+    f_period_foi[t] <- f_period_foi_temp[t] - f_period_foi_mu
+    m_period_foi[t] <- m_period_foi_temp[t] - m_period_foi_mu
+  }
 
   ### random effect for East/West spatial model
   space[1] <- 0
@@ -71,19 +86,21 @@ modelcode <- nimbleCode({
   ### Susceptibles survival intercept
   ####################################
   
-  beta0_survival_sus~ dnorm(-6, .1)
+  # beta0_survival_sus ~ dnorm(-6, .1)
   # beta0_sus_temp ~ dnorm(-6, .1)
-  # # sus_mix ~ dunif(-1, 1)
-  # beta0_survival_sus <- beta0_sus_temp * sus_mix
+  beta0_sus_temp ~ dnorm(0, .1)
+  sus_mix ~ dunif(-1, 1)
+  beta0_survival_sus <- beta0_sus_temp * sus_mix
 
   ##################################
   ### Infected survival intercept
   ##################################
 
-  beta0_survival_inf ~ dnorm(-6, .1)
+  # beta0_survival_inf ~ dnorm(-6, .1)
   # beta0_inf_temp ~ dnorm(-6, .1)
-  # inf_mix ~ dunif(-1, 1)
-  # beta0_survival_inf <- beta0_inf_temp * inf_mix
+  beta0_inf_temp ~ dnorm(0, .1)
+  inf_mix ~ dunif(-1, 1)
+  beta0_survival_inf <- beta0_inf_temp * inf_mix
 
   ##################################
   ### Priors for Age and Period effects
