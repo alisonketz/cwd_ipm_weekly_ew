@@ -118,12 +118,16 @@ d_fit_sus_mort_posttest <- rbind(d_fit_sus_mort_posttest,
 d_fit_sus_mort_postno <- d_fit_sus_mort_postno[-adj_indx, ]
 
 ####################################################
-### separating infected at capture deer
-### that were born before or after start of study
+### separating infected-at-capture 
+### censored deervs mortalities
 #####################################################
 
 d_fit_icap_cens <- d_fit_icap[d_fit_icap$censored == 1, ]
 d_fit_icap_mort <- d_fit_icap[d_fit_icap$censored == 0, ]
+
+####################################################
+### sample sizes each likelihood type
+#####################################################
 
 n_fit_sus_cens_posttest <- nrow(d_fit_sus_cens_posttest)
 n_fit_sus_cens_postno <- nrow(d_fit_sus_cens_postno)

@@ -185,7 +185,6 @@ for (i in 1:length(unique(temp$Year))) {
 ###
 #########################################################################
 
-# n_year_precollar <- 23
 d_fit_season <- matrix(NA, nrow = n_year, ncol = 8)
 for(t in 1:n_year) {
    d_fit_season[t, ] <- c(intvl_step_yr_weekly * (t - 1) + 1,
@@ -197,7 +196,6 @@ for(t in 1:n_year) {
                           season_ng_end[t] + 1,
                           intvl_step_yr_weekly * t)
 }
-# d_fit_season[n_year_precollar, 6] <- d_fit_season[n_year_precollar, 6] - 1
 
 d_fit_season <- data.frame(d_fit_season)
 colnames(d_fit_season) <- c("yr_start",
@@ -211,22 +209,12 @@ colnames(d_fit_season) <- c("yr_start",
 
 #saving for aah_disease test
 save(d_fit_season, file = paste0(filepath, "d_fit_season.Rdata"))
-tail(d_fit_season)
 
 d_fit_season$year <- 1994:2021
 
 ###
 ### Preliminaries gun season
 ###
-# Z_cause_ng <- rep(0,nT_period_collar)
-# Z_cause_gun <- rep(0,nT_period_collar)
-# for(i in 1:5){
-#     Z_cause_ng[startng[i]:endng[i]] <- 1
-#     Z_cause_gun[startgun[i]:endgun[i]] <- 1
-# }
-# Z_cause_ng[which(Z_cause_gun == 1)] <- 0
-
-
 
 Z_cause_ng <- rep(0,nT_period_collar)
 Z_cause_gun <- rep(0,nT_period_collar)
@@ -234,7 +222,6 @@ for(i in 1:5){
     Z_cause_ng[startng[i]:endng[i]] <- 1
     Z_cause_gun[startgun[i]:endgun[i]] <- 1
 }
-
 
 Z_overall_ng <- rep(0,nT_period_overall_ext)
 Z_overall_gun <- rep(0,nT_period_overall_ext)
@@ -244,12 +231,11 @@ for(i in 1:n_year){
     Z_overall_gun[(d_fit_season$gun_start[i]:
                    d_fit_season$gun_end[i]) + nT_period_prestudy_ext] <- 1
 }
-# Z_overall_ng[which(Z_overall_gun == 1)] <- 0
 
 ###
-### this should be used in the likelihoods to ensure use 
-### the time varying hunterharvest only collar data to estimate the 
-### 
+### this should be used in the likelihoods to ensure use
+### the time varying hunterharvest only collar data to estimate the
+###
 
 Z_overall_gun_collar <- Z_overall_gun
 Z_overall_gun_collar[1:nT_period_precollar_ext] <- 0
@@ -303,29 +289,23 @@ Z_overall_ng_collar[1:nT_period_precollar_ext] <- 0
 #     Z_ng[startng[i]:endng[i]] <- 1
 #     Z_gun[startgun[i]:endgun[i]] <- 1
 # }
-
 # Z_ng
 # Z_gun
 
 mort_h <- d_fit_hh$mort_h
 interval_cause <- d_fit_hh$right_period_s-1
-table(interval_cause[d_fit_hh$mort_h==1])
-which(Z_cause_gun==1)
-interval_cause[which(Z_cause_gun==1)]
 
-length(interval_cause[which(interval_cause %in% which(Z_cause_gun==1))])
-sum(mort_h[which(interval_cause %in% which(Z_cause_gun==1))])
-110/130
+### debugging hunting season dates
+# table(interval_cause[d_fit_hh$mort_h==1])
+# which(Z_cause_gun==1)
+# interval_cause[which(Z_cause_gun==1)]
+# length(interval_cause[which(interval_cause %in% which(Z_cause_gun==1))])
+# sum(mort_h[which(interval_cause %in% which(Z_cause_gun==1))])
+# length(interval_cause[which(interval_cause %in% which(Z_cause_ng==1))])
+# sum(mort_h[which(interval_cause %in% which(Z_cause_ng==1))])
+# length(interval_cause[which(interval_cause %in% which(Z_cause_gun==1))])
+# interval_cause[which(interval_cause %in% which(Z_cause_ng==1))]
 
-length(interval_cause[which(interval_cause %in% which(Z_cause_ng==1))])
-sum(mort_h[which(interval_cause %in% which(Z_cause_ng==1))])
-192/301
-
-length(interval_cause[which(interval_cause %in% which(Z_cause_gun==1))])
-
-interval_cause[which(interval_cause %in% which(Z_cause_ng==1))]
-
-table(d_mort$weapon)
 low_gun <- d_mort$lowtag[d_mort$weapon == "rifle"]
 low_gun <- low_gun[!is.na(low_gun)]
 low_bow <- d_mort$lowtag[d_mort$weapon == "bow" |
