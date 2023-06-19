@@ -333,12 +333,16 @@ d_fit_hh$gun[which(interval_cause %in% which(Z_cause_gun==1))]
 # endgun
  
 
-test1 <- which(d_fit_hh$lowtag %in% low_gun)
-
-test2 <- which(interval_cause %in% which(Z_cause_gun==1))
-
-test1[which(!(test1 %in% test2))]
-
-testlow <- d_fit_hh$lowtag[test1[which(!(test1 %in% test2))]]
-
-d_mort[which(d_mort$lowtag %in% testlow),]
+ ##################################################################
+ ###
+ ### Figuring out mistakes in the data,
+ ### which deer were gun harvest not during the nineday gun season
+ ### are these correct? 
+ ###
+ ##################################################################
+# test1 <- which(d_fit_hh$lowtag %in% low_gun)
+# test2 <- which(interval_cause %in% which(Z_cause_gun==1))
+# test1[which(!(test1 %in% test2))]
+# testlow <- d_fit_hh$lowtag[test1[which(!(test1 %in% test2))]]
+# testlowdf <- d_mort[which(d_mort$lowtag %in% testlow),c(2,14:16,55)]
+# write.csv(testlowdf,file="results/testlowgun.csv")
