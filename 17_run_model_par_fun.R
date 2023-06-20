@@ -269,6 +269,10 @@ nb <- .5
 bin <- ni * nb
 nt <- 1
 nc <- 3
+mod.nam = "mod"
+
+Rht.required <- 5
+neff.required <-
 
 parameters <- c(
               "beta_male",
@@ -459,9 +463,10 @@ for(chn in 1:nc) { # nc must be > 1
         which(str_detect(dimnames(out1[[chn]])[[2]], parameters[p]))) %>%
         unique()
   }
-  out1[[chn]] <- out1[[chn]][,ind_keep]
+  out1[[chn]] <- out1[[chn]][2:nrow(out1[[chn]]),ind_keep]
 }
-    
+
+
 ## Check convergence ##
 out2 <- out1
 ni.saved <- nrow(out2[[1]])
@@ -474,20 +479,22 @@ for(chn in 1:nc) { # nc must be > 1
   }
   out2[[chn]] <- out2[[chn]][nb.real:ni.saved,]
 }
-out.mcmc <- coda::as.mcmc.list(lapply(out2, coda::as.mcmc))
+out.mcmc <- coda::as.mcmc.list(lapply(out1, coda::as.mcmc))
 
-mod <- mcmcOutput(out.mcmc)
+mod <- mcmcOutput::mcmcOutput(out.mcmc)
 sumTab <- summary(mod,
-                  MCEpc = F,
-                  Rhat = T,
-                  n.eff = T,
-                  f = T,
-                  overlap0 = T,
-                  verbose = F)
+                  MCEpc = FALSE,
+                  Rhat = TRUE,
+                  n.eff = TRUE,
+                  f = TRUE,
+                  overlap0 = TRUE,
+                  verbose = FALSE)
+# sumTab$Rhat <- mcmcOutput::getRhat(mod)
+
 sumTab <- sumTab %>%
   as_tibble() %>%
   mutate(Parameter = row.names(sumTab)) %>%
-  select(Parameter, mean:f)
+ select(Parameter, mean:f)
 par.ignore.Rht <- c()
 if(length(par.ignore.Rht) == 0) {
   mxRht <- sumTab %>% pull(Rhat) %>% max(na.rm = T)
@@ -513,7 +520,7 @@ mcmc.info <- c(nchains = nc,
 mod <- list(mcmcOutput = mod,
             summary = sumTab,
             mcmc.info = mcmc.info)
-if(sav.model) R.utils::saveObject(mod, mod.nam) # If running all in one.
+R.utils::saveObject(mod, mod.nam) # If running all in one.
 
 ## If has not converged, continue sampling
 if(round(mxRht, digits = 1) > Rht.required | mn.neff < neff.required) {
@@ -522,21 +529,21 @@ if(round(mxRht, digits = 1) > Rht.required | mn.neff < neff.required) {
   R.utils::saveObject(out1, str_c("results/",mod.nam, "_chunk", n.runs))
 }
 
-mcmcout2 <- clusterEvalQ(cl, {
-  CmodelMCMC$run(ni, reset = FALSE, resetMV = TRUE) # Resume sampling.
-  return(as.mcmc(as.matrix(CmodelMCMC$mvSamples)))
-  gc(verbose = F)
-})
+# mcmcout2 <- clusterEvalQ(cl, {
+#   CmodelMCMC$run(ni, reset = FALSE, resetMV = TRUE) # Resume sampling.
+#   return(as.mcmc(as.matrix(CmodelMCMC$mvSamples)))
+#   gc(verbose = F)
+# })
 
-for(chn in 1:nc) { # nc must be > 1
-  ind.keep <- c()
-  for(p in 1:length(parameters)) ind.keep <-
-      c(ind.keep, which(str_detect(dimnames(mcmcout2[[chn]])[[2]], parameters[p]))) %>% unique()
-  mcmcout2[[chn]] <- mcmcout2[[chn]][,ind.keep]
-}
-mod.nam = "mod"
-n.runs <- 2
-R.utils::saveObject(mcmcout2, str_c(mod.nam, "_chunk", n.runs)) # Save samples from previous run to drive.
+# for(chn in 1:nc) { # nc must be > 1
+#   ind.keep <- c()
+#   for(p in 1:length(parameters)) ind.keep <-
+#       c(ind.keep, which(str_detect(dimnames(mcmcout2[[chn]])[[2]], parameters[p]))) %>% unique()
+#   mcmcout2[[chn]] <- mcmcout2[[chn]][,ind.keep]
+# }
+# mod.nam = "mod"
+# n.runs <- 2
+# R.utils::saveObject(mcmcout2, str_c(mod.nam, "_chunk", n.runs)) # Save samples from previous run to drive.
 
 while(round(mxRht, digits = 1) > Rht.required | mn.neff < neff.required) {
     n.runs <- n.runs + 1
@@ -577,11 +584,11 @@ while(round(mxRht, digits = 1) > Rht.required | mn.neff < neff.required) {
     } else {
       ni2 <- round(((ni / nt) * n.runs * nc) - (nb / nt * nc))
     }
-    # if(ni2 > max.samples.saved) {
-    #   nt2 <- round(1 / (max.samples.saved / ni2)) # Set additional thinning so that saved iterations don't exceed (by too much) max.samples.saved (specified by user).
-    # } else {
-    #   nt2 <- 1
-    # }
+    if(ni2 > max.samples.saved) {
+      nt2 <- round(1 / (max.samples.saved / ni2)) # Set additional thinning so that saved iterations don't exceed (by too much) max.samples.saved (specified by user).
+    } else {
+      nt2 <- 1
+    }
     
     # Reassemble chain from chunks and apply additional thinning.
     out1 <- R.utils::loadObject(str_c(mod.nam, "_chunk", 1))
@@ -669,11 +676,12 @@ while(round(mxRht, digits = 1) > Rht.required | mn.neff < neff.required) {
 
 
 
+mod_chunk1 <- R.utils::loadObject("mod_chunk1")
+dim(mod_chunk1[[1]])
 
 
-
-
-
+mod_chunk2 <- R.utils::loadObject("mod_chunk2")
+dim(mod_chunk2[[2]])
 
 
 
