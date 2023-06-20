@@ -49,10 +49,10 @@ po/*~
 rsconnect/
 
 # don't upload data
-datafiles/
+datafiles/*
 
 # don't upload figures
-figures/
+figures/*
 
 #don't upload results
-results/
+results/*
