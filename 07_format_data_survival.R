@@ -228,6 +228,7 @@ for (i in 1:n_postcwd) {
     d_surv$cwd_mort[d_surv$lowtag %in% d_post_cwd$lowtag[i]] <- d_post_cwd$cwdresult[i]
 }
 d_surv$cwd_mort <- as.factor(d_surv$cwd_mort)
+levels(d_surv$cwd_mort) <- c("Negative",NA,"Positive")
 levels(d_surv$cwd_mort) <- c(0, 1)
 
 d_surv$cwd_mort <- as.numeric(as.character(d_surv$cwd_mort))
