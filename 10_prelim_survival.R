@@ -11,17 +11,11 @@ nT_age_short_f <- intvl_step_yr_weekly * (n_agef - 1)
 nT_age_surv_aah_m <- intvl_step_yr_weekly * n_agem
 nT_age_short_m <- intvl_step_yr_weekly * (n_agem - 1)
 
-### The first 2 years period effects for survival 
-### should be set to be the same as 1994 annual period effect
-
-# surv_period_lookup <- c(rep(1, 2 * intvl_step_yr_weekly),
-#                        1:nT_period_overall)
-
-# surv_period_lookup_aah <- 1:nT_period_overall
-
-############################
+########################################################################
 ### matrix with indexes for averaging period effects from collar data
-#################################
+### to account for within year annual variation when 
+### there is no collar data
+########################################################################
 
 # interval("2016-05-15","2017-01-09") %/% weeks(1)
 indx_mat_pe_surv <- matrix(NA, nrow = 6, ncol = 52)
@@ -32,15 +26,12 @@ indx_mat_pe_surv[4,] <- (19 + 2 * 52):(19 + 3 * 52 - 1)
 indx_mat_pe_surv[5,] <- (19 + 3 * 52):(19 + 4 * 52 - 1)
 indx_mat_pe_surv[6,] <- (19 + 4 * 52):(19 + 5 * 52 - 1)
 
-
 ########################################################################
-###
-### calibrating age of deer with the study time for indexing
-### in the likelihood
-###
+### calibrating age of deer with the study time 
+### for indexing in the likelihood for loops
+### age2date = left_period - left_age
 ########################################################################
 
-#left_period - left_age
 sus_age2date <- d_fit_sus$left_period_e - d_fit_sus$left_age_e
 icap_cens_age2date <- d_fit_icap_cens$left_period_e - d_fit_icap_cens$left_age_e
 icap_mort_age2date <- d_fit_icap_mort$left_period_e - d_fit_icap_mort$left_age_e
@@ -55,7 +46,6 @@ sus_cens_posttest_age2date <- d_fit_sus_cens_posttest$left_period_e - d_fit_sus_
 sus_mort_posttest_age2date <- d_fit_sus_mort_posttest$left_period_e - d_fit_sus_mort_posttest$left_age_e
 sus_mort_postno_age2date <- d_fit_sus_mort_postno$left_period_e - d_fit_sus_mort_postno$left_age_e
 endlive_age2date <- d_fit_endlive$left_period_e - d_fit_endlive$left_age_e
-
 
 ################################################################
 ###
@@ -80,16 +70,15 @@ endlive_age2date <- d_fit_endlive$left_period_e - d_fit_endlive$left_age_e
 # Z_age <- splinebasis%*%Z
 # nknots_age <- dim(Z_age)[2]
 
-########################################
+#############################################
 ###
-### Spline basis matrix for Period
+### Spline basis matrix for Period Effects
 ###
-##########################################
+#############################################
 
 intvl_period <- 13
 knots_period <- c(1,seq(intvl_period, nT_period_collar, by = intvl_period))
 knots_period <- unique(knots_period)
-nknots_period <- length(knots_period)
 splinebasis <- bs(1:nT_period_collar, knots = knots_period)
 constr_sumzero <- matrix(1, 1, nrow(splinebasis)) %*% splinebasis
 qrc <- qr(t(constr_sumzero))
@@ -108,8 +97,9 @@ nknots_period <- dim(Z_period)[2]
 
 ################################################################
 ###
-### Function for Basis - Convex shape 
-### neither decreasing or increasing
+### Function for Basis Expansion - 
+### Convex shape neither decreasing or increasing
+### From Meyer et al (2008)
 ###
 ################################################################
 
@@ -146,10 +136,8 @@ convex = function(x, t, pred.new=TRUE){
   v1=1:n*0+1
   v2=x
   x.mat=cbind(v1,v2)
-
   if(pred.new==TRUE){
     list(sigma=sigma,x.mat=x.mat)}
-
   else{
     if(pred.new==FALSE){
       coef=solve(t(x.mat)%*%x.mat)%*%t(x.mat)%*%t(sigma)

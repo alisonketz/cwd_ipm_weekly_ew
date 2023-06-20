@@ -17,33 +17,23 @@ age_lookup_m <- c(rep(1:4, each = intvl_step_yr_weekly),
 age_lookup_m <- c(age_lookup_m,
                   rep(6, nT_age_surv - length(age_lookup_m)))
 
-# This is what I used before
-# age_lookup_f <- c(rep(1:4, each = intvl_step_yr_weekly),
-#                        rep(5, 2 * intvl_step_yr_weekly),
-#                        rep(6, 3 * intvl_step_yr_weekly),
-#                        7)
-# age_lookup_m <- age_lookup_f
-# age_lookup_m[age_lookup_m == 7] <- 6
-# n_age_lookup <- length(age_lookup_f)
-
-###################################################################################
-### age to date conversion within model
-###################################################################################
-
-# birth_start <- min(cwd_df$birth_date)
+######################################################
+### age to date conversion for FOI age/period effects
+######################################################
 study_start_ext <- "1985-05-15"
-death_end <- "2022-05-15"
+death_end <- "2022-05-14"
+
 cwd_df$birthweek <- (interval(study_start_ext,
-                            cwd_df$birth_date) %/% weeks(1)) + 1
+                            cwd_df$birth_date) %/% weeks(1))# + 1
 cwd_df$weekkill <- interval(study_start_ext,
                             cwd_df$kill_date) %/% weeks(1)
 cwd_df$yearkill <- cwd_df$kill_year - year(study_start_ext) + 1
 
 # interval("1994-05-15","1995-01-01") %/% weeks(1)
-# interval("1985-05-15","1994-05-15") %/% weeks(1)
+# interval("1985-05-15","1994-05-15") %/% weeks(1) #469, which is 1 less than nT_period_prestudy?
 
-period_lookup_foi <- c(rep(1, nT_period_prestudy_ext),
-                       rep(1, interval("1994-05-15","1995-01-01")%/%weeks(1)),
+period_lookup_foi <- c(rep(1, interval("1985-05-15","1994-05-15") %/% weeks(1)),
+                       rep(1, interval("1994-05-15","1995-01-01") %/% weeks(1)),
                        rep(2:n_year, each = intvl_step_yr_weekly))
 period_lookup_foi <- c(period_lookup_foi, rep(n_year,nT_period_overall_ext-
                                           length(period_lookup_foi)))
@@ -51,10 +41,9 @@ period_lookup_foi <- c(period_lookup_foi, rep(n_year,nT_period_overall_ext-
 (n_period_lookup <- length(period_lookup_foi))
 
 #############################################################################################
-###
-### Creating adjacency matrix and hyper parameter values for the dcar_normal implementation
-### For PERIOD 
-###
+### Creating adjacency matrix and hyper parameter
+### values for the dcar_normal implementation
+### for period effects for FOI 
 #############################################################################################
 
 #create num vector
@@ -76,32 +65,33 @@ weights_period <- rep(1, length(adj_period))
 ###
 #########################################################
 
-age_week_indx <- c(rep(1,52),#fawns
-                   rep(2,52),#1
-                   rep(3,52),#2
-                   rep(4,52),#3
-                   rep(5, 52 * 2),#4-5
-                   rep(6, 52 * 3),#6-8
-                   rep(7,nT_age_surv-length(c(rep(1,52),#fawns
-                                        rep(2,52),#1
-                   rep(3,52),#2
-                   rep(4,52),#3
-                   rep(5, 52 * 2),#4-5
-                   rep(6, 52 * 3)))))
+# age_week_indx <- c(rep(1,intvl_step_yr_weekly),#fawns
+#                    rep(2,intvl_step_yr_weekly),#1
+#                    rep(3,intvl_step_yr_weekly),#2
+#                    rep(4,intvl_step_yr_weekly),#3
+#                    rep(5, intvl_step_yr_weekly * 2),#4-5
+#                    rep(6, intvl_step_yr_weekly * 3),#6-8
+#                    rep(7,nT_age_surv - 
+#                          length(c(rep(1, intvl_step_yr_weekly),#fawns
+#                                   rep(2, intvl_step_yr_weekly),#1
+#                                   rep(3, intvl_step_yr_weekly),#2
+#                                   rep(4, intvl_step_yr_weekly),#3
+#                                   rep(5, intvl_step_yr_weekly * 2),#4-5
+#                                   rep(6, intvl_step_yr_weekly * 3)))))#6_
 
-period_week_indx <- c(rep(1,51),#2017
-                   rep(2,52),#2018
-                   rep(3,52),#2019
-                   rep(4,52),#2020
-                   rep(5,52),#2021
-                   rep(6,nT_period_collar - length(c(rep(1,51),#2017
-                                              rep(2,52),#2018
-                                              rep(3,52),#2019
-                                              rep(4,52),#2020
-                                              rep(5,52))))#2022
-                   )
+# period_week_indx <- c(rep(1,51),#2017
+#                    rep(2,52),#2018
+#                    rep(3,52),#2019
+#                    rep(4,52),#2020
+#                    rep(5,52),#2021
+#                    rep(6,nT_period_collar - length(c(rep(1,51),#2017
+#                                               rep(2,52),#2018
+#                                               rep(3,52),#2019
+#                                               rep(4,52),#2020
+#                                               rep(5,52))))#2022
+#                    )
 
-period_week_indx_col <- period_week_indx + n_year_precollar_ext - 1
+# period_week_indx_col <- period_week_indx + n_year_precollar_ext - 1
 
 ###############################################################
 ###
@@ -117,7 +107,5 @@ period_week_indx_col <- period_week_indx + n_year_precollar_ext - 1
 cwd_df_agg <- cwd_df %>% 
               group_by(teststatus, ageweeks, birthweek, sex, ew) %>%
               summarise(n_cases = n(), .groups = 'drop')
-cwd_df_agg
-
 d_fit_hunt_neg <- cwd_df_agg[cwd_df_agg$teststatus == 0, ]
 d_fit_hunt_pos <- cwd_df_agg[cwd_df_agg$teststatus == 1, ]

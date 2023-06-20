@@ -269,10 +269,10 @@ nb <- .5
 bin <- ni * nb
 nt <- 1
 nc <- 3
-mod.nam = "mod"
+mod_nam = "mod"
 
-Rht.required <- 5
-neff.required <-
+Rht_required <- 5
+neff_required <-
 
 parameters <- c(
               "beta_male",
@@ -340,17 +340,17 @@ parameters <- c(
 #            data = nimData,
 #            constants = nimConsts,
 #            parameters = parameters,
-#            par.ignore.Rht = c(),
+#            par_ignore_Rht = c(),
 #            nc = 3,
 #            ni = 10,
 #            nb = 0.5,
 #            nt = 1,
-#            mod.nam = "mod",
+#            mod_nam = "mod",
 #           #  max.samples.saved = 1000,
 #            rtrn.model = F,
 #            sav.model = T,
-#            Rht.required = 4.1,
-#            neff.required = 1)
+#            Rht_required = 4.1,
+#            neff_required = 1)
 
 
 
@@ -443,9 +443,9 @@ out1 <-  mcmc.list(clusterEvalQ(cl, {
                             monitors = parameters,
                             thin = nt,
                             useConjugacy = FALSE)
-  confMCMC$removeSamplers(c("beta0_survival_sus", "beta0_survival_inf")) 
-  confMCMC$addSampler(target = "beta0_survival_sus", type = "slice")
-  confMCMC$addSampler(target = "beta0_survival_inf",  type = "slice")
+  # confMCMC$removeSamplers(c("beta0_survival_sus", "beta0_survival_inf")) 
+  # confMCMC$addSampler(target = "beta0_survival_sus", type = "slice")
+  # confMCMC$addSampler(target = "beta0_survival_inf",  type = "slice")
   nimMCMC <- buildMCMC(confMCMC)
   CmodelMCMC <- compileNimble(nimMCMC,
                             project = Rmodel)
@@ -469,23 +469,18 @@ for(chn in 1:nc) { # nc must be > 1
 
 ## Check convergence ##
 out2 <- out1
-ni.saved <- nrow(out2[[1]])
-for(chn in 1:nc) { # nc must be > 1
-  
-  if(nb < 1) {
-    nb.real <- (round(ni.saved * nb)+1)
-  } else {
-    nb.real <- (round(nb / nt) + 1)
-  }
-  out2[[chn]] <- out2[[chn]][nb.real:ni.saved,]
+ni_saved <- nrow(out2[[1]])
+for(chn in 1:nc) {
+  nb_real <- (round(ni_saved * nb) + 1)
+  out2[[chn]] <- out2[[chn]][nb_real:ni_saved,]
 }
-out.mcmc <- coda::as.mcmc.list(lapply(out1, coda::as.mcmc))
+out_mcmc <- coda::as.mcmc.list(lapply(out1, coda::as.mcmc))
 
-mod <- mcmcOutput::mcmcOutput(out.mcmc)
+mod <- mcmcOutput::mcmcOutput(out_mcmc)
 sumTab <- summary(mod,
                   MCEpc = FALSE,
                   Rhat = TRUE,
-                  n.eff = TRUE,
+                  n_eff = TRUE,
                   f = TRUE,
                   overlap0 = TRUE,
                   verbose = FALSE)
@@ -495,134 +490,109 @@ sumTab <- sumTab %>%
   as_tibble() %>%
   mutate(Parameter = row.names(sumTab)) %>%
  select(Parameter, mean:f)
-par.ignore.Rht <- c()
-if(length(par.ignore.Rht) == 0) {
-  mxRht <- sumTab %>% pull(Rhat) %>% max(na.rm = T)
-  mn.neff <- sumTab %>% pull(n.eff) %>% min(na.rm = T)
+par_ignore_Rht <- c()
+if(length(par_ignore_Rht) == 0) {
+  mx_Rht <- sumTab %>% pull(Rhat) %>% max(na.rm = T)
+  mn_neff <- sumTab %>% pull(n_eff) %>% min(na.rm = T)
 } else {
-  ind.ignore <- c()
-  for(p in 1:length(par.ignore.Rht)) ind.ignore <-
-      c(ind.ignore, which(str_detect(sumTab$Parameter, par.ignore.Rht[p]))) %>%
-      unique()
-  if(length(ind.ignore) > 0) {
-    mxRht <- sumTab %>% slice(-ind.ignore) %>% pull(Rhat) %>% max(na.rm = T)
-    mn.neff <- sumTab %>% slice(-ind.ignore) %>% pull(n.eff) %>% min(na.rm = T)
+  ind_ignore <- c()
+  for(p in 1:length(par_ignore_Rht)) {
+    ind_ignore <- c(ind_ignore,
+                   which(str_detect(sumTab$Parameter, par_ignore_Rht[p]))) %>%
+                      unique()
+
+  } 
+  if(length(ind_ignore) > 0) {
+    mx_Rht <- sumTab %>% slice(-ind_ignore) %>% pull(Rhat) %>% max(na.rm = T)
+    mn_neff <- sumTab %>% slice(-ind_ignore) %>% pull(n_eff) %>% min(na.rm = T)
   } else {
-    mxRht <- sumTab %>% pull(Rhat) %>% max(na.rm = T)
-    mn.neff <- sumTab %>% pull(n.eff) %>% min(na.rm = T)
+    mx_Rht <- sumTab %>% pull(Rhat) %>% max(na.rm = T)
+    mn_neff <- sumTab %>% pull(n_eff) %>% min(na.rm = T)
   }
 }
 
-mcmc.info <- c(nchains = nc,
-                niterations = ni,
-                burnin = ifelse(nb < 1, nb*ni, nb),
-                nthin = nt)
+mcmc_info <- c(nchains = nc,
+               niterations = ni,
+               burnin = nb,
+               nthin = nt)
 mod <- list(mcmcOutput = mod,
             summary = sumTab,
-            mcmc.info = mcmc.info)
-R.utils::saveObject(mod, mod.nam) # If running all in one.
+            mcmc_info = mcmc_info)
+R.utils::saveObject(mod, mod_nam)
 
 ## If has not converged, continue sampling
-if(round(mxRht, digits = 1) > Rht.required | mn.neff < neff.required) {
-  n.runs <- 1
+if(round(mx_Rht, digits = 1) > Rht_required | mn_neff < neff_required) {
+  n_runs <- 1
   # Save samples from previous run to drive.
-  R.utils::saveObject(out1, str_c("results/",mod.nam, "_chunk", n.runs))
+  R.utils::saveObject(out1, str_c("results/",mod_nam, "_chunk", n_runs))
 }
 
-# mcmcout2 <- clusterEvalQ(cl, {
-#   CmodelMCMC$run(ni, reset = FALSE, resetMV = TRUE) # Resume sampling.
-#   return(as.mcmc(as.matrix(CmodelMCMC$mvSamples)))
-#   gc(verbose = F)
-# })
-
-# for(chn in 1:nc) { # nc must be > 1
-#   ind.keep <- c()
-#   for(p in 1:length(parameters)) ind.keep <-
-#       c(ind.keep, which(str_detect(dimnames(mcmcout2[[chn]])[[2]], parameters[p]))) %>% unique()
-#   mcmcout2[[chn]] <- mcmcout2[[chn]][,ind.keep]
-# }
-# mod.nam = "mod"
-# n.runs <- 2
-# R.utils::saveObject(mcmcout2, str_c(mod.nam, "_chunk", n.runs)) # Save samples from previous run to drive.
-
-while(round(mxRht, digits = 1) > Rht.required | mn.neff < neff.required) {
-    n.runs <- n.runs + 1
+while(round(mx_Rht, digits = 1) > Rht_required | mn_neff < neff_required) {
+    n_runs <- n_runs + 1
     print(str_c("Run = ",
-                n.runs,
+                n_runs,
                 ". Max Rhat = ",
-                mxRht,
+                mx_Rht,
                 " and min neff = ",
-                mn.neff,
+                mn_neff,
                 ". Keep chugging."))
     out2 <- clusterEvalQ(cl, {
       # Resume sampling.
       CmodelMCMC$run(ni,
                       reset = FALSE,
-                      resetMV = TRUE) 
+                      resetMV = TRUE)
       return(as.mcmc(as.matrix(CmodelMCMC$mvSamples)))
       gc(verbose = F)
     })
     for(chn in 1:nc) { # nc must be > 1
-      ind.keep <- c()
+      ind_keep <- c()
       for(p in 1:length(parameters)){
-        ind.keep <-
-          c(ind.keep, which(str_detect(dimnames(out2[[chn]])[[2]],
+        ind_keep <-
+          c(ind_keep, which(str_detect(dimnames(out2[[chn]])[[2]],
                                         parameters[p]))) %>% unique()
       }
-      out2[[chn]] <- out2[[chn]][, ind.keep]
+      out2[[chn]] <- out2[[chn]][, ind_keep]
     }
     # Save samples from previous run to drive.
     R.utils::saveObject(out2,
                         str_c("results/",
-                        mod.nam,
+                        mod_nam,
                         "_chunk",
-                        n.runs))
-    if(nb < 1) {  
-      # Anticipated number of samples to save 
-      # (assuming half discarded as burn-in).
-      ni2 <- round(((ni / nt) * n.runs * nc) * (1 - nb))
-    } else {
-      ni2 <- round(((ni / nt) * n.runs * nc) - (nb / nt * nc))
-    }
-    if(ni2 > max.samples.saved) {
-      nt2 <- round(1 / (max.samples.saved / ni2)) # Set additional thinning so that saved iterations don't exceed (by too much) max.samples.saved (specified by user).
-    } else {
-      nt2 <- 1
-    }
-    
+                        n_runs))
+
+    # Anticipated number of samples to save
+    # (assuming half discarded as burn-in).
+    ni2 <- round(((ni / nt) * n_runs * nc) * (1 - nb))
+
     # Reassemble chain from chunks and apply additional thinning.
-    out1 <- R.utils::loadObject(str_c(mod.nam, "_chunk", 1))
-    ni.saved <- nrow(out1[[1]])
+    out1 <- R.utils::loadObject(str_c(mod_nam, "_chunk", 1))
+    ni_saved <- nrow(out1[[1]])
     for(chn in 1:nc) { # nc must be > 1
-      out1[[chn]] <- out1[[chn]][seq(2, ni.saved, by = nt2),] # Starting at 2 because first iteration is NA for some reason.
+      out1[[chn]] <- out1[[chn]][seq(2, ni_saved, by = nt),] # Starting at 2 because first iteration is NA for some reason.
     }
-    for(r in 2:n.runs) {
-      out.r <- R.utils::loadObject(str_c(mod.nam, "_chunk", r))
-      ni.saved <- nrow(out.r[[1]])
+    for(r in 2:n_runs) {
+      out_r <- R.utils::loadObject(str_c(mod_nam, "_chunk", r))
+      ni_saved <- nrow(out_r[[1]])
       for(chn in 1:nc) {
-        out.r[[chn]] <- out.r[[chn]][seq(1, ni.saved, by = nt2),]
-        out1[[chn]] <- rbind(out1[[chn]], out.r[[chn]])
+        out_r[[chn]] <- out_r[[chn]][seq(1, ni_saved, by = nt),]
+        out1[[chn]] <- rbind(out1[[chn]], out_r[[chn]])
       }
     }
 
     # Discard specified proportion of initial samples as burn-in
     out3 <- out1
-    ni.saved <- nrow(out3[[1]])
+    ni_saved <- nrow(out3[[1]])
     for(chn in 1:nc) {
-      if(nb < 1) {
-        nb.real <- (round(ni.saved * nb)+1)
-      } else {
-        nb.real <- round((nb / (nt * nt2))+1)
-      }
-      out3[[chn]] <- out3[[chn]][nb.real:ni.saved,]
+      nb_real <- (round(ni_saved * nb) + 1)
+      out3[[chn]] <- out3[[chn]][nb_real:ni_saved, ]
     }
-    out.mcmc.update <- coda::as.mcmc.list(lapply(out3, coda::as.mcmc))
+    out_mcmc_update <- coda::as.mcmc.list(lapply(out3, coda::as.mcmc))
     
-    mod <- mcmcOutput(out.mcmc.update)
+    mod <- mcmcOutput(out_mcmc_update)
     sumTab <- summary(mod,
                       MCEpc = F,
                       Rhat = T,
-                      n.eff = T,
+                      n_eff = T,
                       f = T,
                       overlap0 = T,
                       verbose = F)
@@ -630,46 +600,46 @@ while(round(mxRht, digits = 1) > Rht.required | mn.neff < neff.required) {
       as_tibble() %>%
       mutate(Parameter = row.names(sumTab)) %>%
       select(Parameter, mean:f)
-    if(length(par.ignore.Rht) == 0) {
-      mxRht <- sumTab  %>% pull(Rhat) %>% max(na.rm = T)
-      mn.neff <- sumTab %>% pull(n.eff) %>% min(na.rm = T)
+    if(length(par_ignore_Rht) == 0) {
+      mx_Rht <- sumTab  %>% pull(Rhat) %>% max(na.rm = T)
+      mn_neff <- sumTab %>% pull(n_eff) %>% min(na.rm = T)
     } else {
-      if(length(ind.ignore) > 0) {
-        mxRht <- sumTab %>% slice(-ind.ignore) %>% pull(Rhat) %>% max(na.rm = T)
-        mn.neff <- sumTab %>% slice(-ind.ignore) %>% pull(n.eff) %>% min(na.rm = T)
+      if(length(ind_ignore) > 0) {
+        mx_Rht <- sumTab %>% slice(-ind_ignore) %>% pull(Rhat) %>% max(na.rm = T)
+        mn_neff <- sumTab %>% slice(-ind_ignore) %>% pull(n_eff) %>% min(na.rm = T)
       } else {
-        mxRht <- sumTab %>% pull(Rhat) %>% max(na.rm = T)
-        mn.neff <- sumTab %>% pull(n.eff) %>% min(na.rm = T)
+        mx_Rht <- sumTab %>% pull(Rhat) %>% max(na.rm = T)
+        mn_neff <- sumTab %>% pull(n_eff) %>% min(na.rm = T)
       }
     }
     gc(verbose = F)
 
-    mcmc.info <- c(nchains = nc,
-                   niterations = ni * n.runs,
-                   burnin = ifelse(nb<1, round(ni.saved * nb), nb),
-                   nthin = nt * nt2)
+    mcmc_info <- c(nchains = nc,
+                   niterations = ni * n_runs,
+                   burnin = nb,
+                   nthin = nt)
     mod <- list(mcmcOutput = mod,
                 summary = sumTab,
-                mcmc.info = mcmc.info)
-    R.utils::saveObject(mod, mod.nam) # If running all in one.
+                mcmc_info = mcmc_info)
+    R.utils::saveObject(mod, mod_nam) # If running all in one.
 }
 
 
-# par.ignore.Rht=c()
-# if(length(par.ignore.Rht) == 0) {
-#       mxRht <- sumTab %>% pull(Rhat) %>% max(na.rm = T)
-#       mn.neff <- sumTab %>% pull(n.eff) %>% min(na.rm = T)
+# par_ignore_Rht=c()
+# if(length(par_ignore_Rht) == 0) {
+#       mx_Rht <- sumTab %>% pull(Rhat) %>% max(na.rm = T)
+#       mn_neff <- sumTab %>% pull(n_eff) %>% min(na.rm = T)
 # } else {
-#     ind.ignore <- c()
-#     for(p in 1:length(par.ignore.Rht)) ind.ignore <-
-#         c(ind.ignore, which(str_detect(sumTab$Parameter, par.ignore.Rht[p]))) %>%
+#     ind_ignore <- c()
+#     for(p in 1:length(par_ignore_Rht)) ind_ignore <-
+#         c(ind_ignore, which(str_detect(sumTab$Parameter, par_ignore_Rht[p]))) %>%
 #         unique()
-#     if(length(ind.ignore) > 0) {
-#         mxRht <- sumTab %>% slice(-ind.ignore) %>% pull(Rhat) %>% max(na.rm = T)
-#         mn.neff <- sumTab %>% slice(-ind.ignore) %>% pull(n.eff) %>% min(na.rm = T)
+#     if(length(ind_ignore) > 0) {
+#         mx_Rht <- sumTab %>% slice(-ind_ignore) %>% pull(Rhat) %>% max(na.rm = T)
+#         mn_neff <- sumTab %>% slice(-ind_ignore) %>% pull(n_eff) %>% min(na.rm = T)
 #     } else {
-#         mxRht <- sumTab %>% pull(Rhat) %>% max(na.rm = T)
-#         mn.neff <- sumTab %>% pull(n.eff) %>% min(na.rm = T)
+#         mx_Rht <- sumTab %>% pull(Rhat) %>% max(na.rm = T)
+#         mn_neff <- sumTab %>% pull(n_eff) %>% min(na.rm = T)
 #     }
 # }
 
@@ -702,4 +672,4 @@ dim(mod_chunk2[[2]])
 ###
 
 # save(runtime,file="results/runtime.Rdata")
-# save(mcmcout,file="results/mcmcout.Rdata")
+# save(mcmcout,file="results/mcmcout_rdata")

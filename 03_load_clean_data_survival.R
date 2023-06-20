@@ -533,7 +533,7 @@ df_cap$recap_cwd_date <- df_cap$recap_cwd
 ###
 ##########################################################
 
-d_mort$estmortdate[d_mort$lowtag==6882] <- d_mort$collarfound[d_mort$lowtag==6882]
+# d_mort$estmortdate[d_mort$lowtag==6882] <- d_mort$collarfound[d_mort$lowtag==6882]
 
 ##########################################################
 ###
