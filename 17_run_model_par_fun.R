@@ -289,8 +289,8 @@ parameters <- c(
               "f_period_foi",
               "m_period_foi",
               "space",
-              "space_temp",
-              "space_mix",
+              # "space_temp",
+              # "space_mix",
               # "beta0_sus_temp",
               # "sus_mix",
               "beta0_survival_sus",
@@ -456,14 +456,16 @@ out1 <-  mcmc.list(clusterEvalQ(cl, {
 }))
 # (runtime1 <- difftime(Sys.time(), starttime, units = "min"))
 
+#removing the first row which is initialized as NA
 for(chn in 1:nc) { # nc must be > 1
-  ind_keep <- c()
-  for(p in 1:length(parameters)) {
-    ind_keep <- c(ind_keep,
-        which(str_detect(dimnames(out1[[chn]])[[2]], parameters[p]))) %>%
-        unique()
-  }
-  out1[[chn]] <- out1[[chn]][2:nrow(out1[[chn]]),ind_keep]
+  # ind_keep <- c()
+  # for(p in 1:length(parameters)) {
+  #   ind_keep <- c(ind_keep,
+  #       which(str_detect(dimnames(out1[[chn]])[[2]], parameters[p]))) %>%
+  #       unique()
+  # }
+  # out1[[chn]] <- out1[[chn]][2:nrow(out1[[chn]]),ind_keep]
+  out1[[chn]] <- out1[[chn]][2:nrow(out1[[chn]]),]
 }
 
 
@@ -483,33 +485,35 @@ sumTab <- summary(mod,
                   n_eff = TRUE,
                   f = TRUE,
                   overlap0 = TRUE,
-                  verbose = FALSE)
-# sumTab$Rhat <- mcmcOutput::getRhat(mod)
+                  verbose = FALSE,
+                  bad=TRUE)
+sumTab$Rhat <- mcmcOutput::getRhat(mod)
 
 sumTab <- sumTab %>%
   as_tibble() %>%
-  mutate(Parameter = row.names(sumTab)) %>%
- select(Parameter, mean:f)
-par_ignore_Rht <- c()
-if(length(par_ignore_Rht) == 0) {
-  mx_Rht <- sumTab %>% pull(Rhat) %>% max(na.rm = T)
-  mn_neff <- sumTab %>% pull(n_eff) %>% min(na.rm = T)
-} else {
-  ind_ignore <- c()
-  for(p in 1:length(par_ignore_Rht)) {
-    ind_ignore <- c(ind_ignore,
-                   which(str_detect(sumTab$Parameter, par_ignore_Rht[p]))) %>%
-                      unique()
+  mutate(Parameter = row.names(sumTab))# %>%
+  # select(Parameter, mean:f)
 
-  } 
-  if(length(ind_ignore) > 0) {
-    mx_Rht <- sumTab %>% slice(-ind_ignore) %>% pull(Rhat) %>% max(na.rm = T)
-    mn_neff <- sumTab %>% slice(-ind_ignore) %>% pull(n_eff) %>% min(na.rm = T)
-  } else {
+# par_ignore_Rht <- c()
+# if(length(par_ignore_Rht) == 0) {
+#   mx_Rht <- sumTab %>% pull(Rhat) %>% max(na.rm = T)
+#   mn_neff <- sumTab %>% pull(n_eff) %>% min(na.rm = T)
+# } else {
+#   ind_ignore <- c()
+#   for(p in 1:length(par_ignore_Rht)) {
+#     ind_ignore <- c(ind_ignore,
+#                    which(str_detect(sumTab$Parameter, par_ignore_Rht[p]))) %>%
+#                       unique()
+
+#   } 
+  # if(length(ind_ignore) > 0) {
+  #   mx_Rht <- sumTab %>% slice(-ind_ignore) %>% pull(Rhat) %>% max(na.rm = T)
+  #   mn_neff <- sumTab %>% slice(-ind_ignore) %>% pull(n_eff) %>% min(na.rm = T)
+  # } else {
     mx_Rht <- sumTab %>% pull(Rhat) %>% max(na.rm = T)
     mn_neff <- sumTab %>% pull(n_eff) %>% min(na.rm = T)
-  }
-}
+  # }
+# }
 
 mcmc_info <- c(nchains = nc,
                niterations = ni,

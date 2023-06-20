@@ -19,15 +19,14 @@
 # length(lookup_pe_surv)
 # nT_period_overall_ext
 
-
-
 ##########################################
 ###
 ### age class indexing and period indexing
 ###
 ##########################################
-n_age_lookup <- length(age_lookup_f)
-age_lookup_col <- c(age_lookup_f,rep(n_ageclassf,max(d_surv$right_age_s,na.rm=TRUE) - n_age_lookup))
+
+age_lookup_col <- c(age_lookup_f,
+                    rep(n_ageclassf, max(d_surv$right_age_s,na.rm=TRUE) - nT_age_surv))
 age_lookup_col_f <- age_lookup_col
 age_lookup_col_m <- age_lookup_col
 age_lookup_col_m[age_lookup_col == 7] <- 6
