@@ -119,7 +119,8 @@ source("16_modelcode.R")
 ###########################################################
 
 # source("17_run_model.R")
-source("17_run_model_par.R")
+# source("17_run_model_par.R")
+source("18_run_model_par_fun.R")
 
 ###########################################################
 ### Post processing
