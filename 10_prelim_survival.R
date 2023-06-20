@@ -77,7 +77,7 @@ endlive_age2date <- d_fit_endlive$left_period_e - d_fit_endlive$left_age_e
 #############################################
 
 intvl_period <- 13
-knots_period <- c(1,seq(intvl_period, nT_period_collar, by = intvl_period))
+knots_period <- c(seq(2,nT_period_collar, by = intvl_period))
 knots_period <- unique(knots_period)
 splinebasis <- bs(1:nT_period_collar, knots = knots_period)
 constr_sumzero <- matrix(1, 1, nrow(splinebasis)) %*% splinebasis
@@ -132,7 +132,6 @@ convex = function(x, t, pred.new=TRUE){
   sigma[k+2,i1]=0
   i2=x>t[k+1]
   sigma[k+2,i2]=(x[i2]-t[k+1])^3/(t[k+2]-t[k+1])^2/3
- 
   v1=1:n*0+1
   v2=x
   x.mat=cbind(v1,v2)
