@@ -221,34 +221,64 @@ calc_surv_harvest <- nimble::nimbleFunction(
 	############################################
 
     ### Females
-    for(j in 1:nT_period) {
-        for(i in 1:nT_age_short_f) {
-            UCH[1, i, j] <- exp(beta0 +
-                                age_effect[i] +
-                                period_effect[j])
-        }
-        for(i in (nT_age_short_f + 1):(nT_age_surv_aah_f)) {
-            UCH[1, i, j] <- exp(beta0 +
+    UCH[1, 1:nT_age_short_f, 1:nT_period] <- exp(beta0 +
+                                age_effect[1:nT_age_short_f] +
+                                period_effect[1:nT_period])
+    UCH[1, (nT_age_short_f + 1):(nT_age_surv_aah_f), 1:nT_period] <- exp(beta0 +
                                 mu_old_age_effect_f +
-                                period_effect[j])
-        }
-    }
-
+                                period_effect[1:nT_period])
     ### Males
-    for(j in 1:nT_period) {
-        for(i in 1:nT_age_short_m) {
-            UCH[2, i, j] <- exp(beta0 +
+    UCH[2, 1:nT_age_short_m, 1:nT_period] <- exp(beta0 +
                                 beta_male +
-                                age_effect[i] +
-                                period_effect[j])
-        }
-        for(i in (nT_age_short_m + 1):(nT_age_surv_aah_m)) {
-            UCH[2, i, j] <- exp(beta0 +
+                                age_effect[1:nT_age_short_m] +
+                                period_effect[1:nT_period])
+    UCH[2, (nT_age_short_m + 1):(nT_age_surv_aah_m), 1:nT_period] <- exp(beta0 +
                                 beta_male +
                                 mu_old_age_effect_m +
-                                period_effect[j])
-        }
-    }
+                                period_effect[1:nT_period])
+
+    # for(j in 1:nT_period) {
+    #     for(i in 1:nT_age_short_m) {
+    #         UCH[2, i, j] <- exp(beta0 +
+    #                             beta_male +
+    #                             age_effect[i] +
+    #                             period_effect[j])
+    #     }
+    #     for(i in (nT_age_short_m + 1):(nT_age_surv_aah_m)) {
+    #         UCH[2, i, j] <- exp(beta0 +
+    #                             beta_male +
+    #                             mu_old_age_effect_m +
+    #                             period_effect[j])
+    #     }
+    # }
+    ### Females
+    # for(j in 1:nT_period) {
+    #     for(i in 1:nT_age_short_f) {
+    #         UCH[1, i, j] <- exp(beta0 +
+    #                             age_effect[i] +
+    #                             period_effect[j])
+    #     }
+    #     for(i in (nT_age_short_f + 1):(nT_age_surv_aah_f)) {
+    #         UCH[1, i, j] <- exp(beta0 +
+    #                             mu_old_age_effect_f +
+    #                             period_effect[j])
+    #     }
+    # }
+    ### Males
+    # for(j in 1:nT_period) {
+    #     for(i in 1:nT_age_short_m) {
+    #         UCH[2, i, j] <- exp(beta0 +
+    #                             beta_male +
+    #                             age_effect[i] +
+    #                             period_effect[j])
+    #     }
+    #     for(i in (nT_age_short_m + 1):(nT_age_surv_aah_m)) {
+    #         UCH[2, i, j] <- exp(beta0 +
+    #                             beta_male +
+    #                             mu_old_age_effect_m +
+    #                             period_effect[j])
+    #     }
+    # }
 	############################################
 	# adjust hazards to remove harvest hazards
 	############################################

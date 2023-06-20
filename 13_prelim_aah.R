@@ -24,6 +24,7 @@ df_age_before_male <- df_age_before %>%
 df_age_before_antlerless <- df_age_before_female
 df_age_before_antlered <- df_age_before_male
 
+#adding male fawns to anterless females
 df_age_before_antlerless$n[df_age_before_antlerless$age == 0] <-
               df_age_before_female$n[df_age_before_female$age == 0] +
               df_age_before_male$n[df_age_before_male$age == 0]
@@ -31,6 +32,7 @@ df_age_before_antlerless$n[df_age_before_antlerless$age == 0] <-
 df_age_before_antlered <- df_age_before_male %>% filter(age != 0)
 df_age_before_female_nofawn <- df_age_before_female %>% filter(age != 0)
 
+#ratio to calculate sex-ratio for initial population
 doe_per <- df_age_before_female_nofawn$n[
                 df_age_before_female_nofawn$age == 1] /
                 sum(df_age_before_female_nofawn$n)
@@ -50,10 +52,9 @@ df_age_before_male$proportion <-
     df_age_before_male$n / sum(df_age_before_male$n)
 
 ########################################
-###
-### Hyper prior for  sex-age
+### Hyper prior for  study-area- sex-age
 ### structured initial population size
-###
+### accounting for CWD infection
 ########################################
 
 ###################
@@ -514,3 +515,4 @@ d_fit_notest$age2date_weeks <- interval("1985-05-15", d_fit_notest$birth_date)%/
 d_fit_notest$age2date_months <-interval("1985-05-15", d_fit_notest$birth_date)%/% months(1)
 d_fit_notest$study_area <- ifelse(d_fit_notest$study_area == "east",1,2)
 d_fit_notest <- d_fit_notest[d_fit_notest$n > 0,]
+

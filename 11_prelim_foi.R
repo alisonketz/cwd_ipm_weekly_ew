@@ -49,10 +49,9 @@ min(cwd_df$birth_date)
 interval("1985-05-15","1992-05-15") %/% weeks(1) #365
 ### and if I don't add 1, then this is the correct birth week, but given 
 min(cwd_df$birthweek) #365
-### this appears to be okay.... 
+### this appears to be okay...
 ###############################################################
 ###############################################################
-
 
 cwd_df$weekkill <- interval(study_start_ext,
                             cwd_df$kill_date) %/% weeks(1)

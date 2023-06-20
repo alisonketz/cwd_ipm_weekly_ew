@@ -19,7 +19,7 @@ runNimbleParallel <-
     source("16_modelcode.R")
     # if(nb < 1 & (ni - (ni * nb)) < 100) stop("Increase iterations (ni) or reduce burn-in. Too few samples for calculating Rhat.")
     # if(nb >= 1 & (ni - nb) < 100) stop("Increase iterations (ni) or reduce burn-in. Too few samples for calculating Rhat.")
-    
+
     require(nimble)
     require(parallel)
     require(coda)

@@ -77,8 +77,8 @@ endlive_age2date <- d_fit_endlive$left_period_e - d_fit_endlive$left_age_e
 #############################################
 
 intvl_period <- 13
-knots_period <- c(seq(2,nT_period_collar, by = intvl_period))
-knots_period <- unique(knots_period)
+knots_period <- c(seq(1,nT_period_collar, by = intvl_period))
+knots_period <- knots_period[2:length(knots_period)]
 splinebasis <- bs(1:nT_period_collar, knots = knots_period)
 constr_sumzero <- matrix(1, 1, nrow(splinebasis)) %*% splinebasis
 qrc <- qr(t(constr_sumzero))
