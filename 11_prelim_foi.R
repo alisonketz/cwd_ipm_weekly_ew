@@ -24,13 +24,41 @@ study_start_ext <- "1985-05-15"
 death_end <- "2022-05-14"
 
 cwd_df$birthweek <- (interval(study_start_ext,
-                            cwd_df$birth_date) %/% weeks(1))# + 1
+                            cwd_df$birth_date) %/% weeks(1)) + 1
+
+###############################################################
+###############################################################
+### For glenn and I to discuss.... 
+### I had birthweek specified with "+ 1", because in the
+#### but when I incorporate the age2date vector for the surveillance data
+#### i've used 
+#hunt_pos_age2date = d_fit_hunt_pos$birthweek - 1,
+#hunt_neg_age2date = d_fit_hunt_neg$birthweek - 1,
+### because in the likelihood, we index for loops and add those indexes, 
+### starting with age 1, so we default add one back in in the age2date conversion
+### but the problem that I have here, is that the 
+### parameter indicating the number of intervals prior to the start of the study
+nT_period_prestudy_ext 
+### this is 470, which is when the study starts, but when I calculate this using 
+### the interval function, I get 469
+interval("1985-05-15","1994-05-14") %/% weeks(1) #469
+### which indicates that there are 469 intervals prior to study starting, 
+### the minimum birth date, "1992-05-15" 
+min(cwd_df$birth_date)
+### this aligns with the interval 365
+interval("1985-05-15","1992-05-15") %/% weeks(1) #365
+### and if I don't add 1, then this is the correct birth week, but given 
+min(cwd_df$birthweek) #365
+### this appears to be okay.... 
+###############################################################
+###############################################################
+
+
 cwd_df$weekkill <- interval(study_start_ext,
                             cwd_df$kill_date) %/% weeks(1)
 cwd_df$yearkill <- cwd_df$kill_year - year(study_start_ext) + 1
 
 # interval("1994-05-15","1995-01-01") %/% weeks(1)
-# interval("1985-05-15","1994-05-15") %/% weeks(1) #469, which is 1 less than nT_period_prestudy?
 
 period_lookup_foi <- c(rep(1, interval("1985-05-15","1994-05-15") %/% weeks(1)),
                        rep(1, interval("1994-05-15","1995-01-01") %/% weeks(1)),
