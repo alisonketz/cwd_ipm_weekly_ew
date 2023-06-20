@@ -24,7 +24,7 @@ study_start_ext <- "1985-05-15"
 death_end <- "2022-05-14"
 
 cwd_df$birthweek <- (interval(study_start_ext,
-                            cwd_df$birth_date) %/% weeks(1)) + 1
+                            cwd_df$birth_date) %/% weeks(1))
 
 ###############################################################
 ###############################################################
