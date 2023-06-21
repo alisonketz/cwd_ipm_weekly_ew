@@ -289,12 +289,6 @@ dSusHarvest <- nimble::nimbleFunction(
                     f_age_foi[age_lookup_f[a[i]]] +
                     f_period_foi[period_lookup_foi[age2date[i] + a[i]]])
             } else { # age loops for males
-                if(a[i] == 1) {
-
-                }
-
-
-
                 for (j in 1:(a[i] - 1)) {
                     # sum up foi and sus hazards from 1  to a-1
                     sum_haz <- sum_haz +
