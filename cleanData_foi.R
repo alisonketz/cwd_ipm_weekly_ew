@@ -50,15 +50,15 @@ cleanData <- function(x){
   x$birth_date <- as.Date(x$birth_date)
 
   #calculating age at death in days, weeks, and months
-  x$agedays <- difftime(x$kill_date,x$birth_date) 
-  x$ageweeks  <- ceiling(interval(x$birth_date,x$kill_date) / weeks(1))
-  x$agemonths <- ceiling(interval(x$birth_datex$kill_date) / months(1))
+  x$agedays <- difftime(x$kill_date, x$birth_date) 
+  x$ageweeks  <- ceiling(interval(x$birth_date, x$kill_date) / weeks(1))
+  x$agemonths <- ceiling(interval(x$birth_date, x$kill_date) / months(1))
 
   #removing the few fawns that were negative and only 1 month old or less,
   #although these are unlikely to actually be born within the year we assume
   # x <- x[which(x$ageweeks < 5), ]
   x <- x[which(x$agemonths != min(x$agemonths)), ]
-  
+
   #correcting ages in months
   x$age_num[x$age_num == 0] <- .5
   x$kill_year <- year(x$kill_date)
