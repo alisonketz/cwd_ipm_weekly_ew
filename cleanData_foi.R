@@ -7,6 +7,8 @@
 
 cleanData <- function(x){
 
+  library(lubridate)
+  
   ### convert age class to numeric
   x$age <- as.factor(x$age)
   levels(x$age) <- c("0","1","9","2","3","4","6","9")
@@ -49,8 +51,9 @@ cleanData <- function(x){
 
   #calculating age at death in days, weeks, and months
   x$agedays <- difftime(x$kill_date,x$birth_date) 
-  x$ageweeks  <- ceiling(difftime(x$kill_date,x$birth_date, units = "weeks")) 
-  x$agemonths <- (lubridate::interval(x$birth_date,x$kill_date) %/% months(1))
+  x$ageweeks  <- ceiling(interval(x$kill_date,x$birth_date) / weeks(1))
+
+  x$agemonths <- ceiling(interval(x$birth_date,x$kill_date) / months(1))
 
   #removing the 7 fawns that were negative and only 1 month old
   x <- x[which(x$agemonths != min(x$agemonths)), ]

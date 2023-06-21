@@ -1069,7 +1069,6 @@ df_age_inf <-rbind(df_age_inf,
 ### west study area
 ##########################
 
-
 # fixn9m <- length(which(!(2002:2021 %in% df_age_sus$year[df_age_sus$study_area == "west" & df_age_sus$sex=="Male" & df_age_sus$age==9])))
 # fixn6m <- length(which(!(2002:2021 %in% df_age_sus$year[df_age_sus$study_area == "west" & df_age_sus$sex=="Male" & df_age_sus$age==6])))
 # fixn4m <- length(which(!(2002:2021 %in% df_age_sus$year[df_age_sus$study_area == "west" & df_age_sus$sex=="Male" & df_age_sus$age==4])))
@@ -1111,7 +1110,7 @@ df_age_sus <-rbind(df_age_sus,
                               age = rep(6, fixn6m),
                              n = rep(0, fixn6m)))
 
-fixn9f <-length(which(!(2002:2021 %in% df_age_sus$year[df_age_sus$study_area == "west" & df_age_sus$sex=="Female" & df_age_sus$age==9])))
+# fixn9f <-length(which(!(2002:2021 %in% df_age_sus$year[df_age_sus$study_area == "west" & df_age_sus$sex=="Female" & df_age_sus$age==9])))
 # fixn6f <-length(which(!(2002:2021 %in% df_age_sus$year[df_age_sus$study_area == "west" & df_age_sus$sex=="Female" & df_age_sus$age==6])))
 # fixn4f <-length(which(!(2002:2021 %in% df_age_sus$year[df_age_sus$study_area == "west" & df_age_sus$sex=="Female" & df_age_sus$age==4])))
 # fixn3f <-length(which(!(2002:2021 %in% df_age_sus$year[df_age_sus$study_area == "west" & df_age_sus$sex=="Female" & df_age_sus$age==3])))
@@ -1352,6 +1351,15 @@ fixp9m <- length(which(!(1983:2021 %in% df_aah_notest$year[df_aah_notest$study_a
 # fixp2m <- length(which(!(1983:2021 %in% df_aah_notest$year[df_aah_notest$study_area == "east" & df_aah_notest$sex=="Male" & df_aah_notest$age==2])))
 # fixp1m <- length(which(!(1983:2021 %in% df_aah_notest$year[df_aah_notest$study_area == "east" & df_aah_notest$sex=="Male" & df_aah_notest$age==1])))
 # fixp0m <- length(which(!(1983:2021 %in% df_aah_notest$year[df_aah_notest$study_area == "east" & df_aah_notest$sex=="Male" & df_aah_notest$age==0])))
+
+# fixp9m
+# fixp6m
+# fixp4m
+# fixp3m
+# fixp2m
+# fixp1m
+# fixp0m
+
 
 df_aah_notest <-rbind(df_aah_notest,
                    data.frame(study_area = rep("east", fixp9m),

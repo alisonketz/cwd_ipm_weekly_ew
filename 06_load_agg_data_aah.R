@@ -7,8 +7,8 @@
 
 ### Number of age classes and sex classes
 n_study_area <- 2
-n_year_ext <- length(1985:2022)-1
-n_year <- length(1994:2022)-1
+n_year_ext <- 2022 - 1885
+n_year <- 2022 - 1994
 n_ageclass <- 7
 n_ageclassm <- 6
 n_ageclassf <- 7
@@ -16,10 +16,9 @@ n_agem <- 7
 n_agef <- 10
 n_sex <- 2
 
-
 #structuring classification data to fit into the model
-Cage_sus <- array(NA,c(n_study_area,n_sex,n_ageclassf,n_year))
-for(j in 1:n_year){
+Cage_sus <- array(NA, c(n_study_area, n_sex, n_ageclassf, n_year))
+for(j in 1:(n_year)) {
     Cage_sus[1,1,,j] <- df_age_sus$n[df_age_sus$year == (1993 + j) &
                                     df_age_sus$sex == "Female" &
                                     df_age_sus$study_area == "east"]

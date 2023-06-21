@@ -122,11 +122,10 @@ d_cap$cwdstatus3[which(is.na(d_cap$cwdstatus3))] <- "Negative"
 d_cap$cwdstatus4[which(is.na(d_cap$cwdstatus4))] <- "Negative"
 
 #converting this to 0/1, where 1 ==infected
-d_cap$cwdstatus1 <- as.numeric(d_cap$cwdstatus1)-1
-d_cap$cwdstatus2 <- as.numeric(d_cap$cwdstatus2)-1
-d_cap$cwdstatus3 <- as.numeric(d_cap$cwdstatus3)-1
-d_cap$cwdstatus4 <- as.numeric(d_cap$cwdstatus4)-1
-
+d_cap$cwdstatus1 <- as.numeric(d_cap$cwdstatus1) - 1
+d_cap$cwdstatus2 <- as.numeric(d_cap$cwdstatus2) - 1
+d_cap$cwdstatus3 <- as.numeric(d_cap$cwdstatus3) - 1
+d_cap$cwdstatus4 <- as.numeric(d_cap$cwdstatus4) - 1
 
 #calculating study year for the capture
 d_cap$year <- year(d_cap$date)
@@ -137,7 +136,7 @@ d_cap$year[month(d_cap$date) == 12 & d_cap$year == 2018] <- 2019
 d_cap$year[month(d_cap$date) == 12 & d_cap$year == 2017] <- 2018
 
 #start of the study (in weeks)
-start_week <- week(ymd('2017-01-09'))
+# start_week <- week(ymd('2017-01-09'))
 
 # #year of capture
 # d_cap$year <- NA
@@ -339,9 +338,10 @@ d_cap$ageatcap <- as.numeric(d_cap$ageatcap)
 
 #calculating age at capture in months
 # for(j in 2005:2017){cat(week(paste(j,"-05-21",sep="")),"\n")}
-#21 week of year
+#20th week of year
+
 #this could be any year
-pulse_week <- week("2018-05-25") 
+pulse_week <- week("2018-05-15") 
 
 ###
 ### The number of integrals within a year, 
@@ -353,15 +353,19 @@ intvl_step_yr_monthly <- 12
 
 d_cap$ageweek <- NA
 for (i in 1:n_cap){
-  
-  #if d_cap$date < May 25
+
+  #if d_cap$date < May 15
   if(week(ymd(d_cap$date[i])) < pulse_week){
-    d_cap$ageweek[i] <- week(ymd(d_cap$date[i])) + (intvl_step_yr_weekly - pulse_week) + floor(d_cap$ageatcap[i]) * intvl_step_yr_weekly
+    d_cap$ageweek[i] <- week(ymd(d_cap$date[i])) +
+                        (intvl_step_yr_weekly - pulse_week) +
+                        floor(d_cap$ageatcap[i]) * intvl_step_yr_weekly
   }
-  #if d_cap$date > May 25
+  #if d_cap$date > May 15
   else{
-    d_cap$ageweek[i] <- week(ymd(d_cap$date[i])) - pulse_week + floor(d_cap$ageatcap[i]) * intvl_step_yr_weekly
-  } 
+    d_cap$ageweek[i] <- week(ymd(d_cap$date[i])) -
+                        pulse_week +
+                        floor(d_cap$ageatcap[i]) * intvl_step_yr_weekly
+  }
 }
 
 ###
@@ -374,7 +378,7 @@ d_cap$agemonth <- c()
 for (i in 1:n_cap){
   
   #if d_cap$date < June 1
-  if(month(ymd(d_cap$date[i]))< 6 ){
+  if(month(ymd(d_cap$date[i])) < 6 ){
     d_cap$agemonth[i] <- month(ymd(d_cap$date[i])) + (intvl_step_yr_monthly - 6) + floor(d_cap$ageatcap[i]) * intvl_step_yr_monthly
   }
   #if d_cap$date > June 1
@@ -840,44 +844,39 @@ d_mort$pc7 <- p_cause_obs[, 7]
 ###
 ###################################################
 
-#start of the study (in weeks)
-start_week <- week(ymd('2017-01-09'))
-start_month <- month(ymd('2017-01-09'))
-
+study_origin <- "1985-05-15"
 df_cap <- df_cap[order(df_cap$date_cap),]
-df_cap$eweek <- (week(ymd(df_cap$date_cap)) - start_week + 1)
-df_cap$emonth <- (month(ymd(df_cap$date_cap)) - start_month + 1)
+df_cap$eweek <- ceiling(interval(study_origin,df_cap$date_cap) / weeks(1))
+df_cap$emonth <- ceiling(interval(study_origin,df_cap$date_cap) / months(1))
 
 #adding weeks to make each year a continuous time step from the very first year
-df_cap$eweek[df_cap$year == 2018 & month(df_cap$date_cap) != 12] <- df_cap$eweek[df_cap$year == 2018 & month(df_cap$date_cap) != 12] + intvl_step_yr_weekly#=df_cap$eweek[df_cap$year==2018]+51
-df_cap$eweek[df_cap$year == 2019 & month(df_cap$date_cap) == 12] <- df_cap$eweek[df_cap$year == 2019 & month(df_cap$date_cap) == 12] + intvl_step_yr_weekly
-df_cap$eweek[df_cap$year == 2019 & month(df_cap$date_cap) != 12] <- df_cap$eweek[df_cap$year == 2019 & month(df_cap$date_cap) != 12] + 2 * intvl_step_yr_weekly
-df_cap$eweek[df_cap$year == 2020 & month(df_cap$date_cap) == 12] <- df_cap$eweek[df_cap$year == 2020 & month(df_cap$date_cap) == 12] + 2 * intvl_step_yr_weekly
-df_cap$eweek[df_cap$year == 2020 & month(df_cap$date_cap) != 12] <- df_cap$eweek[df_cap$year == 2020 & month(df_cap$date_cap) != 12] + 3 * intvl_step_yr_weekly
+# df_cap$eweek[df_cap$year == 2018 & month(df_cap$date_cap) != 12] <- df_cap$eweek[df_cap$year == 2018 & month(df_cap$date_cap) != 12] + intvl_step_yr_weekly#=df_cap$eweek[df_cap$year==2018]+51
+# df_cap$eweek[df_cap$year == 2019 & month(df_cap$date_cap) == 12] <- df_cap$eweek[df_cap$year == 2019 & month(df_cap$date_cap) == 12] + intvl_step_yr_weekly
+# df_cap$eweek[df_cap$year == 2019 & month(df_cap$date_cap) != 12] <- df_cap$eweek[df_cap$year == 2019 & month(df_cap$date_cap) != 12] + 2 * intvl_step_yr_weekly
+# df_cap$eweek[df_cap$year == 2020 & month(df_cap$date_cap) == 12] <- df_cap$eweek[df_cap$year == 2020 & month(df_cap$date_cap) == 12] + 2 * intvl_step_yr_weekly
+# df_cap$eweek[df_cap$year == 2020 & month(df_cap$date_cap) != 12] <- df_cap$eweek[df_cap$year == 2020 & month(df_cap$date_cap) != 12] + 3 * intvl_step_yr_weekly
 
-#adding weeks to make each year a continuous time step from the very first year
-df_cap$emonth[df_cap$year == 2018 & month(df_cap$date_cap) != 12] <- df_cap$emonth[df_cap$year == 2018 & month(df_cap$date_cap) != 12] + 12#=df_cap$emonth[df_cap$year==2018]+51
-df_cap$emonth[df_cap$year == 2019 & month(df_cap$date_cap) == 12] <- df_cap$emonth[df_cap$year == 2019 & month(df_cap$date_cap) == 12] + 12
-df_cap$emonth[df_cap$year == 2019 & month(df_cap$date_cap) != 12] <- df_cap$emonth[df_cap$year == 2019 & month(df_cap$date_cap) != 12] + 2*12
-df_cap$emonth[df_cap$year == 2020 & month(df_cap$date_cap) == 12] <- df_cap$emonth[df_cap$year == 2020 & month(df_cap$date_cap) == 12] + 2*12
-df_cap$emonth[df_cap$year == 2020 & month(df_cap$date_cap) != 12] <- df_cap$emonth[df_cap$year == 2020 & month(df_cap$date_cap) != 12] + 3*12
+# #adding weeks to make each year a continuous time step from the very first year
+# df_cap$emonth[df_cap$year == 2018 & month(df_cap$date_cap) != 12] <- df_cap$emonth[df_cap$year == 2018 & month(df_cap$date_cap) != 12] + 12#=df_cap$emonth[df_cap$year==2018]+51
+# df_cap$emonth[df_cap$year == 2019 & month(df_cap$date_cap) == 12] <- df_cap$emonth[df_cap$year == 2019 & month(df_cap$date_cap) == 12] + 12
+# df_cap$emonth[df_cap$year == 2019 & month(df_cap$date_cap) != 12] <- df_cap$emonth[df_cap$year == 2019 & month(df_cap$date_cap) != 12] + 2*12
+# df_cap$emonth[df_cap$year == 2020 & month(df_cap$date_cap) == 12] <- df_cap$emonth[df_cap$year == 2020 & month(df_cap$date_cap) == 12] + 2*12
+# df_cap$emonth[df_cap$year == 2020 & month(df_cap$date_cap) != 12] <- df_cap$emonth[df_cap$year == 2020 & month(df_cap$date_cap) != 12] + 3*12
 
 ##################################################################################### 
 ### d_mort setting up last known alive
 #####################################################################################
 
-d_mort$sweek <- c()
-for(i in 1:nrow(d_mort)){
-  d_mort$sweek[i] <- week(d_mort$mortdate[i]) - start_week + 1
-  d_mort$year[i] <- year(d_mort$mortdate[i])
-}
+d_mort$sweek <- ceiling(interval(study_origin,d_mort$mortdate) / weeks(1))
+d_mort$smonth <- ceiling(interval(study_origin,d_mort$mortdate) / months(1))
+d_mort$year <- year(d_mort$mortdate)
 
 #recalibrating mortality weeks by study intervals in weeks
 #to account for different years
-for(i in 1:5){
-  d_mort$sweek[d_mort$year == (i + 2017)] <- d_mort$sweek[d_mort$year == (i + 2017)] +
-                                              (intvl_step_yr_weekly *i)
-}
+# for(i in 1:5){
+#   d_mort$sweek[d_mort$year == (i + 2017)] <- d_mort$sweek[d_mort$year == (i + 2017)] +
+#                                               (intvl_step_yr_weekly *i)
+# }
 
 # pdf("figures/mortality_hist_weeks.pdf")
   # hist(d_mort$sweek,breaks=100)
@@ -885,18 +884,18 @@ for(i in 1:5){
 
 d_mort$rweek <- d_mort$sweek - 1
 
-d_mort$smonth <- c()
-for(i in 1:nrow(d_mort)){
-  d_mort$smonth[i] <- month(d_mort$mortdate[i]) - start_month + 1
-  # d_mort$year[i] <- year(d_mort$mortdate[i])
-}
+# d_mort$smonth <- c()
+# for(i in 1:nrow(d_mort)){
+#   d_mort$smonth[i] <- month(d_mort$mortdate[i]) - start_month + 1
+#   # d_mort$year[i] <- year(d_mort$mortdate[i])
+# }
 
 #recalibrating mortality weeks by study intervals in weeks
 #to account for different years
-for(i in 1:5){
-  d_mort$smonth[d_mort$year == (i + 2017)] <- d_mort$smonth[d_mort$year == (i + 2017)] +
-                                               (intvl_step_yr_monthly * i)
-}
+# for(i in 1:5){
+#   d_mort$smonth[d_mort$year == (i + 2017)] <- d_mort$smonth[d_mort$year == (i + 2017)] +
+#                                                (intvl_step_yr_monthly * i)
+# }
 
 # pdf("figures/mortality_hist_month.pdf")
 #   hist(d_mort$smonth,breaks=200)
@@ -911,17 +910,20 @@ d_mort$rmonth <- d_mort$smonth - 1
 #########################################################################
 
 d_cens$year <- year(d_cens$censordate_use)
-d_cens$rweek <- week(d_cens$censordate_use) - start_week + 1
-d_cens$rmonth <- month(d_cens$censordate_use) - start_month + 1
+d_cens$rweek <- ceiling(interval(study_origin,d_cens$censordate_use) / weeks(1))
+d_cens$rmonth <- ceiling(interval(study_origin,d_cens$censordate_use) / months(1))
+
+# d_cens$rweek <- week(d_cens$censordate_use) - start_week + 1
+# d_cens$rmonth <- month(d_cens$censordate_use) - start_month + 1
 
 # table(d_cens$year)
-yrs <- 2018:2022
-for(i in 1:length(yrs)){
-  d_cens$rweek[d_cens$year==yrs[i]] <- d_cens$rweek[d_cens$year==yrs[i]] +
-                                            i * intvl_step_yr_weekly
-  d_cens$rmonth[d_cens$year==yrs[i]] <- d_cens$rmonth[d_cens$year==yrs[i]] +
-                                            i * intvl_step_yr_monthly
-}
+# yrs <- 2018:2022
+# for(i in 1:length(yrs)){
+#   d_cens$rweek[d_cens$year==yrs[i]] <- d_cens$rweek[d_cens$year==yrs[i]] +
+#                                             i * intvl_step_yr_weekly
+#   d_cens$rmonth[d_cens$year==yrs[i]] <- d_cens$rmonth[d_cens$year==yrs[i]] +
+#                                             i * intvl_step_yr_monthly
+# }
 # hist(d_cens$rweek,breaks=200)
 # hist(d_cens$rmonth,breaks=200)
 
@@ -937,10 +939,16 @@ df_cap$recap_disagewk <- 0
 df_cap$recap_dismonth <- 0
 df_cap$recap_disagemth <- 0
 
+
 df_cap$recap_disweek[!is.na(df_cap$recap_cwd)] <-
-          df_cap$eweek[!is.na(df_cap$recap_cwd)] +
-            interval(df_cap$date_cap[!is.na(df_cap$recap_cwd)],
-              df_cap$recapdate_cap[!is.na(df_cap$recap_cwd)]) %/% weeks(1)
+      ceiling(interval(study_origin,
+        df_cap$recapdate_cap[!is.na(df_cap$recap_cwd)]) / weeks(1))
+
+
+# df_cap$recap_disweek[!is.na(df_cap$recap_cwd)] <-
+#           df_cap$eweek[!is.na(df_cap$recap_cwd)] +
+#             interval(df_cap$date_cap[!is.na(df_cap$recap_cwd)],
+#               df_cap$recapdate_cap[!is.na(df_cap$recap_cwd)]) %/% weeks(1)
 
 df_cap$recap_disagewk[!is.na(df_cap$recap_cwd)] <-
           df_cap$ageweek_cap[!is.na(df_cap$recap_cwd)] +

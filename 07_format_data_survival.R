@@ -7,27 +7,70 @@
 ###
 #########################################
 
-#setting the maximum number of periods that are estimated by the collar data
-nT_period_collar <- interval("2017-01-09", "2022-05-14") %/% weeks(1)
-nT_period_collar_monthly <- interval("2017-01-09", "2022-05-14") %/% months(1)
+###########################
+### Weekly
+###########################
 
-#the first birth is in 1985
-# weekly calculation
-nT_period_overall_ext <- interval("1985-05-15","2022-05-14") %/% weeks(1)
-nT_period_overall <- interval("1994-05-15", "2022-05-14") %/% weeks(1)
+#setting the maximum number of periods that are estimated by the collar data
+nT_period_overall_ext <- ceiling(interval("1985-05-15","2022-05-14") / weeks(1))
+nT_period_precollar_ext <- floor(interval("1985-05-15","2017-01-08") / weeks(1))
+nT_period_prestudy_ext <- floor(interval("1985-05-15","1994-05-14") / weeks(1))
+nT_period_collar <- nT_period_overall_ext - nT_period_precollar_ext
+nT_period_overall <- nT_period_overall_ext - nT_period_prestudy_ext
 nT_period_precollar <- nT_period_overall - nT_period_collar
-nT_period_prestudy_ext <- nT_period_overall_ext - nT_period_overall
-nT_period_precollar_ext <- nT_period_overall_ext - nT_period_collar
-nT_period_prestudy_ext + nT_period_overall
+
+#setting the maximum number of periods that are estimated by the collar data
+# nT_period_collar <- interval("2017-01-09", "2022-05-14") %/% weeks(1)
+# nT_period_collar_monthly <- interval("2017-01-09", "2022-05-14") %/% months(1)
+
+# #the first birth is in 1985
+# # weekly calculation
+# #from first birth in 1985 until end of study in 2022
+# nT_period_overall_ext <- interval("1985-05-15","2022-05-14") %/% weeks(1)
+
+# #from the start of the population model in May 1994 until the end of the study May 2022
+# nT_period_overall <- interval("1994-05-15", "2022-05-14") %/% weeks(1)
+
+# #number of weekly intervals prior to the first collared individual
+# #from the start of the pop model in 1994
+# nT_period_precollar <- nT_period_overall - nT_period_collar
+
+# #number of weekly intervals prior to the start of the pop model in 1994
+# nT_period_prestudy_ext <- nT_period_overall_ext - nT_period_overall
+
+# #number of weekly intervals from the birth of the first deer in 1985
+# #until the start of the collar study. 
+# nT_period_precollar_ext <- nT_period_overall_ext - nT_period_collar
+
+# nT_period_prestudy_ext + nT_period_overall
 
 ###########################
 ### Monthly
 ###########################
 
-nT_period_overall_ext_monthly <- interval("1985-05-15", "2022-05-14") %/% months(1)
-# nT_period_overall_ext_monthly <- interval("1992-05-15","2022-05-14") %/% months(1)
-nT_period_overall_monthly <- interval("1994-05-15","2022-05-14") %/% months(1)
-nT_period_precollar_ext_monthly <- nT_period_overall_ext_monthly - nT_period_collar
+ 
+
+###########################
+
+### Monthly
+
+###########################
+
+
+nT_period_overall_ext_monthly <- ceiling(interval("1985-05-15","2022-05-14") / months(1))
+nT_period_precollar_ext_monthly <- floor(interval("1985-05-15","2017-01-08") / months(1))
+nT_period_prestudy_ext_monthly <- floor(interval("1985-05-15","1994-05-14") / months(1))
+nT_period_collar_monthly <- nT_period_overall_ext_monthly - nT_period_precollar_ext_monthly
+nT_period_overall_monthly <- nT_period_overall_ext_monthly - nT_period_prestudy_ext_monthly
+nT_period_precollar_monthly <- nT_period_overall_monthly - nT_period_collar_monthly
+
+# and then every date of interest is defined in terms of weeks as:
+# week_period <- <- ceiling(interval("1985-05-15","xxxx-xx-xx") / weeks(1))
+
+# nT_period_overall_ext_monthly <- interval("1985-05-15", "2022-05-14") %/% months(1)
+# # nT_period_overall_ext_monthly <- interval("1992-05-15","2022-05-14") %/% months(1)
+# nT_period_overall_monthly <- interval("1994-05-15","2022-05-14") %/% months(1)
+# nT_period_precollar_ext_monthly <- nT_period_overall_ext_monthly - nT_period_collar
 
 ###########################
 ### Years
@@ -213,11 +256,9 @@ nrow(d_surv[which(is.na(d_surv[,2])),])
 nrow(df_cap) - (nrow(d_cens) + nrow(d_mort))
 
 #Right censor these
-d_surv[which(is.na(d_surv[, 2])), 2] <- nT_period_collar
-d_surv$rmonth[which(d_surv$rmonth == 0)] <- nT_period_collar_monthly
-d_surv$smonth[which(d_surv$smonth == 0)] <- nT_period_collar_monthly
-
-d_surv[d_surv$right_period_r > nT_period_collar]
+d_surv[which(is.na(d_surv[, 2])), 2] <- nT_period_overall_ext
+d_surv$rmonth[which(d_surv$rmonth == 0)] <- nT_period_overall_ext_monthly
+d_surv$smonth[which(d_surv$smonth == 0)] <- nT_period_overall_ext_monthly
 
 ###
 ### converting to a data.frame
@@ -347,20 +388,20 @@ n_surv <- nrow(d_surv)
 ###
 ##########################################################################
 
-#recalibrating periods of collar data
-#weekly adjustment
+# #recalibrating periods of collar data
+# #weekly adjustment
 
-d_surv$left_period_e <- d_surv$left_period_e + nT_period_precollar_ext
-d_surv$right_period_r <- d_surv$right_period_r + nT_period_precollar_ext
-d_surv$right_period_s <- d_surv$right_period_s + nT_period_precollar_ext
-d_surv$periodweek_recap[d_surv$periodweek_recap != 0] <-
-          d_surv$periodweek_recap[d_surv$periodweek_recap != 0] +
-          nT_period_precollar_ext
+# d_surv$left_period_e <- d_surv$left_period_e 
+# d_surv$right_period_r <- d_surv$right_period_r 
+# d_surv$right_period_s <- d_surv$right_period_s 
+# d_surv$periodweek_recap[d_surv$periodweek_recap != 0] <-
+#           d_surv$periodweek_recap[d_surv$periodweek_recap != 0] +
+#           nT_period_precollar_ext
 
-#monthly adjustment
-d_surv$emonth <- d_surv$emonth + nT_period_precollar_ext_monthly
-d_surv$rmonth <- d_surv$rmonth + nT_period_precollar_ext_monthly
-d_surv$smonth <- d_surv$smonth + nT_period_precollar_ext_monthly
-d_surv$periodmonth_recap[d_surv$periodmonth_recap != 0] <-
-          d_surv$periodmonth_recap[d_surv$periodmonth_recap != 0] +
-          nT_period_precollar_ext_monthly
+# #monthly adjustment
+# d_surv$emonth <- d_surv$emonth 
+# d_surv$rmonth <- d_surv$rmonth 
+# d_surv$smonth <- d_surv$smonth 
+# d_surv$periodmonth_recap[d_surv$periodmonth_recap != 0] <-
+#           d_surv$periodmonth_recap[d_surv$periodmonth_recap != 0] +
+#           nT_period_precollar_ext_monthly

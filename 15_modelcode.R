@@ -43,31 +43,31 @@ modelcode <- nimbleCode({
   tau_period_foi_female  ~ dgamma(1, 1)
 
   #CAR specification
-  # f_period_foi[1:n_year] ~ dcar_normal(adj = adj_period[1:n_adj_period],
-  #                                 weights = weights_period[1:n_adj_period],
-  #                                 num = num_period[1:n_year],
-  #                                 tau = tau_period_foi_female,
-  #                                 zero_mean = 1)
+  f_period_foi[1:n_year] ~ dcar_normal(adj = adj_period[1:n_adj_period],
+                                  weights = weights_period[1:n_adj_period],
+                                  num = num_period[1:n_year],
+                                  tau = tau_period_foi_female,
+                                  zero_mean = 1)
   
-  # m_period_foi[1:n_year] ~ dcar_normal(adj = adj_period[1:n_adj_period],
-  #                                 weights = weights_period[1:n_adj_period],
-  #                                 num = num_period[1:n_year],
-  #                                 tau = tau_period_foi_male,
-  #                                 zero_mean = 1)
-  tau1_period_foi_f <- .0000001 * tau_period_foi_female
-  tau1_period_foi_m <- .0000001 * tau_period_foi_male
-  f_period_foi_temp[1] ~ dnorm(0, tau1_period_foi_f)
-  m_period_foi_temp[1] ~ dnorm(0, tau1_period_foi_m)
-  for (t in 2:n_year) {
-    f_period_foi_temp[t] ~ dnorm(f_period_foi_temp[t - 1], tau_period_foi_female)
-    m_period_foi_temp[t] ~ dnorm(m_period_foi_temp[t - 1], tau_period_foi_male)
-  }
-  f_period_foi_mu <- mean(f_period_foi_temp[1:n_year])
-  m_period_foi_mu <- mean(m_period_foi_temp[1:n_year])
-  for (t in 1:n_year) {
-    f_period_foi[t] <- f_period_foi_temp[t] - f_period_foi_mu
-    m_period_foi[t] <- m_period_foi_temp[t] - m_period_foi_mu
-  }
+  m_period_foi[1:n_year] ~ dcar_normal(adj = adj_period[1:n_adj_period],
+                                  weights = weights_period[1:n_adj_period],
+                                  num = num_period[1:n_year],
+                                  tau = tau_period_foi_male,
+                                  zero_mean = 1)
+  # tau1_period_foi_f <- .0000001 * tau_period_foi_female
+  # tau1_period_foi_m <- .0000001 * tau_period_foi_male
+  # f_period_foi_temp[1] ~ dnorm(0, tau1_period_foi_f)
+  # m_period_foi_temp[1] ~ dnorm(0, tau1_period_foi_m)
+  # for (t in 2:n_year) {
+  #   f_period_foi_temp[t] ~ dnorm(f_period_foi_temp[t - 1], tau_period_foi_female)
+  #   m_period_foi_temp[t] ~ dnorm(m_period_foi_temp[t - 1], tau_period_foi_male)
+  # }
+  # f_period_foi_mu <- mean(f_period_foi_temp[1:n_year])
+  # m_period_foi_mu <- mean(m_period_foi_temp[1:n_year])
+  # for (t in 1:n_year) {
+  #   f_period_foi[t] <- f_period_foi_temp[t] - f_period_foi_mu
+  #   m_period_foi[t] <- m_period_foi_temp[t] - m_period_foi_mu
+  # }
 
   ### random effect for East/West spatial model
   space[1] <- 0
@@ -1135,7 +1135,7 @@ modelcode <- nimbleCode({
         # p_ant[k, 4, t] <- sum(harv_pop[k, 2, 5:6, t]) / mu_obs[k, 2, t]#4-5
         # p_ant[k, 5, t] <- 1 - sum(p_ant[k, 1:4, t]) #6+
 
-      }# end t
+      # }# end t
 
       # for(t in 1:n_year){
       #     #antlerless, male fawns
@@ -1145,6 +1145,7 @@ modelcode <- nimbleCode({
       #     Cage_ant[k, 1:(n_ageclassm - 1),t] ~ dmulti(prob = p_ant[k, 1:(n_ageclassm - 1),t],
       #               size = sizeCage_m[k, t])
       #   }
+      }# end t
   }
 
 })#end model statement
