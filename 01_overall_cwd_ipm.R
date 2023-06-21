@@ -92,35 +92,34 @@ source("09_format_data_cause.R")
 
 source("10_prelim_survival.R")
 source("11_prelim_foi.R")
-source("12_prelim_collar_foi.R")
-source("13_prelim_aah.R")
+source("12_prelim_aah.R")
 
 ###########################################################
 ### Likelihoods
 ###########################################################
 
-source("14_distributions_check.R")
-source("14_distributions.R")
+source("13_distributions_check.R")
+source("13_distributions.R")
 
 ###########################################################
 ### Functions for Efficient Calculations
 ###########################################################
 
-source("15_calculations.R")
+source("14_calculations.R")
 
 ###########################################################
 ### Run model
 ###########################################################
 
-source("16_modelcode.R")
+source("15_modelcode.R")
 
 ###########################################################
 ### Run model
 ###########################################################
 
-# source("17_run_model.R")
+source("16_run_model.R")
 # source("17_run_model_par.R")
-source("18_run_model_par_fun.R")
+# source("17_run_model_par_fun.R")
 
 ###########################################################
 ### Post processing
