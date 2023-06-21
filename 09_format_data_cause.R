@@ -9,24 +9,6 @@
 d_fit_hh <- d_surv[d_surv$censored == 0,]
 d_fit_hh[,1:3] <- d_fit_hh[,1:3] - nT_period_precollar_ext
 
-# age_class_indx <- c(intvl_step_yr_weekly,#fawns
-#                     intvl_step_yr_weekly * 2,#1
-#                     intvl_step_yr_weekly * 3,#2
-#                     intvl_step_yr_weekly * 4,#3
-#                     intvl_step_yr_weekly * 6,#4-5
-#                     intvl_step_yr_weekly * 9#6-8
-#                     )#9.5+
-
-# d_fit_hh$ageclassmort <- c()
-# for(i in 1:nrow(d_fit_hh)) {
-#     if(d_fit_hh$right_age_s[i] > intvl_step_yr_weekly * 9) {
-#         d_fit_hh$ageclassmort[i] <- 7
-#     }else{
-#         d_fit_hh$ageclassmort[i] <- 
-#             min(which(d_fit_hh$right_age_s[i] < age_class_indx))
-#     }
-# }
-
 #females are 0
 #males are 1
 #creating the response for the cause-specific likelihood
@@ -37,30 +19,6 @@ d_fit_hh$mort_h <- 0
 d_fit_hh$mort_h[d_fit_hh$p4 == 1] <- 1
 records_cause <- nrow(d_fit_hh)
 
-#change the sex for antlerless males (i.e. male fawns) to sex == 0
-# d_fit_hh$sex[d_fit_hh$sex==0 & d_fit_hh$ageclassmort == 1] <- 0
-
-# table(d_fit_hh$right_period_s[d_fit_hh$mort_h==1])
-# d_fit_hh$right_period_s[d_fit_hh$mort_h==1]
-
-# checkhh1 <- sort(d_fit_hh$lowtag[d_fit_hh$right_period_s==45])
-# d_mort[d_mort$lowtag %in% checkhh1,]
-# d_fit_hh[d_fit_hh$lowtag %in% checkhh1,]
-# interval(startdate,"2017-11-18") %/% weeks(1)
-# interval(startdate,"2017-11-21") %/% weeks(1)
-
-# checkhh2 <- sort(d_fit_hh$lowtag[d_fit_hh$right_period_s==202 & d_fit_hh$mort_h == 1])
-# d_mort[d_mort$lowtag %in% checkhh2,]
-# d_fit_hh[d_fit_hh$lowtag %in% checkhh2,]
-# interval(startdate,"2017-11-18") %/% weeks(1)
-# interval(startdate,"2017-11-21") %/% weeks(1)
-
-# d_mort$estmortdate[d_mort$lowtag %in% checkhh2]
-
-# d_mort[d_mort$lowtag %in% checkhh2,]
-# d_mort$mortdate[d_mort$lowtag %in% checkhh2]
-# interval(startdate,"2020-11-21") %/% weeks(1)
-# interval(startdate,"2020-11-23") %/% weeks(1)
 ###########################################
 ###
 ### Read data - hunting season dates
@@ -78,7 +36,8 @@ d_season <- read_xlsx(paste0(filepath,"Hunting_SeasonDates.xlsx"),1)
 d_season <- d_season %>% filter(Year > 1993)
 
 
-startdate <- "2017-01-09"
+# startdate <- "2017-01-09"
+startdate <- "1985-05-15"
 n_year <- length(unique(d_season$Year))
 n_year_collar <- 5
 
@@ -87,20 +46,24 @@ endng <- c()
 startgun <- c()
 endgun <- c()
 for (i in 1:n_year_collar) {
-    startng[i] <- interval(startdate,
+    startng[i] <- ceiling(interval(startdate,
         min(d_huntseason$OpenDate[d_huntseason$Year ==
-                                  (i + 2016)])) %/% weeks(1)
-    endng[i] <- interval(startdate,
+                                  (i + 2016)])) / weeks(1)) -
+        nT_period_precollar_ext
+    endng[i] <- ceiling(interval(startdate,
         max(d_huntseason$CloseDate[d_huntseason$Year ==
-                                  (i + 2016)])) %/% weeks(1)
-    startgun[i] <- interval(startdate,
+                                  (i + 2016)])) / weeks(1)) -
+        nT_period_precollar_ext
+    startgun[i] <- ceiling(interval(startdate,
         d_huntseason$OpenDate[d_huntseason$Year ==
                               (i + 2016) &
-        d_huntseason$SeasonType == "nineday"]) %/% weeks(1)
-    endgun[i] <- interval(startdate,
+        d_huntseason$SeasonType == "nineday"]) / weeks(1)) -
+        nT_period_precollar_ext
+    endgun[i] <- ceiling(interval(startdate,
         d_huntseason$CloseDate[d_huntseason$Year ==
                                 (i + 2016) &
-        d_huntseason$SeasonType == "nineday"]) %/% weeks(1)
+        d_huntseason$SeasonType == "nineday"]) / weeks(1)) -
+        nT_period_precollar_ext
 }
 
 #########################################################################
@@ -120,18 +83,20 @@ for (i in 1:n_year_collar) {
 ### 
 #########################################################################
 
-study_start <- "1994-05-15"
-# study_start <- "1985-05-15"
+# study_start2 <- "1994-05-15"
+study_origin <- "1985-05-15"
 season_ng_start <- c()
 season_ng_end <- c()
 for (i in 1:length(unique(d_season$Year))) {
-    season_ng_start[i] <- interval(study_start,
+    season_ng_start[i] <- ceiling(interval(study_origin,
         min(d_season$OpenDate[d_season$Year ==
-                                  (i + 1993)])) %/% weeks(1)
+                                  (i + 1993)])) / weeks(1)) - 
+        nT_period_prestudy_ext
 
-    season_ng_end[i] <- interval(study_start,
+    season_ng_end[i] <- ceiling(interval(study_origin,
         max(d_season$CloseDate[d_season$Year ==
-                                  (i + 1993)])) %/% weeks(1)
+                                  (i + 1993)])) / weeks(1)) -
+        nT_period_prestudy_ext
 }
 
 # pulling out approximate 9 day gun season
@@ -150,11 +115,13 @@ temp <- temp[order(temp$Year),]
 season_gun_start <- c()
 season_gun_end <- c()
 for (i in 1:length(unique(temp$Year))) {
-    season_gun_start[i] <- interval(study_start,
-          temp$OpenDate[temp$Year == (i + 1993)]) %/% weeks(1)
+    season_gun_start[i] <- ceiling(interval(study_origin,
+          temp$OpenDate[temp$Year == (i + 1993)]) / weeks(1)) - 
+    nT_period_prestudy_ext
 
-    season_gun_end[i] <-  interval(study_start,
-          temp$CloseDate[temp$Year == (i + 1993)]) %/% weeks(1)
+    season_gun_end[i] <-  ceiling(interval(study_origin,
+          temp$CloseDate[temp$Year == (i + 1993)]) / weeks(1)) - 
+    nT_period_prestudy_ext
 }
 
 #########################################################################
@@ -249,51 +216,8 @@ Z_overall_ng_collar[1:nT_period_precollar_ext] <- 0
 ###
 ################################################################
 
-
-# startdate <- min(df_cap$date_cap)
-
-# # interval(df_cap$date_cap[!is.na(df_cap$recap_cwd)],df_cap$recapdate_cap[!is.na(df_cap$recap_cwd)]) %/% months(1)
-# year  <- 2017:2021
-# startng <- c(interval(startdate,"2017-09-16") %/% months(1)+1,
-#              interval(startdate,"2018-09-15") %/% months(1)+1,
-#              interval(startdate,"2019-09-14") %/% months(1)+1,
-#              interval(startdate,"2020-09-12") %/% months(1)+1,
-#              interval(startdate,"2021-09-18") %/% months(1)+1
-#             )
-
-# endng <- c(interval(startdate,"2018-01-07") %/% months(1)+1,
-#            interval(startdate,"2019-01-06") %/% months(1)+1,
-#            interval(startdate,"2020-01-05") %/% months(1)+1,
-#            interval(startdate,"2021-01-03") %/% months(1)+1,
-#            interval(startdate,"2022-01-09") %/% months(1)+1
-#             )
-
-# startgun <- c(interval(startdate,"2017-11-18") %/% months(1)+1,
-#               interval(startdate,"2018-11-17") %/% months(1)+1,
-#               interval(startdate,"2019-11-23") %/% months(1)+1,
-#               interval(startdate,"2020-11-21") %/% months(1)+1,
-#               interval(startdate,"2021-11-20") %/% months(1)+1
-#             )
-
-# endgun <- c(interval(startdate,"2017-11-26") %/% months(1)+1,
-#             interval(startdate,"2018-11-25") %/% months(1)+1,
-#             interval(startdate,"2019-12-01") %/% months(1)+1,
-#             interval(startdate,"2020-11-29") %/% months(1)+1,
-#             interval(startdate,"2021-11-28") %/% months(1)+1
-#             )
-
-
-# Z_ng <- rep(0,nT_period_month)
-# Z_gun <- rep(0,nT_period_month)
-# for(i in 1:5){
-#     Z_ng[startng[i]:endng[i]] <- 1
-#     Z_gun[startgun[i]:endgun[i]] <- 1
-# }
-# Z_ng
-# Z_gun
-
 mort_h <- d_fit_hh$mort_h
-interval_cause <- d_fit_hh$right_period_s-1
+interval_cause <- d_fit_hh$right_period_s - 1
 
 ### debugging hunting season dates
 # table(interval_cause[d_fit_hh$mort_h==1])

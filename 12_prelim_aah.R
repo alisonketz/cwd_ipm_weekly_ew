@@ -497,11 +497,18 @@ eab_antlered_beta <- gamma.moments(.71, .1015^2)$beta
 ###
 ###################################################
 
-d_fit_aah$birthweek <-floor(as.duration(ymd("1994-05-15") %--% ymd(d_fit_aah$birth_date))/dweeks(1))
-d_fit_aah$birthmonth <-floor(as.duration(ymd("1994-05-15") %--% ymd(d_fit_aah$birth_date))/dmonths(1))
-d_fit_aah$age2date_weeks <- interval("1985-05-15",d_fit_aah$birth_date)%/% weeks(1)
-d_fit_aah$age2date_months <-interval("1985-05-15",d_fit_aah$birth_date)%/% months(1)
-d_fit_aah$study_area <- ifelse(d_fit_aah$study_area=="east",1,2)
+d_fit_aah$birthweek <- ceiling(interval(study_origin,
+                                d_fit_aah$birth_date) / weeks(1)) -
+                        nT_period_prestudy_ext
+d_fit_aah$birthmonth <- ceiling(interval(study_origin,
+                                d_fit_aah$birth_date) / weeks(1)) -
+                        nT_period_prestudy_ext
+d_fit_aah$age2date_weeks <- ceiling(interval(study_origin,
+                                d_fit_aah$birth_date) / weeks(1))
+d_fit_aah$age2date_months <- ceiling(interval(study_origin,
+                                d_fit_aah$birth_date) / months(1))
+
+d_fit_aah$study_area <- ifelse(d_fit_aah$study_area == "east", 1, 2)
 
 ####################################################
 ###
@@ -509,10 +516,16 @@ d_fit_aah$study_area <- ifelse(d_fit_aah$study_area=="east",1,2)
 ###
 ###################################################
 
-d_fit_notest$birthweek <- floor(as.duration(ymd("1994-05-15") %--% ymd(d_fit_notest$birth_date)) / dweeks(1))
-d_fit_notest$birthmonth <- floor(as.duration(ymd("1994-05-15") %--% ymd(d_fit_notest$birth_date)) / dmonths(1))
-d_fit_notest$age2date_weeks <- interval("1985-05-15", d_fit_notest$birth_date)%/% weeks(1)
-d_fit_notest$age2date_months <-interval("1985-05-15", d_fit_notest$birth_date)%/% months(1)
-d_fit_notest$study_area <- ifelse(d_fit_notest$study_area == "east",1,2)
+d_fit_notest$birthweek <- ceiling(interval(study_origin,
+                                d_fit_notest$birth_date) / weeks(1)) -
+                        nT_period_prestudy_ext
+d_fit_notest$birthmonth <- ceiling(interval(study_origin,
+                                d_fit_notest$birth_date) / weeks(1)) -
+                        nT_period_prestudy_ext
+d_fit_notest$age2date_weeks <- ceiling(interval(study_origin,
+                                d_fit_notest$birth_date) / weeks(1))
+d_fit_notest$age2date_months <- ceiling(interval(study_origin,
+                                d_fit_notest$birth_date) / months(1))
+d_fit_notest$study_area <- ifelse(d_fit_notest$study_area == "east", 1, 2)
 d_fit_notest <- d_fit_notest[d_fit_notest$n > 0,]
 

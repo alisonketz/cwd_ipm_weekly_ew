@@ -203,7 +203,7 @@ assign("dInfHarvest",
 #     x = 1,
 #     n_cases = d_fit_hunt_pos$n_cases,
 #     n_samples = nrow(d_fit_hunt_pos),
-#     a = d_fit_hunt_pos$ageweeks, # age (weeks) at harvest
+#     a = d_fit_hunt_pos$ageweeks,
 #     sex = d_fit_hunt_pos$sex,
 #     age2date = d_fit_hunt_pos$birthweek - 1,
 #     beta_male = beta_male,
@@ -318,6 +318,7 @@ dSusHarvest <- nimble::nimbleFunction(
 
             sumllik <- sumllik +
                 (-sum_haz + lam_foi + log(lam_sus)) * n_cases[i]
+         if(is.na(sumllik)){stop("ack")}
         }
         returnType(double(0))
         if (log) {
@@ -361,31 +362,31 @@ nimble::registerDistributions(list(
 # for a user-defined distribution
 assign("dSusHarvest", dSusHarvest, envir = .GlobalEnv)
 
-# starttime <- Sys.time()
-#  <-  <- dSusHarvest(
-#     x = 1,
-#     n_cases = d_fit_hunt_neg$n_cases,
-#     n_samples = nrow(d_fit_hunt_neg),
-#     a = d_fit_hunt_neg$ageweeks, # age (weeks) at harvest
-#     sex = d_fit_hunt_neg$sex,
-#     age2date = d_fit_hunt_neg$birthweek - 1,
-#     beta_male = beta_male,
-#     beta0_sus = beta0_survival_sus,
-#     age_effect_surv = age_effect_survival_test,
-#     period_effect_surv = period_effect_survival_test,
-#     f_age_foi = f_age_foi,
-#     m_age_foi = m_age_foi,
-#     age_lookup_f = age_lookup_f,
-#     age_lookup_m = age_lookup_m,
-#     period_lookup_foi = period_lookup_foi,
-#     f_period_foi = f_period_foi,
-#     m_period_foi = m_period_foi,
-#     space = c(0, -.55),
-#     sect = d_fit_hunt_neg$ew,
-#     log = TRUE
-# )
-# (end <- Sys.time() - starttime)
-# test
+starttime <- Sys.time()
+ test  <- dSusHarvest(
+    x = 1,
+    n_cases = d_fit_hunt_neg$n_cases,
+    n_samples = nrow(d_fit_hunt_neg),
+    a = d_fit_hunt_neg$ageweeks, # age (weeks) at harvest
+    sex = d_fit_hunt_neg$sex,
+    age2date = d_fit_hunt_neg$birthweek - 1,
+    beta_male = beta_male,
+    beta0_sus = beta0_survival_sus,
+    age_effect_surv = age_effect_survival_test,
+    period_effect_surv = period_effect_survival_test,
+    f_age_foi = f_age_foi,
+    m_age_foi = m_age_foi,
+    age_lookup_f = age_lookup_f,
+    age_lookup_m = age_lookup_m,
+    period_lookup_foi = period_lookup_foi,
+    f_period_foi = f_period_foi,
+    m_period_foi = m_period_foi,
+    space = c(0, -.55),
+    sect = d_fit_hunt_neg$ew,
+    log = TRUE
+)
+(end <- Sys.time() - starttime)
+test
 
 
 #######################################################################
