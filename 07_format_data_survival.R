@@ -13,61 +13,66 @@ nT_period_collar_monthly <- interval("2017-01-09", "2022-05-14") %/% months(1)
 
 #the first birth is in 1985
 # weekly calculation
-nT_period_overall_ext <- interval("1985-05-15",
-                                  "2022-05-14") %/% weeks(1)
-# nT_period_overall_ext <- interval("1992-05-15","2022-05-14") %/% weeks(1)
+nT_period_overall_ext <- interval("1985-05-15","2022-05-14") %/% weeks(1)
 nT_period_overall <- interval("1994-05-15", "2022-05-14") %/% weeks(1)
 nT_period_precollar <- nT_period_overall - nT_period_collar
 nT_period_prestudy_ext <- nT_period_overall_ext - nT_period_overall
 nT_period_precollar_ext <- nT_period_overall_ext - nT_period_collar
 nT_period_prestudy_ext + nT_period_overall
 
-nT_period_overall_ext_monthly <- interval("1985-05-15",
-                                          "2022-05-14") %/% months(1)
-# nT_period_overall_ext_monthly <- interval("1992-05-15","2022-05-14") %/% months(1)
-nT_period_overall_monthly <- interval("1994-05-15","2022-05-14") %/% months(1)
-nT_period_precollar_ext_monthly <- nT_period_overall_ext_monthly - nT_period_collar
+###########################
+### Monthly
+###########################
+
+# nT_period_overall_ext_monthly <- interval("1985-05-15", "2022-05-14") %/% months(1)
+# # nT_period_overall_ext_monthly <- interval("1992-05-15","2022-05-14") %/% months(1)
+# nT_period_overall_monthly <- interval("1994-05-15","2022-05-14") %/% months(1)
+# nT_period_precollar_ext_monthly <- nT_period_overall_ext_monthly - nT_period_collar
+
+###########################
+### Years
+###########################
+
 n_year_precollar <- 2017 - 1994
 n_year_precollar_ext <- 2017 - 1985
 n_year_prestudy_ext <- 1994 - 1985
 
-
-#setting the maximum number of periods that are estimated by the collar data
-nT_period_collar
-# nT_period_collar_monthly
+########################################
+### spreadsheet to confirm timeline
+########################################
 
 #the first birth is in 1985
 # weekly calculation
-timing_df <- data.frame(var=c("nT_period_collar",
-"nT_period_overall_ext",
-"nT_period_overall ",
-"nT_period_precollar ",
-"nT_period_prestudy_ext ",
-"nT_period_precollar_ext ",
-"nT_period_prestudy_ext + nT_period_overall",
-"n_year_precollar",
-"n_year_precollar_ext",
-"n_year_prestudy_ext"),
-value=c(nT_period_collar,
-nT_period_overall_ext,
-nT_period_overall,
-nT_period_precollar,
-nT_period_prestudy_ext,
-nT_period_precollar_ext,
-nT_period_prestudy_ext + nT_period_overall,
-n_year_precollar,
-n_year_precollar_ext,
-n_year_prestudy_ext),
-formula=c("interval(2017-01-09, 2022-05-14) %/% weeks(1)",
-"interval(1985-05-15,2022-05-14) %/% weeks(1)",
-"interval(1994-05-15, 2022-05-14) %/% weeks(1)",
-"nT_period_overall - nT_period_collar",
-"nT_period_overall_ext - nT_period_overall",
-"nT_period_overall_ext - nT_period_collar",
-"nT_period_prestudy_ext + nT_period_overall",
-"2017 - 1994",
-"2017 - 1985",
-"1994 - 1985")
+timing_df <- data.frame(var = c("nT_period_collar",
+    "nT_period_overall_ext",
+    "nT_period_overall ",
+    "nT_period_precollar ",
+    "nT_period_prestudy_ext ",
+    "nT_period_precollar_ext ",
+    "nT_period_prestudy_ext + nT_period_overall",
+    "n_year_precollar",
+    "n_year_precollar_ext",
+    "n_year_prestudy_ext"),
+    value = c(nT_period_collar,
+    nT_period_overall_ext,
+    nT_period_overall,
+    nT_period_precollar,
+    nT_period_prestudy_ext,
+    nT_period_precollar_ext,
+    nT_period_prestudy_ext + nT_period_overall,
+    n_year_precollar,
+    n_year_precollar_ext,
+    n_year_prestudy_ext),
+    formula = c("interval(2017-01-09, 2022-05-14) %/% weeks(1)",
+    "interval(1985-05-15,2022-05-14) %/% weeks(1)",
+    "interval(1994-05-15, 2022-05-14) %/% weeks(1)",
+    "nT_period_overall - nT_period_collar",
+    "nT_period_overall_ext - nT_period_overall",
+    "nT_period_overall_ext - nT_period_collar",
+    "nT_period_prestudy_ext + nT_period_overall",
+    "2017 - 1994",
+    "2017 - 1985",
+    "1994 - 1985")
 )
 write.csv(timing_df,file="results/timing_params.csv")
 

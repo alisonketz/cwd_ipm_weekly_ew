@@ -1,3 +1,5 @@
+
+
 ######################################################################################
 ###
 ### Preliminary constants for running in the model
@@ -10,6 +12,7 @@ nT_age_surv_aah_f <- intvl_step_yr_weekly * n_agef
 nT_age_short_f <- intvl_step_yr_weekly * (n_agef - 1)
 nT_age_surv_aah_m <- intvl_step_yr_weekly * n_agem
 nT_age_short_m <- intvl_step_yr_weekly * (n_agem - 1)
+
 
 ########################################################################
 ### matrix with indexes for averaging period effects from collar data
