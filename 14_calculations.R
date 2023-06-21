@@ -9,7 +9,7 @@ calc_surv_aah <- nimble::nimbleFunction(
     run = function(
         ### argument type declarations
         nT_age = double(0),
-        nT_period = double(0),
+        nT_period_overall = double(0),
         nT_age_short_f = double(0),
         nT_age_short_m = double(0),
         nT_age_surv_aah_f = double(0),
@@ -39,11 +39,11 @@ calc_surv_aah <- nimble::nimbleFunction(
 	# Calculate hazards
 	############################################
 
-    UCH <- nimArray(NA, c(2, nT_age_surv_aah_f, nT_period))
+    UCH <- nimArray(NA, c(2, nT_age_surv_aah_f, nT_period_overall))
     s_aah <- nimArray(NA, c(2, n_agef, n_year))
 
     ### Females
-    for(j in 1:nT_period) {
+    for(j in 1:nT_period_overall) {
         for(i in 1:nT_age_short_f) {
             UCH[1, i, j] <- exp(beta0 +
                                 age_effect[i] +
@@ -57,7 +57,7 @@ calc_surv_aah <- nimble::nimbleFunction(
     }
 
     ### Males
-    for(j in 1:nT_period) {
+    for(j in 1:nT_period_overall) {
         for(i in 1:nT_age_short_m) {
             UCH[2, i, j] <- exp(beta0 +
                                 beta_male +
@@ -71,7 +71,6 @@ calc_surv_aah <- nimble::nimbleFunction(
                                 period_effect[j])
         }
     }
-
     ############################################
     # calculate survival from cummulative haz
     ############################################
@@ -91,41 +90,47 @@ calc_surv_aah <- nimble::nimbleFunction(
   return(s_aah[1:2, 1:n_agef, 1:n_year])
 })
 
-Ccalc_surv_aah <- compileNimble(calc_surv_aah)
+# Ccalc_surv_aah <- compileNimble(calc_surv_aah)
 
-assign("calc_surv_aah", calc_surv_aah, envir = .GlobalEnv)
+# assign("calc_surv_aah", calc_surv_aah, envir = .GlobalEnv)
 
-# starttime <- Sys.time()
-# sn_sus <- calc_surv_aah(
-# 	nT_age = nT_age_surv,
-#     nT_age_short = nT_age_short,
-#     nT_age_surv_aah = nT_age_surv_aah,
-#     nT_period = nT_period_overall,
-#     beta0 = beta0_survival_sus,
-#     beta_male = beta_male,
-#     age_effect = age_effect_survival_test,        # length = 962
-#     period_effect = period_effect_survival_test,  # length = 1564
-# 	yr_start = d_fit_season$yr_start,
-#     yr_end = d_fit_season$yr_end,
-#     intvl_step_yr = intvl_step_yr,
-#     n_year = n_year,
-#     n_agef = n_agef,
-#     n_agem = n_agem)
-# (endtime1 <- Sys.time() - starttime)
+starttime <- Sys.time()
+sn_sus <- calc_surv_aah(
+	nT_age = nT_age_surv,
+    nT_period_overall = nT_period_overall,
+    nT_age_short_f = nT_age_short_f,
+    nT_age_short_m = nT_age_short_m,
+    nT_age_surv_aah_f = nT_age_surv_aah_f,
+    nT_age_surv_aah_m = nT_age_surv_aah_m,
+    beta0 = beta0_survival_sus-1.5,
+    beta_male = beta_male,
+    age_effect = age_effect_survival_test,        # length = 962
+    period_effect = period_effect_survival_test[(nT_period_prestudy_ext + 1):(nT_period_overall_ext)], 
+	yr_start = d_fit_season$yr_start,
+    yr_end = d_fit_season$yr_end,
+    intvl_step_yr = intvl_step_yr_weekly,
+    n_year = n_year,
+    n_agef = n_agef,
+    n_agem = n_agem)
+(endtime1 <- Sys.time() - starttime)
 # sn_sus[1,1:5,]
 # sn_sus[2,1:5,]
 
 # starttime <- Sys.time()
 # sn_inf <- Ccalc_surv_aah(
-# 	      nT_age = n_agef*intvl_step_yr,
-#         nT_period = n_year*intvl_step_yr,
-#         beta0 = inf_beta0_survival,
-#         beta_male = inf_beta_sex_survival,
-#         age_effect = age_effect_survival,
-#         period_effect = period_effect_survival,
+#         nT_age = nT_age_surv,
+#         nT_period_overall = nT_period_overall,
+#         nT_age_short_f = nT_age_short_f,
+#         nT_age_short_m = nT_age_short_m,
+#         nT_age_surv_aah_f = nT_age_surv_aah_f,
+#         nT_age_surv_aah_m = nT_age_surv_aah_m,
+#         beta0 = beta0_survival_inf-1,
+#         beta_male = beta_male,
+#         age_effect = age_effect_survival_test,
+#         period_effect = period_effect_survival_test[(nT_period_prestudy_ext + 1):(nT_period_overall_ext)],
 #         yr_end = d_fit_season$yr_end,
 #         yr_start = d_fit_season$yr_start,
-#         intvl_step_yr = intvl_step_yr,
+#         intvl_step_yr = intvl_step_yr_weekly,
 #         n_year = n_year,
 #         n_agef = n_agef,
 #         n_agem = n_agem)
@@ -133,35 +138,6 @@ assign("calc_surv_aah", calc_surv_aah, envir = .GlobalEnv)
 # sn_inf[1,3,]
 # sn_inf[2,3,]
 
-
-# sn_sus[1:2,1:n_agef,1:n_year] <- calc_surv_aah(
-# 	nT_age = nT_age_surv,
-#     nT_age_short = nT_age_short,
-#     nT_age_surv_aah = nT_age_surv_aah,
-#     nT_period = nT_period_overall,
-#     beta0 = sus_beta0_survival,
-#     beta_male = .5,
-#     age_effect = age_effect_survival_test,
-#     period_effect = period_effect_survival_test,
-#     yr_start = d_fit_season$yr_start,
-#     yr_end = d_fit_season$yr_end,
-#     intvl_step_yr = intvl_step_yr,
-#     n_year = n_year,
-#     n_agef = n_agef,
-#     n_agem = n_agem)
-
-# sn_inf[1:2,1:n_agef,1:n_year] <- calc_surv_aah(
-#	      nT_age = n_agef*intvl_step_yr,
-#         nT_period = n_year*intvl_step_yr,
-#         beta0 = inf_beta0_survival,
-#         beta_male = sus_beta_sex_survival,
-#         age_effect = age_effect_survival,
-#         period_effect = period_effect_survival,
-#         yr_end_indx = d_fit_season$yr_end,
-#         intvl_step_yr = intvl_step_yr,
-#         n_year = n_year,
-#         n_agef = n_agef,
-#         n_agem = n_agem)
 
 #######################################################################
 ###
@@ -178,7 +154,7 @@ calc_surv_harvest <- nimble::nimbleFunction(
         nT_age_short_m = double(0),
         nT_age_surv_aah_f = double(0),
         nT_age_surv_aah_m = double(0),
-        nT_period = double(0),
+        nT_period_overall = double(0),
         beta0 = double(0),
         beta_male = double(0),
         age_effect = double(1),
@@ -212,8 +188,8 @@ calc_surv_harvest <- nimble::nimbleFunction(
 	# Initialize hazard array
 	############################################
 
-    UCH <- nimArray(NA, c(2, nT_age_surv_aah_f, nT_period))
-    UCH_hunt <- nimArray(NA, c(2, nT_age_surv_aah_f, nT_period))
+    UCH <- nimArray(NA, c(2, nT_age_surv_aah_f, nT_period_overall))
+    UCH_hunt <- nimArray(NA, c(2, nT_age_surv_aah_f, nT_period_overall))
     s_hunt <- nimArray(NA, c(2, n_agef, n_year))
 
 	############################################
@@ -221,64 +197,64 @@ calc_surv_harvest <- nimble::nimbleFunction(
 	############################################
 
     ### Females
-    UCH[1, 1:nT_age_short_f, 1:nT_period] <- exp(beta0 +
-                                age_effect[1:nT_age_short_f] +
-                                period_effect[1:nT_period])
-    UCH[1, (nT_age_short_f + 1):(nT_age_surv_aah_f), 1:nT_period] <- exp(beta0 +
-                                mu_old_age_effect_f +
-                                period_effect[1:nT_period])
-    ### Males
-    UCH[2, 1:nT_age_short_m, 1:nT_period] <- exp(beta0 +
+    # UCH[1, 1:nT_age_short_f, 1:nT_period_overall] <- exp(beta0 +
+    #                             age_effect[1:nT_age_short_f] +
+    #                             period_effect[1:nT_period_overall])
+    # UCH[1, (nT_age_short_f + 1):(nT_age_surv_aah_f), 1:nT_period_overall] <- exp(beta0 +
+    #                             mu_old_age_effect_f +
+    #                             period_effect[1:nT_period_overall])
+    # ### Males
+    # UCH[2, 1:nT_age_short_m, 1:nT_period_overall] <- exp(beta0 +
+    #                             beta_male +
+    #                             age_effect[1:nT_age_short_m] +
+    #                             period_effect[1:nT_period_overall])
+    # UCH[2, (nT_age_short_m + 1):(nT_age_surv_aah_m), 1:nT_period_overall] <- exp(beta0 +
+    #                             beta_male +
+    #                             mu_old_age_effect_m +
+    #                             period_effect[1:nT_period_overall])
+
+    for(j in 1:nT_period_overall) {
+        for(i in 1:nT_age_short_m) {
+            UCH[2, i, j] <- exp(beta0 +
                                 beta_male +
-                                age_effect[1:nT_age_short_m] +
-                                period_effect[1:nT_period])
-    UCH[2, (nT_age_short_m + 1):(nT_age_surv_aah_m), 1:nT_period] <- exp(beta0 +
+                                age_effect[i] +
+                                period_effect[j])
+        }
+        for(i in (nT_age_short_m + 1):(nT_age_surv_aah_m)) {
+            UCH[2, i, j] <- exp(beta0 +
                                 beta_male +
                                 mu_old_age_effect_m +
-                                period_effect[1:nT_period])
-
-    # for(j in 1:nT_period) {
-    #     for(i in 1:nT_age_short_m) {
-    #         UCH[2, i, j] <- exp(beta0 +
-    #                             beta_male +
-    #                             age_effect[i] +
-    #                             period_effect[j])
-    #     }
-    #     for(i in (nT_age_short_m + 1):(nT_age_surv_aah_m)) {
-    #         UCH[2, i, j] <- exp(beta0 +
-    #                             beta_male +
-    #                             mu_old_age_effect_m +
-    #                             period_effect[j])
-    #     }
-    # }
+                                period_effect[j])
+        }
+    }
     ### Females
-    # for(j in 1:nT_period) {
-    #     for(i in 1:nT_age_short_f) {
-    #         UCH[1, i, j] <- exp(beta0 +
-    #                             age_effect[i] +
-    #                             period_effect[j])
-    #     }
-    #     for(i in (nT_age_short_f + 1):(nT_age_surv_aah_f)) {
-    #         UCH[1, i, j] <- exp(beta0 +
-    #                             mu_old_age_effect_f +
-    #                             period_effect[j])
-    #     }
-    # }
+    for(j in 1:nT_period_overall) {
+        for(i in 1:nT_age_short_f) {
+            UCH[1, i, j] <- exp(beta0 +
+                                age_effect[i] +
+                                period_effect[j])
+        }
+        for(i in (nT_age_short_f + 1):(nT_age_surv_aah_f)) {
+            UCH[1, i, j] <- exp(beta0 +
+                                mu_old_age_effect_f +
+                                period_effect[j])
+        }
+    }
     ### Males
-    # for(j in 1:nT_period) {
-    #     for(i in 1:nT_age_short_m) {
-    #         UCH[2, i, j] <- exp(beta0 +
-    #                             beta_male +
-    #                             age_effect[i] +
-    #                             period_effect[j])
-    #     }
-    #     for(i in (nT_age_short_m + 1):(nT_age_surv_aah_m)) {
-    #         UCH[2, i, j] <- exp(beta0 +
-    #                             beta_male +
-    #                             mu_old_age_effect_m +
-    #                             period_effect[j])
-    #     }
-    # }
+    for(j in 1:nT_period_overall) {
+        for(i in 1:nT_age_short_m) {
+            UCH[2, i, j] <- exp(beta0 +
+                                beta_male +
+                                age_effect[i] +
+                                period_effect[j])
+        }
+        for(i in (nT_age_short_m + 1):(nT_age_surv_aah_m)) {
+            UCH[2, i, j] <- exp(beta0 +
+                                beta_male +
+                                mu_old_age_effect_m +
+                                period_effect[j])
+        }
+    }
 	############################################
 	# adjust hazards to remove harvest hazards
 	############################################
@@ -330,56 +306,40 @@ Ccalc_surv_harvest <- compileNimble(calc_surv_harvest)
 assign("calc_surv_harvest", calc_surv_harvest, envir = .GlobalEnv)
 
 # starttime <- Sys.time()
-# sh_sus <- Ccalc_surv_harvest(nT_age = n_agef*intvl_step_yr,
-#         nT_period = n_year*intvl_step_yr,
-#         beta0 = sus_beta0_survival,
-#         beta_male = sus_beta_sex_survival,
-#         age_effect = age_effect_survival,
-#         period_effect = period_effect_survival,
-#         #yr_end_indx = d_fit_season$yr_end,
-#         intvl_step_yr = intvl_step_yr,
+# sh_sus <- calc_surv_harvest(
+#         nT_age = nT_age_surv,
+#         nT_period_overall = nT_period_overall,
+#         nT_age_short_f = nT_age_short_f,
+#         nT_age_short_m = nT_age_short_m,
+#         nT_age_surv_aah_f = nT_age_surv_aah_f,
+#         nT_age_surv_aah_m = nT_age_surv_aah_m,
+#         beta0 = beta0_survival_sus,
+#         beta_male = beta_male,
+#         age_effect = age_effect_survival_test,
+#         period_effect = period_effect_survival_test[(nT_period_prestudy_ext + 1):(nT_period_overall_ext)], 
+# 	    intvl_step_yr = intvl_step_yr_weekly,
 #         n_year = n_year,
 #         n_agef = n_agef,
 #         n_agem = n_agem,
-#         pre_hunt_end = d_fit_season$pre_hunt_end,
 #         ng_start = d_fit_season$ng_start,
 #         gun_start = d_fit_season$gun_start,
 #         gun_end = d_fit_season$gun_end,
-#         #gun_end = d_fit_season$gun_start,
 #         ng_end = d_fit_season$ng_end,
 #         yr_start = d_fit_season$yr_start,
 #         yr_end = d_fit_season$yr_end,
-#         p_nogun_f = p_ng_f,
-#         p_nogun_m = p_ng_m,
-#         p_gun_f = p_gun_f,
-#         p_gun_m = p_gun_m
+#         p_nogun_f = .55,
+#         p_nogun_m = .65,
+#         p_gun_f = .8,
+#         p_gun_m = .95
+#         # p_nogun_f = p_ng_f,
+#         # p_nogun_m = p_ng_m,
+#         # p_gun_f = p_gun_f,
+#         # p_gun_m = p_gun_m
 #         )
 # (endtime3 <- Sys.time() - starttime)
+# sh_sus[1,4,]
 
 
-
-# sh_sus[1:2,1:n_agef,1:n_year] <- Ccalc_surv_harvest(nT_age = nT_age_surv,
-#         nT_period = nT_period_surv,
-#         beta0 = sus_beta0_survival,
-#         beta_male = sus_beta_sex_survival,
-#         age_effect = age_effect_survival,
-#         period_effect = period_effect_survival,
-#         intvl_step_yr = intvl_step_yr,
-#         n_year = n_year,
-#         n_agef = n_agef,
-#         n_agem = n_agem,
-#         pre_hunt_end = d_fit_season$pre_hunt_end,
-#         ng_start = d_fit_season$ng_start,
-#         gun_start = d_fit_season$gun_start,
-#         gun_end = d_fit_season$gun_end,
-#         ng_end = d_fit_season$ng_end,
-#         yr_start = d_fit_season$yr_start,
-#         yr_end = d_fit_season$yr_end,
-#         p_nogun_f = p_ng_f,
-#         p_nogun_m = p_ng_m,
-#         p_gun_f = p_gun_f,
-#         p_gun_m = p_gun_m
-#         )
 
 #######################################################################
 ###
@@ -537,7 +497,7 @@ set_period_effects_constant <- nimble::nimbleFunction(
     period_effect_survival_temp[i] <- period_annual_survival[1]
   }
 
-  for(i in 1:(n_year_precollar+1)) {
+  for(i in 1:(n_year_precollar + 1)) {
     period_effect_survival_temp[(yr_start[i] + nT_period_prestudy_ext):(yr_end[i] + nT_period_prestudy_ext)] <- period_annual_survival[i]
   }
 

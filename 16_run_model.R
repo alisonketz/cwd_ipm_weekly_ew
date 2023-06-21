@@ -143,7 +143,7 @@ nimConsts <- list(n_year = n_year,
     n_year_fec_early = n_year_fec_early,
     nknots_age = nknots_age,
     nknots_period = nknots_period,
-    # n_adj_period = n_adj_period,
+    n_adj_period = n_adj_period,
     period_lookup_foi = period_lookup_foi,
     ng_start = d_fit_season$ng_start,
     gun_start = d_fit_season$gun_start,
@@ -204,8 +204,8 @@ initsFun <- function()list(beta_male = rnorm(1, -.5, .01),
     tau_age_foi_female = runif(1, 2.7, 4.2),
     tau_period_foi_male = runif(1, 4.2, 6.8),
     tau_period_foi_female = runif(1, 2.27, 3.44),
-    m_period_foi_temp = seq(-1.2, 1, length = n_year),
-    f_period_foi_temp = seq(-1.5, 1, length = n_year),
+    m_period_foi = seq(-1.2, 1, length = n_year),
+    f_period_foi = seq(-1.5, 1, length = n_year),
     m_age_foi = c(rnorm(1, -6, sd =.1),
                   rnorm(1, -5.5, sd =.1),
                   rnorm(1, -5, sd =.1),
@@ -321,12 +321,12 @@ confMCMC <- configureMCMC(Rmodel,
 nimMCMC <- buildMCMC(confMCMC)
 CnimMCMC <- compileNimble(nimMCMC,
                          project = Rmodel)
-# for(i in 1:10){beepr::beep(1)}
+for(i in 1:10){beepr::beep(1)}
 
 set.seed(1001)
 starttime <- Sys.time()
 mcmcout <- runMCMC(CnimMCMC,
-                  niter = 1000,
+                  niter = 5,
                   nburnin = 0,
                   nchains = 1,
                   inits = initsFun,

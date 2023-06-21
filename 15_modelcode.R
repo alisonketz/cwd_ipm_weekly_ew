@@ -782,110 +782,110 @@ modelcode <- nimbleCode({
   ###################################################
 
   sn_sus[1:n_sex, 1:n_agef, 1:n_year] <- calc_surv_aah(
-          nT_age = nT_age_surv,
-          nT_age_surv_aah_f = nT_age_surv_aah_f,
-          nT_age_surv_aah_m = nT_age_surv_aah_m,
-          nT_age_short_f = nT_age_short_f,
-          nT_age_short_m = nT_age_short_m,
-          nT_period = nT_period_overall,
-          beta0 = beta0_survival_sus,
-          beta_male = beta_male,
-          age_effect = age_effect_survival[1:nT_age_surv],
-          period_effect = period_effect_survival[(nT_period_prestudy_ext + 1):
-                                                  nT_period_overall_ext],
-          yr_start = yr_start[1:n_year],
-          yr_end = yr_end[1:n_year],
-          intvl_step_yr = intvl_step_yr,
-          n_year = n_year,
-          n_agef = n_agef,
-          n_agem = n_agem)
+      nT_age = nT_age_surv,
+      nT_period_overall = nT_period_overall,
+      nT_age_short_f = nT_age_short_f,
+      nT_age_short_m = nT_age_short_m,
+      nT_age_surv_aah_f = nT_age_surv_aah_f,
+      nT_age_surv_aah_m = nT_age_surv_aah_m,
+      beta0 = beta0_survival_sus,
+      beta_male = beta_male,
+      age_effect = age_effect_survival[1:nT_age_surv],
+      period_effect = period_effect_survival[(nT_period_prestudy_ext + 1):
+                                              nT_period_overall_ext],
+      yr_start = yr_start[1:n_year],
+      yr_end = yr_end[1:n_year],
+      intvl_step_yr = intvl_step_yr,
+      n_year = n_year,
+      n_agef = n_agef,
+      n_agem = n_agem)
 
   ###################################################
   #### Overall Survival CWD Infected
   ###################################################
 
   sn_inf[1:n_sex, 1:n_agef, 1:n_year] <- calc_surv_aah(
-          nT_age = nT_age_surv,
-          nT_age_surv_aah_f = nT_age_surv_aah_f,
-          nT_age_surv_aah_m = nT_age_surv_aah_m,
-          nT_age_short_f = nT_age_short_f,
-          nT_age_short_m = nT_age_short_m,
-          nT_period = nT_period_overall,
-          beta0 = beta0_survival_inf,
-          beta_male = beta_male,
-          age_effect = age_effect_survival[1:nT_age_surv],
-          period_effect = period_effect_survival[(nT_period_prestudy_ext + 1):
-                                                  nT_period_overall_ext],
-          yr_start = yr_start[1:n_year],
-          yr_end = yr_end[1:n_year],
-          intvl_step_yr = intvl_step_yr,
-          n_year = n_year,
-          n_agef = n_agef,
-          n_agem = n_agem)
+      nT_age = nT_age_surv,
+      nT_period_overall = nT_period_overall,
+      nT_age_short_f = nT_age_short_f,
+      nT_age_short_m = nT_age_short_m,
+      nT_age_surv_aah_f = nT_age_surv_aah_f,
+      nT_age_surv_aah_m = nT_age_surv_aah_m,
+      beta0 = beta0_survival_inf,
+      beta_male = beta_male,
+      age_effect = age_effect_survival[1:nT_age_surv],
+      period_effect = period_effect_survival[(nT_period_prestudy_ext + 1):
+                                              nT_period_overall_ext],
+      yr_start = yr_start[1:n_year],
+      yr_end = yr_end[1:n_year],
+      intvl_step_yr = intvl_step_yr,
+      n_year = n_year,
+      n_agef = n_agef,
+      n_agem = n_agem)
 
   ###################################################
   #### Hunting Survival Susceptibles
   ###################################################
 
   sh_sus[1:n_sex, 1:n_agef, 1:n_year] <- calc_surv_harvest(
-          nT_age = nT_age_surv,
-          nT_age_surv_aah_f = nT_age_surv_aah_f,
-          nT_age_surv_aah_m = nT_age_surv_aah_m,
-          nT_age_short_f = nT_age_short_f,
-          nT_age_short_m = nT_age_short_m,
-          nT_period = nT_period_overall,
-          beta0 = beta0_survival_sus,
-          beta_male = beta_male,
-          age_effect = age_effect_survival[1:nT_age_surv],
-          period_effect = period_effect_survival[(nT_period_prestudy_ext + 1):
-                                                  nT_period_overall_ext],
-          intvl_step_yr = intvl_step_yr,
-          n_year = n_year,
-          n_agef = n_agef,
-          n_agem = n_agem,
-          ng_start = ng_start[1:n_year],
-          gun_start = gun_start[1:n_year],
-          gun_end = gun_end[1:n_year],
-          ng_end = ng_end[1:n_year],
-          yr_start = yr_start[1:n_year],
-          yr_end = yr_end[1:n_year],
-          p_nogun_f = p_nogun_f,
-          p_nogun_m = p_nogun_m,
-          p_gun_f = p_gun_f,
-          p_gun_m = p_gun_m
-          )
+      nT_age = nT_age_surv,
+      nT_period_overall = nT_period_overall,
+      nT_age_short_f = nT_age_short_f,
+      nT_age_short_m = nT_age_short_m,
+      nT_age_surv_aah_f = nT_age_surv_aah_f,
+      nT_age_surv_aah_m = nT_age_surv_aah_m,
+      beta0 = beta0_survival_sus,
+      beta_male = beta_male,
+      age_effect = age_effect_survival[1:nT_age_surv],
+      period_effect = period_effect_survival[(nT_period_prestudy_ext + 1):
+                                             nT_period_overall_ext],
+      intvl_step_yr = intvl_step_yr,
+      n_year = n_year,
+      n_agef = n_agef,
+      n_agem = n_agem,
+      ng_start = ng_start[1:n_year],
+      gun_start = gun_start[1:n_year],
+      gun_end = gun_end[1:n_year],
+      ng_end = ng_end[1:n_year],
+      yr_start = yr_start[1:n_year],
+      yr_end = yr_end[1:n_year],
+      p_nogun_f = p_nogun_f,
+      p_nogun_m = p_nogun_m,
+      p_gun_f = p_gun_f,
+      p_gun_m = p_gun_m
+      )
 
   ###################################################
   #### Hunting Survival Infected
   ###################################################
 
   sh_inf[1:n_sex, 1:n_agef, 1:n_year] <- calc_surv_harvest(
-          nT_age = nT_age_surv,
-          nT_age_surv_aah_f = nT_age_surv_aah_f,
-          nT_age_surv_aah_m = nT_age_surv_aah_m,
-          nT_age_short_f = nT_age_short_f,
-          nT_age_short_m = nT_age_short_m,
-          nT_period = nT_period_overall_ext,
-          beta0 = beta0_survival_inf,
-          beta_male = beta_male,
-          age_effect = age_effect_survival[1:nT_age_surv],
-          period_effect = period_effect_survival[(nT_period_prestudy_ext + 1):
-                                                  nT_period_overall_ext],
-          intvl_step_yr = intvl_step_yr,
-          n_year = n_year,
-          n_agef = n_agef,
-          n_agem = n_agem,
-          ng_start = ng_start[1:n_year],
-          gun_start = gun_start[1:n_year],
-          gun_end = gun_end[1:n_year],
-          ng_end = ng_end[1:n_year],
-          yr_start = yr_start[1:n_year],
-          yr_end = yr_end[1:n_year],
-          p_nogun_f = p_nogun_f,
-          p_nogun_m = p_nogun_m,
-          p_gun_f = p_gun_f,
-          p_gun_m = p_gun_m
-          )
+      nT_age = nT_age_surv,
+      nT_period_overall = nT_period_overall,
+      nT_age_short_f = nT_age_short_f,
+      nT_age_short_m = nT_age_short_m,
+      nT_age_surv_aah_f = nT_age_surv_aah_f,
+      nT_age_surv_aah_m = nT_age_surv_aah_m,
+      beta0 = beta0_survival_sus,
+      beta_male = beta_male,
+      age_effect = age_effect_survival[1:nT_age_surv],
+      period_effect = period_effect_survival[(nT_period_prestudy_ext + 1):
+                                              nT_period_overall_ext],
+      intvl_step_yr = intvl_step_yr,
+      n_year = n_year,
+      n_agef = n_agef,
+      n_agem = n_agem,
+      ng_start = ng_start[1:n_year],
+      gun_start = gun_start[1:n_year],
+      gun_end = gun_end[1:n_year],
+      ng_end = ng_end[1:n_year],
+      yr_start = yr_start[1:n_year],
+      yr_end = yr_end[1:n_year],
+      p_nogun_f = p_nogun_f,
+      p_nogun_m = p_nogun_m,
+      p_gun_f = p_gun_f,
+      p_gun_m = p_gun_m
+      )
 
 
   ###################################################
