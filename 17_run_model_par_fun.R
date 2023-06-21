@@ -262,7 +262,7 @@ nimInits <- initsFun()
 
 #######################################
 ### Parameters to trace in MCMC
-#######################################
+########## #############################
 
 ni  <- 100
 nb <- .5
@@ -658,11 +658,56 @@ dim(mod_chunk1[[1]])
 mod_chunk2 <- R.utils::loadObject("mod_chunk2")
 dim(mod_chunk2[[2]])
 
+########################
+###
+### Re-assemble posterior
+###
+########################
+
+for(i in 1:n_runs){
+  mod_chunk <- rbind()
+}
+n_runs <- 31
+# Reassemble chain from chunks and apply additional thinning.
+out1 <- R.utils::loadObject(str_c("results/",mod_nam, "_chunk", 1))
+ni_saved <- nrow(out1[[1]])
+for(chn in 1:nc) { # nc must be > 1
+  out1[[chn]] <- out1[[chn]][seq(1, ni_saved, by = nt),]
+}
+for(r in 2:n_runs) {
+  out_r <- R.utils::loadObject(str_c("results/",mod_nam, "_chunk", r))
+  ni_saved <- nrow(out_r[[1]])
+  for(chn in 1:nc) {
+    out_r[[chn]] <- out_r[[chn]][seq(1, ni_saved, by = nt),]
+    out1[[chn]] <- rbind(out1[[chn]], out_r[[chn]])
+  }
+}
 
 
+# Discard specified proportion of initial samples as burn-in
+out3 <- out1
+ni_saved <- nrow(out3[[1]])
+for(chn in 1:nc) {
+  nb_real <- (round(ni_saved * nb) + 1)
+  out3[[chn]] <- out3[[chn]][nb_real:ni_saved, ]
+}
+out_mcmc_update <- coda::as.mcmc.list(lapply(out3, coda::as.mcmc))
+mod <- mcmcOutput::mcmcOutput(out_mcmc_update)
+sumTab <- summary(mod,
+                  MCEpc = FALSE,
+                  Rhat = TRUE,
+                  # n.eff = T,
+                  f = T,
+                  overlap0 = T,
+                  verbose = F)
+sumTab$Rhat <- mcmcOutput::getRhat(mod, bad = NA)
 
-
-
+sumTab <- sumTab %>%
+  as_tibble() %>%
+  mutate(Parameter = row.names(sumTab)) %>%
+  select(Parameter, mean:Rhat)
+# if(length(par_ignore_Rht) == 0) {
+  mx_Rht <- sumTab  %>% pull(Rhat) %>% max(na.rm = T)
 
 
 # stopCluster(cl)
