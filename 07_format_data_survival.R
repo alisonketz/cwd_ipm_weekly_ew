@@ -24,10 +24,10 @@ nT_period_prestudy_ext + nT_period_overall
 ### Monthly
 ###########################
 
-# nT_period_overall_ext_monthly <- interval("1985-05-15", "2022-05-14") %/% months(1)
-# # nT_period_overall_ext_monthly <- interval("1992-05-15","2022-05-14") %/% months(1)
-# nT_period_overall_monthly <- interval("1994-05-15","2022-05-14") %/% months(1)
-# nT_period_precollar_ext_monthly <- nT_period_overall_ext_monthly - nT_period_collar
+nT_period_overall_ext_monthly <- interval("1985-05-15", "2022-05-14") %/% months(1)
+# nT_period_overall_ext_monthly <- interval("1992-05-15","2022-05-14") %/% months(1)
+nT_period_overall_monthly <- interval("1994-05-15","2022-05-14") %/% months(1)
+nT_period_precollar_ext_monthly <- nT_period_overall_ext_monthly - nT_period_collar
 
 ###########################
 ### Years
@@ -36,6 +36,7 @@ nT_period_prestudy_ext + nT_period_overall
 n_year_precollar <- 2017 - 1994
 n_year_precollar_ext <- 2017 - 1985
 n_year_prestudy_ext <- 1994 - 1985
+n_year_ext <- 2022 - 1985
 
 ########################################
 ### spreadsheet to confirm timeline
@@ -50,6 +51,8 @@ timing_df <- data.frame(var = c("nT_period_collar",
     "nT_period_prestudy_ext ",
     "nT_period_precollar_ext ",
     "nT_period_prestudy_ext + nT_period_overall",
+    "n_year",
+    "n_year_ext",
     "n_year_precollar",
     "n_year_precollar_ext",
     "n_year_prestudy_ext"),
@@ -60,6 +63,8 @@ timing_df <- data.frame(var = c("nT_period_collar",
     nT_period_prestudy_ext,
     nT_period_precollar_ext,
     nT_period_prestudy_ext + nT_period_overall,
+    n_year,
+    n_year_ext,
     n_year_precollar,
     n_year_precollar_ext,
     n_year_prestudy_ext),
@@ -70,6 +75,8 @@ timing_df <- data.frame(var = c("nT_period_collar",
     "nT_period_overall_ext - nT_period_overall",
     "nT_period_overall_ext - nT_period_collar",
     "nT_period_prestudy_ext + nT_period_overall",
+    "2022 - 1994",
+    "2022 - 1985",
     "2017 - 1994",
     "2017 - 1985",
     "1994 - 1985")
