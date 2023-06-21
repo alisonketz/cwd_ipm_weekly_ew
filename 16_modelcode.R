@@ -974,7 +974,7 @@ modelcode <- nimbleCode({
                                       sn_sus[2, a, t - 1] *
                                       (1 - psi[k, 2, a, t - 1])
         }
-        
+
         #Male: max age class
         pop_sus_proj[k, 2, n_agem, t] <- pop_sus_proj[k, 2, (n_agem - 1), t] +
                                          pop_sus[k, 2, n_agem, t - 1] *
@@ -1022,7 +1022,6 @@ modelcode <- nimbleCode({
         for (a in 2:n_agef) {
           pop_inf[k, 1, a, t] <- pop_inf_proj[k, 1, (a - 1), t]
         }
-        
         #Female: fawn class = total #females * unisex fawns per female/2
         #(should this be divided by 2?)
         pop_inf[k, 1, 1, t] <- ((sum(pop_sus_proj[k, 1, 1:n_agef, t]) +
@@ -1065,15 +1064,15 @@ modelcode <- nimbleCode({
     }#end t
     }#end study_area
 
-  ######################################################################
-  ### Observation Model
-  ######################################################################
+    ######################################################################
+    ### Observation Model
+    ######################################################################
 
-  for (i in 1:n_sex) {
-    tau_obs[i] ~ dgamma(1, 1)
-  }#end i
+    for (i in 1:n_sex) {
+      tau_obs[i] ~ dgamma(1, 1)
+    }#end i
 
-  for(k in 1:n_study_area){
+    for(k in 1:n_study_area) {
 
       # for (i in 1:n_sex) {
       #   tau_obs[k, i] ~ dgamma(1, 1)
@@ -1110,33 +1109,33 @@ modelcode <- nimbleCode({
 
         for (j in 1:n_sex) {
           # O[k, j, t] ~ dnorm(mu_obs[k, j, t], tau_obs[j])
-          log(O[k, j, t]) ~ dnorm(log(mu_obs[k, j, t]), tau_obs[j])
+          O[k, j, t] ~ dnorm(log(mu_obs[k, j, t]), tau_obs[j])
         }#end i
 
       #   ###################################
       #   #Likelihood for overall total
       #   ###################################
 
-      #   ### parameters for likelihood harvest data by antlerless group
-      #   ### proportion of each age class
-      #   ### Antlerless deer
-      #   p_less[k, 1, t] <- harv_pop[k, 1, 1, t] / mu_obs[k, 1, t]#f
-      #   p_less[k, 2, t] <- harv_pop[k, 1, 2, t] / mu_obs[k, 1, t]#1
-      #   p_less[k, 3, t] <- harv_pop[k, 1, 3, t] / mu_obs[k, 1, t]#2
-      #   p_less[k, 4, t] <- harv_pop[k, 1, 4, t] / mu_obs[k, 1, t]#3
-      #   p_less[k, 5, t] <- sum(harv_pop[k, 1, 5:6, t]) / mu_obs[k, 1, t]#4-5
-      #   p_less[k, 6, t] <- sum(harv_pop[k, 1, 7:9, t]) / mu_obs[k, 1, t]#6-8
-      #   p_less[k, 7, t] <- harv_pop[k, 1, 10, t] / mu_obs[k, 1, t]#9+
-      #   p_less[k, 8, t] <- 1 - sum(p_less[k, 1:7, t])#male f, antlerless
+        # ### parameters for likelihood harvest data by antlerless group
+        # ### proportion of each age class
+        # ### Antlerless deer
+        # p_less[k, 1, t] <- harv_pop[k, 1, 1, t] / mu_obs[k, 1, t]#f
+        # p_less[k, 2, t] <- harv_pop[k, 1, 2, t] / mu_obs[k, 1, t]#1
+        # p_less[k, 3, t] <- harv_pop[k, 1, 3, t] / mu_obs[k, 1, t]#2
+        # p_less[k, 4, t] <- harv_pop[k, 1, 4, t] / mu_obs[k, 1, t]#3
+        # p_less[k, 5, t] <- sum(harv_pop[k, 1, 5:6, t]) / mu_obs[k, 1, t]#4-5
+        # p_less[k, 6, t] <- sum(harv_pop[k, 1, 7:9, t]) / mu_obs[k, 1, t]#6-8
+        # p_less[k, 7, t] <- harv_pop[k, 1, 10, t] / mu_obs[k, 1, t]#9+
+        # p_less[k, 8, t] <- 1 - sum(p_less[k, 1:7, t])#male f, antlerless
 
-      #   ### harvest data bt antlered group
-      #   p_ant[k, 1, t] <- harv_pop[k, 2, 2, t] / mu_obs[k, 2, t]#1
-      #   p_ant[k, 2, t] <- harv_pop[k, 2, 3, t] / mu_obs[k, 2, t]#2
-      #   p_ant[k, 3, t] <- harv_pop[k, 2, 4, t] / mu_obs[k, 2, t]#3
-      #   p_ant[k, 4, t] <- sum(harv_pop[k, 2, 5:6, t]) / mu_obs[k, 2, t]#4-5
-      #   p_ant[k, 5, t] <- 1 - sum(p_ant[k, 1:4, t]) #6+
+        # ### harvest data bt antlered group
+        # p_ant[k, 1, t] <- harv_pop[k, 2, 2, t] / mu_obs[k, 2, t]#1
+        # p_ant[k, 2, t] <- harv_pop[k, 2, 3, t] / mu_obs[k, 2, t]#2
+        # p_ant[k, 3, t] <- harv_pop[k, 2, 4, t] / mu_obs[k, 2, t]#3
+        # p_ant[k, 4, t] <- sum(harv_pop[k, 2, 5:6, t]) / mu_obs[k, 2, t]#4-5
+        # p_ant[k, 5, t] <- 1 - sum(p_ant[k, 1:4, t]) #6+
 
-      # }# end t
+      }# end t
 
       # for(t in 1:n_year){
       #     #antlerless, male fawns
@@ -1146,7 +1145,6 @@ modelcode <- nimbleCode({
       #     Cage_ant[k, 1:(n_ageclassm - 1),t] ~ dmulti(prob = p_ant[k, 1:(n_ageclassm - 1),t],
       #               size = sizeCage_m[k, t])
       #   }
-    }
   }
 
 })#end model statement
