@@ -17,7 +17,7 @@
 out <- mcmcout$samples
 fit_sum <- mcmcout$summary
 # fit_sum <- mcmcout$summary$all.chains
-pdf(paste0("figures/traceplots_",Sys.time(),".pdf")
+pdf(str_replace_all(str_replace_all(paste0("figures/traceplots_B_",Sys.time(),".pdf"), " ",""),":",""))
 traceplot(out[, "beta_male_foi"], ylab = "beta_male_foi")
 traceplot(out[, "beta_male_surv"], ylab = "beta_male_surv")
 traceplot(out[, "tau_age_foi_female"], ylab = "tau_age_foi_female")
@@ -172,7 +172,6 @@ mu_obs_out <- rbind(mu_obs_east_f,mu_obs_east_m,mu_obs_west_f,mu_obs_west_m)
 mu_obs_out$sex <- as.factor(mu_obs_out$sex)
 mu_obs_out$study_area <- as.factor(mu_obs_out$study_area)
 
-library(ggh4x)
 mu_obs_plot <- ggplot(data = mu_obs_out, aes(x=year,y=mean)) +
                geom_ribbon(aes(ymin=lower,ymax=upper),alpha=.2,linetype=0)+
                geom_line() +
@@ -180,7 +179,7 @@ mu_obs_plot <- ggplot(data = mu_obs_out, aes(x=year,y=mean)) +
                facet_nested(study_area ~ sex)+
                theme_bw()
 mu_obs_plot
-ggsave("figures/mu_obs_plot_BE.png",mu_obs_plot)
+ggsave("figures/mu_obs_plot_B.png",mu_obs_plot)
 
 
 
@@ -190,19 +189,18 @@ ggsave("figures/mu_obs_plot_BE.png",mu_obs_plot)
 ###
 ####################################################
 
-p_hunt_indx <- grep("p_",rownames(fit_sum))
-# p_hunt_out <- fit_sum[p_hunt_indx,]
-# p_hunt_out$sex <- rep(c("Female","Male"),2)
-# p_hunt_out$hunttype <- c(rep("9day-Gun",2),rep("Non-9day-Gun",2))
-p_hunt_out <- data.frame(out[,p_hunt_indx]) %>% pivot_longer(cols=everything())
+tau_indx <- grep("tau",rownames(fit_sum))
+tau_out <- data.frame(out[,tau_indx]) %>% pivot_longer(cols=everything())
 
-p_hunt_plot <- ggplot(p_hunt_out, aes(x = value, y = name)) +
+tau_plot <- ggplot(tau_out, aes(x = value, y = name)) +
                 geom_density_ridges(scale = .8) +
-                ylab("Condiitonal Probability of Harvest Type") +
-                xlab("Probability") +
+                ylab("Precision Parameters") +
+                xlab("Posterior Density") +
                 theme_bw()
-p_hunt_plot
-ggsave("figures/cause_prob_hh_BE.png", p_hunt_plot)
+tau_plot
+ggsave("figures/tau_posteriors_B.png", tau_plot)
+
+
 
 
 ###################################################
@@ -220,7 +218,7 @@ tau_plot <- ggplot(tau_out, aes(x = value, y = name)) +
                 xlab("Posterior Density") +
                 theme_bw()
 tau_plot
-ggsave("figures/tau_posteriors_BE.png", tau_plot)
+ggsave("figures/tau_posteriors_B.png", tau_plot)
 
 
 
@@ -240,7 +238,7 @@ beta_plot <- ggplot(beta_out, aes(x = value, y = name)) +
                 xlab("Posterior Density") +
                 theme_bw()
 beta_plot
-ggsave("figures/beta_posteriors_BE.png", beta_plot)
+ggsave("figures/beta_posteriors_B.png", beta_plot)
 
 
 ###################################################
@@ -259,7 +257,7 @@ space_plot <- ggplot(space_out, aes(x = Space_West)) +
                 xlab("Posterior Density") +
                 theme_bw()
 space_plot
-ggsave("figures/space_posterior_BE.png", space_plot)
+ggsave("figures/space_posterior_B.png", space_plot)
 
 
 
