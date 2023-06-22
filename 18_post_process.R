@@ -17,7 +17,7 @@
 out <- mcmcout$samples
 fit_sum <- mcmcout$summary
 # fit_sum <- mcmcout$summary$all.chains
-pdf("figures/traceplots.pdf")
+pdf(paste0("figures/traceplots_",Sys.time(),".pdf")
 traceplot(out[, "beta_male_foi"], ylab = "beta_male_foi")
 traceplot(out[, "beta_male_surv"], ylab = "beta_male_surv")
 traceplot(out[, "tau_age_foi_female"], ylab = "tau_age_foi_female")
