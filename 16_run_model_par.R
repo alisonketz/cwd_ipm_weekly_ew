@@ -143,7 +143,7 @@ nimConsts <- list(n_year = n_year,
     n_year_fec_early = n_year_fec_early,
     nknots_age = nknots_age,
     nknots_period = nknots_period,
-    n_adj_period = n_adj_period,
+    # n_adj_period = n_adj_period,
     period_lookup_foi = period_lookup_foi,
     ng_start = d_fit_season$ng_start,
     gun_start = d_fit_season$gun_start,
@@ -192,10 +192,12 @@ nimConsts <- list(n_year = n_year,
 #######################################
 
 initsFun <- function()list(beta_male = rnorm(1, -.5, .01),
-    beta0_sus_temp = rnorm(1, -8.5, 0.0001),
-    sus_mix = 1,
-    beta0_inf_temp = rnorm(1, -8, 0.0001),
-    inf_mix = 1,
+    # beta0_sus_temp = rnorm(1, -8.5, 0.0001),
+    # sus_mix = 1,
+    # beta0_inf_temp = rnorm(1, -8, 0.0001),
+    # inf_mix = 1,
+    beta0_survival_inf = rnorm(1, -6, 0.1),
+    beta0_survival_sus = rnorm(1, -6, 0.1),
     ln_b_age_survival = rnorm(nknots_age) * 10^-4,
     b_period_survival = rnorm(nknots_period) * 10^-4,
     tau_period_survival = runif(1, .1, 1),
@@ -204,8 +206,8 @@ initsFun <- function()list(beta_male = rnorm(1, -.5, .01),
     tau_age_foi_female = runif(1, 2.7, 4.2),
     tau_period_foi_male = runif(1, 4.2, 6.8),
     tau_period_foi_female = runif(1, 2.27, 3.44),
-    m_period_foi = seq(-1.2, 1, length = n_year),
-    f_period_foi = seq(-1.5, 1, length = n_year),
+    m_period_foi_temp = seq(-1.2, 1, length = n_year),
+    f_period_foi_temp = seq(-1.5, 1, length = n_year),
     m_age_foi = c(rnorm(1, -6, sd =.1),
                   rnorm(1, -5.5, sd =.1),
                   rnorm(1, -5, sd =.1),
@@ -222,7 +224,7 @@ initsFun <- function()list(beta_male = rnorm(1, -.5, .01),
     tau_period_precollar = rgamma(1, 1, 1),
     period_annual_survival = rnorm(n_year_precollar + 1, .1),
     beta0_cause = rnorm(1, -2.8, .1),
-    beta_cause_male = rnorm(1, 0, .1),
+    beta_cause_male = rnorm(1, 0, 1),
     beta_cause_gun = rnorm(1, 1.5, .1),
     beta_cause_ng = rnorm(1, 3, .1),
     # tau_obs = matrix(runif(4, 1, 3), 2, 2),
@@ -243,19 +245,19 @@ nimInits <- initsFun()
 ########################################################
 
 # start_Rmodel <- Sys.time()
-Rmodel <- nimbleModel(code = modelcode,
-                      constants = nimConsts,
-                      data = nimData,
-                      inits = initsFun(),
-                      calculate = FALSE,
-                      check = FALSE
-                      )
-# end_Rmodel <- Sys.time() - start_Rmodel
-Rmodel$initializeInfo()
+# Rmodel <- nimbleModel(code = modelcode,
+#                       constants = nimConsts,
+#                       data = nimData,
+#                       inits = initsFun(),
+#                       calculate = FALSE,
+#                       check = FALSE
+#                       )
+# # end_Rmodel <- Sys.time() - start_Rmodel
+# Rmodel$initializeInfo()
 
-Cnim <- compileNimble(Rmodel)
+# Cnim <- compileNimble(Rmodel)
 
-for(i in 1:10){beepr::beep(1)}
+# for(i in 1:10){beepr::beep(1)}
 
 #######################################
 ### Parameters to trace in MCMC
@@ -265,8 +267,8 @@ parameters <- c(
               "beta_male",
               "tau_age_foi_male",
               "tau_age_foi_female",
-            #   "tau1_age_foi_male",
-            #   "tau1_age_foi_female",
+              # "tau1_age_foi_male",
+              # "tau1_age_foi_female",
               "m_age_foi",
               "f_age_foi",
               "m_age_foi_mu",
@@ -278,18 +280,18 @@ parameters <- c(
               "space",
               "space_temp",
               "space_mix",
-              "beta0_sus_temp",
-              "sus_mix",
+              # "beta0_sus_temp",
+              # "sus_mix",
               "beta0_survival_sus",
               "tau_age_survival",
-              # "age_effect_survival",
+              "age_effect_survival",
               "ln_b_age_survival",
               "b_period_survival",
               "tau_period_survival",
               "tau_period_precollar",
-              # "period_effect_survival",
-              "beta0_inf_temp",
-              "inf_mix",
+              "period_effect_survival",
+              # "beta0_inf_temp",
+              # "inf_mix",
               "beta0_survival_inf",
               "beta0_cause",
               "beta_cause_gun",
@@ -301,9 +303,9 @@ parameters <- c(
               "p_gun_m",
               "report",
               "fec",
-              "mu_fec",
               "fec_prec_eps",
-              "fec_epsilon",
+              # "mu_fec",
+              # "fec_epsilon",
               # "sn_inf",
               # "sn_sus",
               # "sh_inf",
@@ -313,37 +315,36 @@ parameters <- c(
               "tau_pop"
                )
 
-confMCMC <- configureMCMC(Rmodel,
-                         monitors = parameters,
-                         thin = 1,
-                         # enableWAIC = TRUE,
-                         useConjugacy = FALSE)
-nimMCMC <- buildMCMC(confMCMC)
-CnimMCMC <- compileNimble(nimMCMC,
-                         project = Rmodel)
-for(i in 1:10){beepr::beep(1)}
+# confMCMC <- configureMCMC(Rmodel,
+#                          monitors = parameters,
+#                          thin = 1,
+#                          # enableWAIC = TRUE,
+#                          useConjugacy = FALSE)
+# nimMCMC <- buildMCMC(confMCMC)
+# CnimMCMC <- compileNimble(nimMCMC,
+#                          project = Rmodel)
+# for(i in 1:10){beepr::beep(1)}
 
-set.seed(1001)
-starttime <- Sys.time()
-mcmcout <- runMCMC(CnimMCMC,
-                  niter = 5,
-                  nburnin = 0,
-                  nchains = 1,
-                  inits = initsFun,
-                  samplesAsCodaMCMC = TRUE,
-                  summary = TRUE
-                  )
-runtime <- difftime(Sys.time(),
-                    starttime,
-                    units = "min")
-runtime
-for (i in 1:10) {beepr::beep(1)}
+# set.seed(7654321)
+# starttime <- Sys.time()
+# mcmcout <- runMCMC(CnimMCMC,
+#                   niter = 1000,
+#                   nburnin = 0,
+#                   nchains = 1,
+#                   inits = initsFun,
+#                   samplesAsCodaMCMC = TRUE,
+#                   summary = TRUE
+#                   )
+# runtime <- difftime(Sys.time(),
+#                     starttime,
+#                     units = "min")
+# for (i in 1:10) {beepr::beep(1)}
 
-mcmcout$summary
+
 # end_Rmodel
 # endtime_rmodel_compile
 # endtime_mcmc
-runtime
+# runtime
 
 # sink("runtime_allsteps.txt")
 # cat("Rmodel:\n")
@@ -360,140 +361,170 @@ runtime
 ###
 #############################################################
 
-# reps  <- 10
-# bin <- reps * .5
-# n_thin <- 1
-# n_chains <- 3
-# starttime <- Sys.time()
-# cl <- makeCluster(n_chains, timeout = 5184000)
+ni  <- 1000
+nb <- .5
+bin <- ni * nb
+nt <- 1
+nc <- 3
+starttime <- Sys.time()
+cl <- makeCluster(nc, timeout = 5184000)
 
-# clusterExport(cl, c("modelcode",
-#                     "initsFun",
-#                     "nimData",
-#                     "nimConsts",
-#                     "parameters",
-#                     "reps",
-#                     "bin",
-#                     "n_thin",
-#                     "set_period_effects_constant",
-#                     "dInfHarvest",
-#                     "dSusHarvest",
-#                     "dSusCensTest",
-#                     "dSusCensNo",
-#                     "dSusMortTest",
-#                     "dSusMortNoTest",
-#                     "dIcapCens",
-#                     "dIcapMort",
-#                     "dRecNegCensTest",
-#                     "dRecNegMort",
-#                     "dRecPosMort",
-#                     "dRecPosCens",
-#                     "dNegCapPosMort",
-#                     "dAAH",
-#                     "calc_surv_aah",
-#                     "calc_surv_harvest",
-#                     "calc_infect_prob"
-#                     ))
-# for (j in seq_along(cl)) {
-#   set.seed(j + 1000)
-#   init <- initsFun()
-#   clusterExport(cl[j], "init")
-# }
-# for (i in 1:10) {beepr::beep(1)}
+clusterExport(cl, c("modelcode",
+                    "initsFun",
+                    "nimData",
+                    "nimConsts",
+                    "parameters",
+                    "ni",
+                    "bin",
+                    "nt"
+                    ))
+for (j in seq_along(cl)) {
+  set.seed(j + 1000)
+  init <- initsFun()
+  clusterExport(cl[j], "init")
+}
+for (i in 1:10) {beepr::beep(1)}
 
-# # starttime <- Sys.time()
-# # mcmcout1 <-  mcmc.list(clusterEvalQ(cl, {
-# #   library(nimble)
-# #   library(coda)
+starttime <- Sys.time()
+mcmcout1 <-  mcmc.list(clusterEvalQ(cl, {
+  library(nimble)
+  library(coda)
 
-#   compile(dInfHarvest)
-#   compile(dSusHarvest)
-#   compile(dSusCensTest)
-#   compile(dSusCensNo)
-#   compile(dSusMortTest)
-#   compile(dSusMortNoTest)
-#   compile(dIcapCens)
-#   compile(dIcapMort)
-#   compile(dRecNegCensTest)
-#   compile(dRecNegMort)
-#   compile(dRecPosMort)
-#   compile(dRecPosCens)
-#   compile(dNegCapPosMort)
-#   compile(dAAH)
-#   compile(set_period_effects_constant)
-#   compile(calc_surv_aah)
-#   compile(calc_surv_harvest)
-#   compile(calc_infect_prob)
+  source("14_distributions.R")
+  source("15_calculations.R")
 
-# #   ##############################################################
-# #   ###
-# #   ### Execute MCMC
-# #   ###
-# #   ##############################################################
+  ##############################################################
+  ###
+  ### Execute MCMC
+  ###
+  ##############################################################
 
-# #   Rmodel <- nimbleModel(code = modelcode,
-# #                         name = "modelcode",
-# #                         constants = nimConsts,
-# #                         data = nimData,
-# #                         inits = initsFun)
-# #   Cnim <- compileNimble(Rmodel)
-# #   confMCMC <- configureMCMC(Rmodel,
-# #                             monitors = parameters,
-# #                             thin = n_thin,
-# #                             useConjugacy = FALSE)
-# #   nimMCMC <- buildMCMC(confMCMC)
-# #   CnimMCMC <- compileNimble(nimMCMC,
-# #                             project = Rmodel)
+  Rmodel <- nimbleModel(code = modelcode,
+                        name = "modelcode",
+                        constants = nimConsts,
+                        data = nimData,
+                        inits = init)
+  Cnim <- compileNimble(Rmodel)
+  confMCMC <- configureMCMC(Rmodel,
+                            monitors = parameters,
+                            thin = nt,
+                            useConjugacy = FALSE)
+  confMCMC$removeSamplers(c("beta0_survival_sus", "beta0_survival_inf")) 
+  confMCMC$addSampler(target = "beta0_survival_sus", type = "slice")
+  confMCMC$addSampler(target = "beta0_survival_inf",  type = "slice")
+  nimMCMC <- buildMCMC(confMCMC)
+  CnimMCMC <- compileNimble(nimMCMC,
+                            project = Rmodel)
 
-# #   CnimMCMC$run(reps, reset = FALSE)
+  CnimMCMC$run(ni, reset = FALSE)
 
-# #   return(as.mcmc(as.matrix(CnimMCMC$mvSamples)))
-# # }))
-# # runtime1 <- difftime(Sys.time(), starttime, units = "min")
+  return(as.mcmc(as.matrix(CnimMCMC$mvSamples)))
+}))
+(runtime1 <- difftime(Sys.time(), starttime, units = "min"))
 
-# # for(chn in 1:nc) { # nc must be > 1
-# #   ind.keep <- c()
-# #   for(p in 1:length(parameters)) ind.keep <-
-# #       c(ind.keep, which(str_detect(dimnames(out1[[chn]])[[2]], parameters[p]))) %>% unique()
-# #   out1[[chn]] <- out1[[chn]][,ind.keep]
-# # }
 
-# # ## Check convergence ##
-# # out2 <- out1
-# # ni.saved <- nrow(out2[[1]])
-# # for(chn in 1:nc) { # nc must be > 1
+
+for(chn in 1:nc) { # nc must be > 1
+  ind_keep <- c()
+  for(p in 1:length(parameters)) {
+    ind_keep <- c(ind_keep,
+        which(str_detect(dimnames(mcmcout1[[chn]])[[2]], parameters[p]))) %>%
+        unique()
+  }
+  mcmcout1[[chn]] <- mcmcout1[[chn]][,ind_keep]
+}
+
+## Check convergence ##
+out1 <- mcmcout1
+ni_saved <- nrow(out1[[1]])
+for(chn in 1:nc) { # nc must be > 1
   
-# #   if(nb < 1) {
-# #     nb.real <- (round(ni.saved * nb)+1)
-# #   } else {
-# #     nb.real <- (round(nb/nt)+1)
-# #   }
-# #   out2[[chn]] <- out2[[chn]][nb.real:ni.saved,]
-# # }
-# # out.mcmc <- coda::as.mcmc.list(lapply(out2, coda::as.mcmc))
-# # stopCluster(cl)
+  if(nb < 1) {
+    nb_real <- (round(ni_saved * nb)+1)
+  } else {
+    nb_real <- (round(nb/nt)+1)
+  }
+  out1[[chn]] <- out1[[chn]][nb_real:ni_saved,]
+}
+out_mcmc1 <- coda::as.mcmc.list(lapply(out1, coda::as.mcmc))
+mod <- mcmcOutput::mcmcOutput(out_mcmc1)
+sumTab <- summary(mod,
+                  MCEpc = FALSE,
+                  Rhat = TRUE,
+                  n.eff = TRUE, 
+                  f = TRUE,
+                  overlap0 = TRUE,
+                  verbose = FALSE)
 
-# # save(mcmcout1, file = "mcmcout1.Rdata")
-# # save(runtime1, file = "runtime1.Rdata")
-# # save(endtime_rmodel_compile, file = "endtime_rmodel_compile.Rdata")
-# # save(endtime_mcmc, file = "endtime_mcmc.Rdata")
+sumTab <- sumTab %>%
+      as_tibble() %>%
+      mutate(Parameter = row.names(sumTab)) %>%
+      select(Parameter, mean:f)
 
-# #not calculating waic, because too many params would need to be traced
-# # posteriorSamplesMatrix <- rbind(mcmcout[[1]], mcmcout[[2]], mcmcout[[3]])
-# # CnimMCMC$run(5)   ## non-zero number of iterations
-# # nimble:::matrix2mv(posteriorSamplesMatrix, CnimMCMC$mvSamples)
-# # # CnimMCMC$enableWAIC <- TRUE
-# # waic_spline <- calculateWAIC(posteriorSamplesMatrix,Rmodel)
+sumTab
+
+mcmcout2 <- clusterEvalQ(cl, {
+  CnimMCMC$run(ni, reset = FALSE, resetMV = TRUE) # Resume sampling.
+  return(as.mcmc(as.matrix(CnimMCMC$mvSamples)))
+  gc(verbose = F)
+})
+
+for(chn in 1:nc) { # nc must be > 1
+  ind.keep <- c()
+  for(p in 1:length(parameters)) ind.keep <-
+      c(ind.keep, which(str_detect(dimnames(mcmcout2[[chn]])[[2]], parameters[p]))) %>% unique()
+  mcmcout2[[chn]] <- mcmcout2[[chn]][,ind.keep]
+}
+mod.nam = "mod"
+n.runs <- 2
+R.utils::saveObject(mcmcout2, str_c(mod.nam, "_chunk", n.runs)) # Save samples from previous run to drive.
 
 
-# # waic_spline_covs <- mcmcout$WAIC
-# # save(waic_spline, file = "waic_spline.Rdata")
+
+# par.ignore.Rht=c()
+# if(length(par.ignore.Rht) == 0) {
+#       mxRht <- sumTab %>% pull(Rhat) %>% max(na.rm = T)
+#       mn.neff <- sumTab %>% pull(n.eff) %>% min(na.rm = T)
+# } else {
+#     ind.ignore <- c()
+#     for(p in 1:length(par.ignore.Rht)) ind.ignore <-
+#         c(ind.ignore, which(str_detect(sumTab$Parameter, par.ignore.Rht[p]))) %>%
+#         unique()
+#     if(length(ind.ignore) > 0) {
+#         mxRht <- sumTab %>% slice(-ind.ignore) %>% pull(Rhat) %>% max(na.rm = T)
+#         mn.neff <- sumTab %>% slice(-ind.ignore) %>% pull(n.eff) %>% min(na.rm = T)
+#     } else {
+#         mxRht <- sumTab %>% pull(Rhat) %>% max(na.rm = T)
+#         mn.neff <- sumTab %>% pull(n.eff) %>% min(na.rm = T)
+#     }
+# }
 
 
 
-# ###
-# ### save model run
-# ###
 
-# # save(runtime,file="results/runtime.Rdata")
-# # save(mcmcout,file="results/mcmcout.Rdata")
+
+
+
+
+
+
+
+
+
+
+
+
+
+# stopCluster(cl)
+
+# save(mcmcmcmcout1, file = "mcmcmcmcout1.Rdata")
+# save(runtime1, file = "runtime1.Rdata")
+# save(endtime_rmodel_compile, file = "endtime_rmodel_compile.Rdata")
+# save(endtime_mcmc, file = "endtime_mcmc.Rdata")
+
+###
+### save model run
+###
+
+# save(runtime,file="results/runtime.Rdata")
+# save(mcmcout,file="results/mcmcout.Rdata")
