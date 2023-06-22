@@ -1109,7 +1109,7 @@ modelcode <- nimbleCode({
 
         for (j in 1:n_sex) {
           # O[k, j, t] ~ dnorm(mu_obs[k, j, t], tau_obs[j])
-          O[k, j, t] ~ dnorm(log(mu_obs[k, j, t]), tau_obs[j])
+          O[k, j, t] ~ dnorm(mu_obs[k, j, t], tau_obs[j])
         }#end i
 
       #   ###################################
