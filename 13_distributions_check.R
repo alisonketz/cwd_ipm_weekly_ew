@@ -21,7 +21,8 @@ period_effect_survival_test <- period_effect_survival_test - mean(period_effect_
 ### loading age and period effects from Transmission v3 w/o Survival
 ###########################################################################
 
-load("~/Documents/Transmission/Transmission_v5/01_urw2_ew_timeRW1/fit_sum.Rdata")
+# load("~/Documents/Transmission/Transmission_v5/01_urw2_ew_timeRW1/fit_sum.Rdata")
+load("datafiles/fit_sum_foi.Rdata")
 
 m_age_foi <- fit_sum[grep("m_age",rownames(fit_sum))[1:7],1]
 f_age_foi <- fit_sum[grep("f_age",rownames(fit_sum))[1:7],1]

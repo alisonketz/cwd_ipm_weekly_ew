@@ -146,6 +146,7 @@ nimConsts <- list(n_year = n_year,
     nknots_period = nknots_period,
     n_adj_period = n_adj_period,
     period_lookup_foi = period_lookup_foi,
+    period_lookup_foi_study = period_lookup_foi_study,
     ng_start = d_fit_season$ng_start,
     gun_start = d_fit_season$gun_start,
     gun_end = d_fit_season$gun_end,
@@ -327,7 +328,7 @@ for(i in 1:10){beepr::beep(1)}
 set.seed(1001)
 starttime <- Sys.time()
 mcmcout <- runMCMC(CnimMCMC,
-                  niter = 300,
+                  niter = 10,
                   nburnin = 0,
                   nchains = 1,
                   inits = initsFun,
