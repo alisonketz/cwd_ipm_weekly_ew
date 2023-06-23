@@ -33,14 +33,21 @@ df_age_before_antlered <- df_age_before_male %>% filter(age != 0)
 df_age_before_female_nofawn <- df_age_before_female %>% filter(age != 0)
 
 #ratio to calculate sex-ratio for initial population
+ sum(df_age_before_female_nofawn$n)
+ sum(df_age_before_antlered$n)
+
 doe_per <- df_age_before_female_nofawn$n[
                 df_age_before_female_nofawn$age == 1] /
                 sum(df_age_before_female_nofawn$n)
 buck_per <- df_age_before_antlered$n[
                 df_age_before_antlered$age == 1] /
                 sum(df_age_before_antlered$n)
-
 sex_ratio_early <- doe_per / buck_per
+female_proportion_early <- 1 - (sex_ratio_early/(sex_ratio_early + 1))
+
+
+#proportion of females in the total population size
+
 
 df_age_before_antlerless$proportion <- 
     df_age_before_antlerless$n / sum(df_age_before_antlerless$n)
@@ -129,8 +136,8 @@ initN_inf <- array(0, dim = c(n_study_area, n_sex, n_agef))
 
 ### Total population initialized from SAK estimate from 1994
 init0_east <- c()
-init0_east$female <- sex_ratio_early * pop_estimate_east
-init0_east$male <- (1 - sex_ratio_early) * pop_estimate_east
+init0_east$female <- female_proportion_early * pop_estimate_east
+init0_east$male <- (1 - female_proportion_early) * pop_estimate_east
 
 
 ###susceptible initial population
