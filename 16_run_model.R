@@ -126,6 +126,7 @@ nimConsts <- list(n_year = n_year,
     n_ageclassf = n_ageclassf,
     n_ageclassm = n_ageclassm,
     n_sex = n_sex,
+    cal = d_fit_season$ng_end - d_fit_season$yr_start,
     # sizeCage_f = sizeCage_f,
     # sizeCage_m = sizeCage_m,
     report_hyp_all = report_hyp_all,
@@ -328,7 +329,7 @@ for(i in 1:10){beepr::beep(1)}
 set.seed(1001)
 starttime <- Sys.time()
 mcmcout <- runMCMC(CnimMCMC,
-                  niter = 200,
+                  niter = 300,
                   nburnin = 0,
                   nchains = 1,
                   inits = initsFun,
