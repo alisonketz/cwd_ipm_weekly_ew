@@ -103,40 +103,22 @@ df_prev_m_west <- data.frame(x = 2002:2021,
 lm_m_west <- lm(prevalence_m_west ~ x,
                   data = df_prev_m_west)
 # summary(lm_m_west)
-
+# 
 pred_prev_f_west <- exp(predict(lm_f_west,
                         newdata = data.frame(x = 1994:2001)))
 pred_prev_m_west <- exp(predict(lm_m_west,
                         newdata = data.frame(x = 1994:2001)))
-
-df_prev_f_west <- data.frame(x = 2002:2021,
-                      prevalence_f_west = log(prevalence_f_west))
-lm_f_west <- lm(prevalence_f_west ~ x,
-                data = df_prev_f_west)
-# summary(lm_f_west)
-df_prev_m_west <- data.frame(x = 2002:2021,
-                    prevalence_m_west = log(prevalence_m_west))
-lm_m_west <- lm(prevalence_m_west ~ x,
-                  data = df_prev_m_west)
-# summary(lm_m_west)
-
-pred_prev_f_west <- exp(predict(lm_f_west,
-                      newdata = data.frame(x = 1994:2001)))
-pred_prev_m_west <- exp(predict(lm_m_west,
-                          newdata = data.frame(x = 1994:2001)))
-
-
 # pred_prev_f_east
 # pred_prev_m_east
 # pred_prev_f_west
 # pred_prev_m_west
 
-########################################
+#############################################################
 ###
 ### Hyper prior for  sex-age
 ### structured initial population size
 ###
-########################################
+#############################################################
 
 initN_sus <- array(0, dim = c(n_study_area, n_sex, n_agef))
 initN_inf <- array(0, dim = c(n_study_area, n_sex, n_agef))
@@ -238,7 +220,7 @@ initN_inf[1, 1, 10] <- init0_east$female *
                     df_age_before_antlerless$proportion[6] *
                     (1 / 12) *
                     (pred_prev_f_east[[1]])  # 9+, set as same proportion from 6-8
-
+ 
 ###antlered
 initN_inf[1, 2, 1] <- init0_east$female *
                    .5 *
@@ -446,7 +428,7 @@ obs_ct_fd_beta <- c(fdr_ct_gam_moments_1992_2016$beta,
 fec_init <- c(fawndoe_df$overall_fd,
               df_camtrap_fd$fdr_mean)
 mu_fec_init <-  mean(log(fec_init))
-fec_eps_init <- log(fec_init) - mean(log(fec_init))
+fec_eps_init <- log(fec_init) - mu_fec_init
 n_year_fec_early <- nrow(fawndoe_df)
 
 ############################################################
@@ -501,8 +483,8 @@ d_fit_aah$birthweek <- ceiling(interval(study_origin,
                                 d_fit_aah$birth_date) / weeks(1)) -
                         nT_period_prestudy_ext
 d_fit_aah$birthmonth <- ceiling(interval(study_origin,
-                                d_fit_aah$birth_date) / weeks(1)) -
-                        nT_period_prestudy_ext
+                                d_fit_aah$birth_date) / months(1)) -
+                        nT_period_prestudy_ext_monthly
 d_fit_aah$age2date_weeks <- ceiling(interval(study_origin,
                                 d_fit_aah$birth_date) / weeks(1))
 d_fit_aah$age2date_months <- ceiling(interval(study_origin,
@@ -520,8 +502,8 @@ d_fit_notest$birthweek <- ceiling(interval(study_origin,
                                 d_fit_notest$birth_date) / weeks(1)) -
                         nT_period_prestudy_ext
 d_fit_notest$birthmonth <- ceiling(interval(study_origin,
-                                d_fit_notest$birth_date) / weeks(1)) -
-                        nT_period_prestudy_ext
+                                d_fit_notest$birth_date) / months(1)) -
+                        nT_period_prestudy_ext_monthly
 d_fit_notest$age2date_weeks <- ceiling(interval(study_origin,
                                 d_fit_notest$birth_date) / weeks(1))
 d_fit_notest$age2date_months <- ceiling(interval(study_origin,

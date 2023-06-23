@@ -196,23 +196,6 @@ calc_surv_harvest <- nimble::nimbleFunction(
 	# Calculate hazards
 	############################################
 
-    ### Females
-    # UCH[1, 1:nT_age_short_f, 1:nT_period_overall] <- exp(beta0 +
-    #                             age_effect[1:nT_age_short_f] +
-    #                             period_effect[1:nT_period_overall])
-    # UCH[1, (nT_age_short_f + 1):(nT_age_surv_aah_f), 1:nT_period_overall] <- exp(beta0 +
-    #                             mu_old_age_effect_f +
-    #                             period_effect[1:nT_period_overall])
-    # ### Males
-    # UCH[2, 1:nT_age_short_m, 1:nT_period_overall] <- exp(beta0 +
-    #                             beta_male +
-    #                             age_effect[1:nT_age_short_m] +
-    #                             period_effect[1:nT_period_overall])
-    # UCH[2, (nT_age_short_m + 1):(nT_age_surv_aah_m), 1:nT_period_overall] <- exp(beta0 +
-    #                             beta_male +
-    #                             mu_old_age_effect_m +
-    #                             period_effect[1:nT_period_overall])
-
     for(j in 1:nT_period_overall) {
         for(i in 1:nT_age_short_m) {
             UCH[2, i, j] <- exp(beta0 +
