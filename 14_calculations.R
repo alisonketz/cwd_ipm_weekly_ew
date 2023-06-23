@@ -605,29 +605,29 @@ assign("calc_infect_prob_hunt", calc_infect_prob_hunt, envir = .GlobalEnv)
 # m_period = m_period_foi-2
 # space <- space[2]
 # ##testing state.transition function as R function
-starttime <- Sys.time()
-psi <- calc_infect_prob_hunt(age_lookup_f = age_lookup_f,
-                        age_lookup_m = age_lookup_m,
-                        n_agef = n_agef,
-                        n_agem = n_agem,
-                        yr_start = d_fit_season$yr_start,
-                        yr_end = d_fit_season$yr_end,
-                        ng_end = d_fit_season$ng_end,
-                        f_age = f_age_foi-2,
-                        m_age = m_age_foi-2,
-                        f_period = f_period_foi-2,
-                        m_period = m_period_foi-2,
-                        nT_period_overall = nT_period_overall,
-                        period_lookup_foi_study = period_lookup_foi_study[1:nT_period_overall],
-                        n_year = n_year,
-                        n_sex = n_sex,
-                        n_study_area = n_study_area, 
-                        space = -.55,
-                        nT_age_surv_aah_f = nT_age_surv_aah_f,
-                        nT_age_surv_aah_m = nT_age_surv_aah_m
-                        )
-(endtime6 <- Sys.time() - starttime)
-psi[1,1,,]
+# starttime <- Sys.time()
+# psi <- calc_infect_prob_hunt(age_lookup_f = age_lookup_f,
+#                         age_lookup_m = age_lookup_m,
+#                         n_agef = n_agef,
+#                         n_agem = n_agem,
+#                         yr_start = d_fit_season$yr_start,
+#                         yr_end = d_fit_season$yr_end,
+#                         ng_end = d_fit_season$ng_end,
+#                         f_age = f_age_foi-2,
+#                         m_age = m_age_foi-2,
+#                         f_period = f_period_foi-2,
+#                         m_period = m_period_foi-2,
+#                         nT_period_overall = nT_period_overall,
+#                         period_lookup_foi_study = period_lookup_foi_study[1:nT_period_overall],
+#                         n_year = n_year,
+#                         n_sex = n_sex,
+#                         n_study_area = n_study_area, 
+#                         space = -.55,
+#                         nT_age_surv_aah_f = nT_age_surv_aah_f,
+#                         nT_age_surv_aah_m = nT_age_surv_aah_m
+#                         )
+# (endtime6 <- Sys.time() - starttime)
+# psi[1,1,,]
             
 
 #######################################################################
