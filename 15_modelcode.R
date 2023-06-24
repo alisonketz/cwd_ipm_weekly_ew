@@ -913,7 +913,7 @@ modelcode <- nimbleCode({
             age_lookup_m = age_lookup_m[1:nT_age_surv],
             n_agef = n_agef,
             n_agem = n_agem,
-            yr_start = yr_start[1:n_year],
+            # yr_start = yr_start[1:n_year],
             yr_end = yr_end[1:n_year],
             f_age = f_age_foi[1:n_ageclassf],
             m_age = m_age_foi[1:n_ageclassm],
@@ -926,7 +926,8 @@ modelcode <- nimbleCode({
             n_study_area = n_study_area,
             space = space[n_study_area],
             nT_age_surv_aah_f = nT_age_surv_aah_f,
-            nT_age_surv_aah_m = nT_age_surv_aah_m
+            nT_age_surv_aah_m = nT_age_surv_aah_m,
+            intvl_step_yr = intvl_step_yr
             )
 
   ##################################################################
@@ -955,6 +956,17 @@ modelcode <- nimbleCode({
   #         nT_age_surv_aah_f = nT_age_surv_aah_f,
   #         nT_age_surv_aah_m = nT_age_surv_aah_m
   #         )
+   psi_hat[1:n_study_area, 1:n_sex, 1:n_agef, 1:n_year] <-
+      calc_infect_prob_hunt(
+          psi = psi[1:n_study_area, 1:n_sex, 1:n_agef, 1:n_year],
+          n_agef = n_agef,
+          n_agem = n_agem,
+          cal = cal[1:n_year],
+          n_year = n_year,
+          n_sex = n_sex,
+          n_study_area = n_study_area
+          )
+
 
   ###################################################
   #### Earn-a-buck correction factor
