@@ -153,7 +153,7 @@ d_cap$year[month(d_cap$date) == 12 & d_cap$year == 2017] <- 2018
 
 ### resetting the recapture info for the 3 deer that were 
 ### NOT recaptured during our study, but during the later EEID study
-reset_recap <- which(year(d_cap$recapdate)==2023)
+reset_recap <- which(year(d_cap$recapdate) == 2023)
 d_cap$recapdate[reset_recap] <- NA
 d_cap$capturestatus[reset_recap] <- "New"
  

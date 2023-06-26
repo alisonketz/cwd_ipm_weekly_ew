@@ -183,18 +183,18 @@ calc_surv_harvest <- nimble::nimbleFunction(
 
     mu_old_age_effect_f <- mean(age_effect[(nT_age_short_f + 1):nT_age])
     mu_old_age_effect_m <- mean(age_effect[(nT_age_short_m + 1):nT_age])
-
-	############################################
-	# Initialize hazard array
-	############################################
+    
+    ############################################
+    ### Initialize hazard array
+    ############################################
 
     UCH <- nimArray(NA, c(2, nT_age_surv_aah_f, nT_period_overall))
-    UCH_hunt <- nimArray(NA, c(2, nT_age_surv_aah_f, nT_period_overall))
+    # UCH_hunt <- nimArray(NA, c(2, nT_age_surv_aah_f, nT_period_overall))
     s_hunt <- nimArray(NA, c(2, n_agef, n_year))
 
-	############################################
-	# Calculate hazards
-	############################################
+    ############################################
+    ### Calculate hazards
+    ############################################
 
     for(j in 1:nT_period_overall) {
         for(i in 1:nT_age_short_m) {
@@ -241,15 +241,16 @@ calc_surv_harvest <- nimble::nimbleFunction(
 	############################################
 	# adjust hazards to remove harvest hazards
 	############################################
+	UCH_hunt[1:2, 1:nT_age_surv_aah_f, 1:nT_period_overall] <- UCH[1:2, 1:nT_age_surv_aah_f, 1:nT_period_overall]
     for(i in 1:n_year){
-        for(j in yr_start[i]:(ng_start[i] - 1)) {
-            UCH_hunt[1, 1:nT_age_surv_aah_f, j] <- UCH[1, 1:nT_age_surv_aah_f, j]
-            UCH_hunt[2, 1:nT_age_surv_aah_m, j] <- UCH[2, 1:nT_age_surv_aah_m, j]
-        }
-        for(j in (ng_end[i] + 1):(yr_end[i])){
-            UCH_hunt[1, 1:nT_age_surv_aah_f, j] <- UCH[1, 1:nT_age_surv_aah_f, j]
-            UCH_hunt[2, 1:nT_age_surv_aah_m, j] <- UCH[2, 1:nT_age_surv_aah_m, j]
-        }
+     #   for(j in yr_start[i]:(ng_start[i] - 1)) {
+     #       UCH_hunt[1, 1:nT_age_surv_aah_f, j] <- UCH[1, 1:nT_age_surv_aah_f, j]
+     #       UCH_hunt[2, 1:nT_age_surv_aah_m, j] <- UCH[2, 1:nT_age_surv_aah_m, j]
+     #   }
+     #   for(j in (ng_end[i] + 1):(yr_end[i])){
+     #       UCH_hunt[1, 1:nT_age_surv_aah_f, j] <- UCH[1, 1:nT_age_surv_aah_f, j]
+     #       UCH_hunt[2, 1:nT_age_surv_aah_m, j] <- UCH[2, 1:nT_age_surv_aah_m, j]
+     #   }
         for(j in ng_start[i]:(gun_start[i] - 1)){
             UCH_hunt[1, 1:nT_age_surv_aah_f, j] <- UCH[1, 1:nT_age_surv_aah_f, j] * p_nogun_f
             UCH_hunt[2, 1:nT_age_surv_aah_m, j] <- UCH[2, 1:nT_age_surv_aah_m, j] * p_nogun_m
@@ -351,10 +352,6 @@ calc_infect_prob <- nimbleFunction(
                  nT_age_surv_aah_f = double(0),
                  nT_age_surv_aah_m = double(0)) {
 
-    p <- nimArray(value = 0, c(n_study_area, 
-                               n_sex,
-                               nT_age_surv_aah_f,
-                               n_year))
     gam <- nimArray(value = 0, c(n_study_area,
                                  n_sex,
                                  nT_age_surv_aah_f,
@@ -368,69 +365,35 @@ calc_infect_prob <- nimbleFunction(
         for (i in 1:nT_age_surv_aah_f) {
             ### Female
             ### East
-            gam[1, 1, i, t] <- f_age[age_lookup_f[i]] +
-                               f_period[period_lookup_foi_study[t]]
+            gam[1, 1, i, t] <- exp(f_age[age_lookup_f[i]] +
+                               f_period[period_lookup_foi_study[t]])
             ### West
-            gam[2, 1, i, t] <- f_age[age_lookup_f[i]] +
+            gam[2, 1, i, t] <- exp(f_age[age_lookup_f[i]] +
                                f_period[period_lookup_foi_study[t]] +
-                               space
+                               space)
 
         }
         for (i in 1:nT_age_surv_aah_m) {
             ### Male
             ### East
-            gam[1, 2, i, t] <- m_age[age_lookup_m[i]] +
-                               m_period[period_lookup_foi_study[t]]
+            gam[1, 2, i, t] <- exp(m_age[age_lookup_m[i]] +
+                               m_period[period_lookup_foi_study[t]])
             ### West
-            gam[2, 2, i, t] <- m_age[age_lookup_m[i]] +
+            gam[2, 2, i, t] <- exp(m_age[age_lookup_m[i]] +
                                m_period[period_lookup_foi_study[t]] +
-                               space
+                               space)
         }
     }
-    #Cumulative probability of NOT getting infected with CWD
-    for (t in 1:n_year) {
-        for (i in 1:nT_age_surv_aah_f) {
-            ### Female
-            ### East
-            p[1, 1, i, t] <- exp(-sum(exp(gam[1, 1, 1:i, yr_start[t]:yr_end[t]])))
-            ### West
-            p[2, 1, i, t] <- exp(-sum(exp(gam[2, 1, 1:i, yr_start[t]:yr_end[t]])))
-        }
-        for (i in 1:nT_age_surv_aah_m) {
-            ### Male
-            ### East
-            p[1, 2, i, t] <- exp(-sum(exp(gam[1, 2, 1:i, yr_start[t]:yr_end[t]])))
-            ### West
-            p[2, 2, i, t] <- exp(-sum(exp(gam[2, 2, 1:i, yr_start[t]:yr_end[t]])))
-        }
-    }
-
+   # infection probability all ages all years 
     for(k in 1:n_study_area) {
-        #fawn probability of infection all years
-        #both sexes
-        for(t in 1:n_year) {
-            p_inf[k, 1, 1, t] <- 1 - p[k, 1, yr_end[1], t]
-            p_inf[k, 2, 1, t] <- 1 - p[k, 2, yr_end[1], t]
-        }
-        #all non-fawn prob of infection first year
-        for (a in 2:n_agef) {
-            p_inf[k, 1, a, 1] <- 1 - p[k, 1, yr_end[a], 1]
-        }
-        for (a in 2:n_agem) {
-            p_inf[k, 2, a, 1] <- 1 - p[k, 2, yr_end[a], 1]
-        }
-
-        #non-fawn infection probability all years except first year
-        for (t in 2:n_year) {
-            for (a in 2:n_agef) {
+        for (t in 1:n_year) {
+            for (a in 1:n_agef) {
                 p_inf[k, 1, a, t] <- 
-                    1 - (p[k, 1, yr_end[a], t] /
-                         p[k, 1, yr_end[a - 1], t])
+                    1 - exp(-sum(gam[k, 1, yr_start[a]:yr_end[a], yr_start[t]:yr_end[t]]))
             }
-            for (a in 2:n_agem) {
-                p_inf[k, 2, a, t] <-
-                    1 - (p[k, 2, yr_end[a], t] /
-                         p[k, 2, yr_end[a - 1], t])
+            for (a in 1:n_agem) {
+                p_inf[k, 2, a, t] <- 
+                    1 - exp(-sum(gam[k, 2, yr_start[a]:yr_end[a], yr_start[t]:yr_end[t]]))
             }
         }
     }
@@ -504,10 +467,6 @@ calc_infect_prob_hunt <- nimbleFunction(
                  nT_age_surv_aah_f = double(0),
                  nT_age_surv_aah_m = double(0)) {
 
-    p <- nimArray(value = 0, c(n_study_area, 
-                               n_sex,
-                               nT_age_surv_aah_f,
-                               n_year))
     gam <- nimArray(value = 0, c(n_study_area,
                                  n_sex,
                                  nT_age_surv_aah_f,
@@ -521,70 +480,38 @@ calc_infect_prob_hunt <- nimbleFunction(
         for (i in 1:nT_age_surv_aah_f) {
             ### Female
             ### East
-            gam[1, 1, i, t] <- f_age[age_lookup_f[i]] +
-                               f_period[period_lookup_foi_study[t]]
+            gam[1, 1, i, t] <- exp(f_age[age_lookup_f[i]] +
+                               f_period[period_lookup_foi_study[t]])
             ### West
-            gam[2, 1, i, t] <- f_age[age_lookup_f[i]] +
+            gam[2, 1, i, t] <- exp(f_age[age_lookup_f[i]] +
                                f_period[period_lookup_foi_study[t]] +
-                               space
+                               space)
 
         }
         for (i in 1:nT_age_surv_aah_m) {
             ### Male
             ### East
-            gam[1, 2, i, t] <- m_age[age_lookup_m[i]] +
-                               m_period[period_lookup_foi_study[t]]
+            gam[1, 2, i, t] <- exp(m_age[age_lookup_m[i]] +
+                               m_period[period_lookup_foi_study[t]])
             ### West
-            gam[2, 2, i, t] <- m_age[age_lookup_m[i]] +
+            gam[2, 2, i, t] <- exp(m_age[age_lookup_m[i]] +
                                m_period[period_lookup_foi_study[t]] +
-                               space
+                               space)
         }
 
     }
 
-    for (t in 1:n_year) {
-        for (i in 1:nT_age_surv_aah_f) {
-            ### Female
-            ### East
-            p[1, 1, i, t] <- exp(-sum(exp(gam[1, 1, 1:i, yr_start[t]:ng_end[t]])))
-            ### West
-            p[2, 1, i, t] <- exp(-sum(exp(gam[1, 1, 1:i, yr_start[t]:ng_end[t]])))
-        }
-        for (i in 1:nT_age_surv_aah_m) {
-            ### Male
-            ### East
-            p[1, 2, i, t] <- exp(-sum(exp(gam[1, 2, 1:i, yr_start[t]:ng_end[t]])))
-            ### West
-            p[2, 2, i, t] <- exp(-sum(exp(gam[2, 2, 1:i, yr_start[t]:ng_end[t]])))
-        }
-    }
-
+    #Probability of getting infected with CWD
     for(k in 1:n_study_area) {
-        #fawn probability of infection all years
-        #both sexes
-        for(t in 1:n_year) {
-            p_inf[k, 1, 1, t] <- 1 - p[k, 1, yr_end[1], t]
-            p_inf[k, 2, 1, t] <- 1 - p[k, 2, yr_end[1], t]
-        }
-        #all non-fawn prob of infection first year
-        for (a in 2:n_agef) {
-            p_inf[k, 1, a, 1] <- 1 - p[k, 1, yr_end[a], 1]
-        }
-        for (a in 2:n_agem) {
-            p_inf[k, 2, a, 1] <- 1 - p[k, 2, yr_end[a], 1]
-        }
-
-        #non-fawn infection probability all years except first year
-        for (t in 2:n_year) {
-            for (a in 2:n_agef) {
+        # infection probability all ages all years 
+        for (t in 1:n_year) {
+            for (a in 1:n_agef) {
                 p_inf[k, 1, a, t] <- 
-                    1 - (p[k, 1, yr_end[a], t] /
-                         p[k, 1, yr_end[a - 1], t])
+                    1 - exp(-sum(gam[k, 1, yr_start[a]:ng_end[a], yr_start[t]:ng_end[t]]))
             }
-            for (a in 2:n_agem) {
-                p_inf[k, 2, a, t] <-
-                    1 - (p[k, 2, yr_end[a], t] /
-                         p[k, 1, yr_end[a - 1], t])
+            for (a in 1:n_agem) {
+                p_inf[k, 2, a, t] <- 
+                    1 - exp(-sum(gam[k, 2, yr_start[a]:ng_end[a], yr_start[t]:ng_end[t]]))
             }
         }
     }
@@ -899,10 +826,7 @@ set_period_effects_ave <- nimble::nimbleFunction(
     ############################################################
     ## incorporating period effects from collar data
     ############################################################
-
-    period_effect_survival_temp[((nT_period_precollar + 1 + nT_period_prestudy_ext):
-                                nT_period_overall + nT_period_prestudy_ext)] <-
-                                period_effect_surv[1:nT_period_collar]
+    period_effect_survival_temp[(nT_period_precollar_ext+1): nT_period_overall_ext] <- period_effect_surv[1:nT_period_collar]
 
     #making the period effects sum to zero using centering
     ### only during the study though.... ignoring centering outside the study?
