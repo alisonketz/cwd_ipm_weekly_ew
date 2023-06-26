@@ -69,7 +69,7 @@ period_lookup_foi <- c(period_lookup_foi, rep(n_year,nT_period_overall_ext-
 (n_period_lookup <- length(period_lookup_foi))
 
 period_lookup_foi_study <- period_lookup_foi[(nT_period_prestudy_ext+1):nT_period_overall_ext]
-
+num_foi_cal <- table(period_lookup_foi_study)
 
 #############################################################################################
 ### Creating adjacency matrix and hyper parameter

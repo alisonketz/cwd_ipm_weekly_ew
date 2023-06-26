@@ -186,7 +186,8 @@ nimConsts <- list(n_year = n_year,
     records_cause = records_cause,
     interval_cause = d_fit_hh$right_period_s - 1,
     # indx_mat_pe_surv = indx_mat_pe_surv,
-    intvl_step_yr = intvl_step_yr_weekly
+    intvl_step_yr = intvl_step_yr_weekly,
+    num_foi_cal = num_foi_cal
     )
 
 
@@ -329,7 +330,7 @@ for(i in 1:10){beepr::beep(1)}
 set.seed(1001)
 starttime <- Sys.time()
 mcmcout <- runMCMC(CnimMCMC,
-                  niter = 300,
+                  niter = 10,
                   nburnin = 0,
                   nchains = 1,
                   inits = initsFun,
