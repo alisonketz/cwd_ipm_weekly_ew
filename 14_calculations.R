@@ -511,17 +511,16 @@ calc_infect_prob_hunt <- nimbleFunction(
         for (t in 1:n_year) {
             for (a in 1:n_agef) {
                 p_inf[k, 1, a, t] <- 
-                    1 - exp(-sum(gam[k, 1, yr_start[a]:ng_end[a], yr_start[t]:ng_end[t]]))
+                    (1 - exp(-sum(gam[k, 1, yr_start[a]:ng_end[a], yr_start[t]:ng_end[t]]))) * fudge_factor
             }
             for (a in 1:n_agem) {
                 p_inf[k, 2, a, t] <- 
-                    1 - exp(-sum(gam[k, 2, yr_start[a]:ng_end[a], yr_start[t]:ng_end[t]]))
+                    (1 - exp(-sum(gam[k, 2, yr_start[a]:ng_end[a], yr_start[t]:ng_end[t]]))) * fudge_factor
             }
         }
     }
-
     returnType(double(4))
-    return(p_inf[1:n_study_area, 1:n_sex, 1:n_agef, 1:n_year] * fudge_factor)
+    return(p_inf[1:n_study_area, 1:n_sex, 1:n_agef, 1:n_year])
   })
 
 Ccalc_infect_prob_hunt <- compileNimble(calc_infect_prob_hunt)
