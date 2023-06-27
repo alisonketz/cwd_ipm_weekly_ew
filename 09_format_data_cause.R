@@ -152,16 +152,23 @@ for (i in 1:length(unique(temp$Year))) {
 ###
 #########################################################################
 
+end_dates <- paste(1986:2022,"05","14",sep="-")
+start_date <- "1985-05-15"
+interval_cuts <- floor(interval(start_date,end_dates)/weeks(1))
+(interval_step <- c(diff(interval_cuts),52))
+length(interval_step)
+intvl_step_yearly <- interval_step[(n_year_prestudy_ext + 1):n_year_ext]
+
 d_fit_season <- matrix(NA, nrow = n_year, ncol = 8)
 for(t in 1:n_year) {
-   d_fit_season[t, ] <- c(intvl_step_yr_weekly * (t - 1) + 1,
+   d_fit_season[t, ] <- c(intvl_step_yearly[t] * (t - 1) + 1,
                           season_ng_start[t] - 1,
                           season_ng_start[t],
                           season_gun_start[t],
                           season_gun_end[t],
                           season_ng_end[t],
                           season_ng_end[t] + 1,
-                          intvl_step_yr_weekly * t)
+                          intvl_step_yr_weekly * t)#this is changed
 }
 
 d_fit_season <- data.frame(d_fit_season)
@@ -174,6 +181,7 @@ colnames(d_fit_season) <- c("yr_start",
                             "post_hunt_start",
                             "yr_end")
 
+d_fit_season$yr_end <- cumsum(interval_step_yearly)
 #saving for aah_disease test
 save(d_fit_season, file = paste0(filepath, "d_fit_season.Rdata"))
 
