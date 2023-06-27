@@ -90,9 +90,9 @@ calc_surv_aah <- nimble::nimbleFunction(
   return(s_aah[1:2, 1:n_agef, 1:n_year])
 })
 
-# Ccalc_surv_aah <- compileNimble(calc_surv_aah)
+Ccalc_surv_aah <- compileNimble(calc_surv_aah)
 
-# assign("calc_surv_aah", calc_surv_aah, envir = .GlobalEnv)
+assign("calc_surv_aah", calc_surv_aah, envir = .GlobalEnv)
 
 # starttime <- Sys.time()
 # sn_sus <- calc_surv_aah(
@@ -184,7 +184,7 @@ calc_surv_harvest <- nimble::nimbleFunction(
 
     mu_old_age_effect_f <- mean(age_effect[(nT_age_short_f + 1):nT_age])
     mu_old_age_effect_m <- mean(age_effect[(nT_age_short_m + 1):nT_age])
-    
+
     ############################################
     ### Initialize hazard array
     ############################################
@@ -197,20 +197,20 @@ calc_surv_harvest <- nimble::nimbleFunction(
     ### Calculate hazards
     ############################################
 
-    for(j in 1:nT_period_overall) {
-        for(i in 1:nT_age_short_m) {
-            UCH[2, i, j] <- exp(beta0 +
-                                beta_male +
-                                age_effect[i] +
-                                period_effect[j])
-        }
-        for(i in (nT_age_short_m + 1):(nT_age_surv_aah_m)) {
-            UCH[2, i, j] <- exp(beta0 +
-                                beta_male +
-                                mu_old_age_effect_m +
-                                period_effect[j])
-        }
-    }
+    # for(j in 1:nT_period_overall) {
+    #     for(i in 1:nT_age_short_m) {
+    #         UCH[2, i, j] <- exp(beta0 +
+    #                             beta_male +
+    #                             age_effect[i] +
+    #                             period_effect[j])
+    #     }
+    #     for(i in (nT_age_short_m + 1):(nT_age_surv_aah_m)) {
+    #         UCH[2, i, j] <- exp(beta0 +
+    #                             beta_male +
+    #                             mu_old_age_effect_m +
+    #                             period_effect[j])
+    #     }
+    # }
     ### Females
     for(j in 1:nT_period_overall) {
         for(i in 1:nT_age_short_f) {
@@ -242,16 +242,18 @@ calc_surv_harvest <- nimble::nimbleFunction(
 	############################################
 	# adjust hazards to remove harvest hazards
 	############################################
-	UCH_hunt[1:2, 1:nT_age_surv_aah_f, 1:nT_period_overall] <- UCH[1:2, 1:nT_age_surv_aah_f, 1:nT_period_overall]
+	UCH_hunt[1, 1:nT_age_surv_aah_f, 1:nT_period_overall] <- UCH[1, 1:nT_age_surv_aah_f, 1:nT_period_overall]
+	UCH_hunt[2, 1:nT_age_surv_aah_f, 1:nT_period_overall] <- UCH[2, 1:nT_age_surv_aah_f, 1:nT_period_overall]
+
     for(i in 1:n_year){
-     #   for(j in yr_start[i]:(ng_start[i] - 1)) {
-     #       UCH_hunt[1, 1:nT_age_surv_aah_f, j] <- UCH[1, 1:nT_age_surv_aah_f, j]
-     #       UCH_hunt[2, 1:nT_age_surv_aah_m, j] <- UCH[2, 1:nT_age_surv_aah_m, j]
-     #   }
-     #   for(j in (ng_end[i] + 1):(yr_end[i])){
-     #       UCH_hunt[1, 1:nT_age_surv_aah_f, j] <- UCH[1, 1:nT_age_surv_aah_f, j]
-     #       UCH_hunt[2, 1:nT_age_surv_aah_m, j] <- UCH[2, 1:nT_age_surv_aah_m, j]
-     #   }
+    #    for(j in yr_start[i]:(ng_start[i] - 1)) {
+    #        UCH_hunt[1, 1:nT_age_surv_aah_f, j] <- UCH[1, 1:nT_age_surv_aah_f, j]
+    #        UCH_hunt[2, 1:nT_age_surv_aah_m, j] <- UCH[2, 1:nT_age_surv_aah_m, j]
+    #    }
+    #    for(j in (ng_end[i] + 1):(yr_end[i])){
+    #        UCH_hunt[1, 1:nT_age_surv_aah_f, j] <- UCH[1, 1:nT_age_surv_aah_f, j]
+    #        UCH_hunt[2, 1:nT_age_surv_aah_m, j] <- UCH[2, 1:nT_age_surv_aah_m, j]
+    #    }
         for(j in ng_start[i]:(gun_start[i] - 1)){
             UCH_hunt[1, 1:nT_age_surv_aah_f, j] <- UCH[1, 1:nT_age_surv_aah_f, j] * p_nogun_f
             UCH_hunt[2, 1:nT_age_surv_aah_m, j] <- UCH[2, 1:nT_age_surv_aah_m, j] * p_nogun_m
@@ -781,6 +783,7 @@ set_period_effects_ave <- nimble::nimbleFunction(
         ### argument type declarations
         n_year_precollar = double(0),
         nT_period_precollar = double(0),
+        nT_period_precollar_ext = double(0),
         nT_period_collar = double(0),
         nT_period_overall = double(0),
         nT_period_overall_ext = double(0),

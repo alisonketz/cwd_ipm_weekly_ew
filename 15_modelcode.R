@@ -838,6 +838,7 @@ modelcode <- nimbleCode({
       period_effect = period_effect_survival[(nT_period_prestudy_ext + 1):
                                              nT_period_overall_ext],
       intvl_step_yr = intvl_step_yr,
+      n_sex = n_sex,
       n_year = n_year,
       n_agef = n_agef,
       n_agem = n_agem,
@@ -870,6 +871,7 @@ modelcode <- nimbleCode({
       period_effect = period_effect_survival[(nT_period_prestudy_ext + 1):
                                               nT_period_overall_ext],
       intvl_step_yr = intvl_step_yr,
+      n_sex = n_sex,
       n_year = n_year,
       n_agef = n_agef,
       n_agem = n_agem,
@@ -913,21 +915,20 @@ modelcode <- nimbleCode({
             age_lookup_m = age_lookup_m[1:nT_age_surv],
             n_agef = n_agef,
             n_agem = n_agem,
-            # yr_start = yr_start[1:n_year],
+            yr_start = yr_start[1:n_year],
             yr_end = yr_end[1:n_year],
             f_age = f_age_foi[1:n_ageclassf],
             m_age = m_age_foi[1:n_ageclassm],
             f_period = f_period_foi[1:n_year],
             m_period = m_period_foi[1:n_year],
-            # nT_period_overall = nT_period_overall,
-            # period_lookup_foi_study = period_lookup_foi_study[1:nT_period_overall],
+            nT_period_overall = nT_period_overall,
+            period_lookup_foi_study = period_lookup_foi_study[1:nT_period_overall],
             n_year = n_year,
             n_sex = n_sex,
             n_study_area = n_study_area,
             space = space[n_study_area],
             nT_age_surv_aah_f = nT_age_surv_aah_f,
-            nT_age_surv_aah_m = nT_age_surv_aah_m,
-            intvl_step_yr = intvl_step_yr
+            nT_age_surv_aah_m = nT_age_surv_aah_m
             )
 
   ##################################################################
@@ -935,38 +936,27 @@ modelcode <- nimbleCode({
   ### based on FOI hazards
   ##################################################################
 
-  # psi_hat[1:n_study_area, 1:n_sex, 1:n_agef, 1:n_year] <-
-  #     calc_infect_prob_hunt(age_lookup_f = age_lookup_f[1:nT_age_surv],
-  #         age_lookup_m = age_lookup_m[1:nT_age_surv],
-  #         n_agef = n_agef,
-  #         n_agem = n_agem,
-  #         yr_start = yr_start[1:n_year],
-  #         yr_end = yr_end[1:n_year],
-  #         ng_end = ng_end[1:n_year],
-  #         f_age = f_age_foi[1:n_ageclassf],
-  #         m_age = m_age_foi[1:n_ageclassm],
-  #         f_period = f_period_foi[1:n_year],
-  #         m_period = m_period_foi[1:n_year],
-  #         # nT_period_overall = nT_period_overall,
-  #         # period_lookup_foi_study = period_lookup_foi_study[1:nT_period_overall],
-  #         n_year = n_year,
-  #         n_sex = n_sex,
-  #         n_study_area = n_study_area,
-  #         space = space[n_study_area],
-  #         nT_age_surv_aah_f = nT_age_surv_aah_f,
-  #         nT_age_surv_aah_m = nT_age_surv_aah_m
-  #         )
-   psi_hat[1:n_study_area, 1:n_sex, 1:n_agef, 1:n_year] <-
-      calc_infect_prob_hunt(
-          psi = psi[1:n_study_area, 1:n_sex, 1:n_agef, 1:n_year],
+  psi_hat[1:n_study_area, 1:n_sex, 1:n_agef, 1:n_year] <-
+      calc_infect_prob_hunt(age_lookup_f = age_lookup_f[1:nT_age_surv],
+          age_lookup_m = age_lookup_m[1:nT_age_surv],
           n_agef = n_agef,
           n_agem = n_agem,
-          cal = cal[1:n_year],
+          yr_start = yr_start[1:n_year],
+          yr_end = yr_end[1:n_year],
+          ng_end = ng_end[1:n_year],
+          f_age = f_age_foi[1:n_ageclassf],
+          m_age = m_age_foi[1:n_ageclassm],
+          f_period = f_period_foi[1:n_year],
+          m_period = m_period_foi[1:n_year],
+          nT_period_overall = nT_period_overall,
+          period_lookup_foi_study = period_lookup_foi_study[1:nT_period_overall],
           n_year = n_year,
           n_sex = n_sex,
-          n_study_area = n_study_area
+          n_study_area = n_study_area,
+          space = space[n_study_area],
+          nT_age_surv_aah_f = nT_age_surv_aah_f,
+          nT_age_surv_aah_m = nT_age_surv_aah_m
           )
-
 
   ###################################################
   #### Earn-a-buck correction factor
