@@ -8,11 +8,13 @@
 
 ### Number of age effects for survival
 nT_age_surv <- max(d_surv$right_age_s, na.rm = TRUE) - 1
-nT_age_surv_aah_f <- intvl_step_yr_weekly * n_agef
-nT_age_short_f <- intvl_step_yr_weekly * (n_agef - 1)
-nT_age_surv_aah_m <- intvl_step_yr_weekly * n_agem
-nT_age_short_m <- intvl_step_yr_weekly * (n_agem - 1)
-
+nT_age_surv_aah_f <- intvl_step_yr_weekly * n_agef + 2
+nT_age_short_f <- intvl_step_yr_weekly * (n_agef - 1) + 2
+nT_age_surv_aah_m <- intvl_step_yr_weekly * n_agem + 1 
+nT_age_short_m <- intvl_step_yr_weekly * (n_agem - 1) + 1
+### adding 1 and 2 to account for the fact that deer that live 
+### to the 9 or 7 years or older actually live more than
+### 52 weeks in a year, due to leap years and timing of weeks beginning into end
 
 ########################################################################
 ### matrix with indexes for averaging period effects from collar data

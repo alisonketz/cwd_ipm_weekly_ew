@@ -15,8 +15,8 @@
                                             (1 - psi[k, 1, n_agef, t - 1])
 
         #Female: fawn class = total #females * unisex fawns per female/2
-        pop_sus[k, 1, 1, t] <- (sum(pop_sus_proj[k, 1, 1:n_agef, t - 1]) +
-                                sum(pop_inf_proj[k, 1, 1:n_agef, t - 1])) *
+        pop_sus[k, 1, 1, t] <- (sum(pop_sus[k, 1, 1:n_agef, t - 1]) +
+                                sum(pop_inf[k, 1, 1:n_agef, t - 1])) *
                                 fec[t] * .5
 
         ##########
