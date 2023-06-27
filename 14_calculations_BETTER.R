@@ -160,6 +160,7 @@ calc_surv_harvest <- nimble::nimbleFunction(
         age_effect = double(1),
         period_effect = double(1),
         intvl_step_yr = double(0),
+        n_sex = double(0),
         n_year = double(0),
         n_agef = double(0),
         n_agem = double(0),
@@ -188,9 +189,9 @@ calc_surv_harvest <- nimble::nimbleFunction(
     ### Initialize hazard array
     ############################################
 
-    UCH <- nimArray(NA, c(2, nT_age_surv_aah_f, nT_period_overall))
-    # UCH_hunt <- nimArray(NA, c(2, nT_age_surv_aah_f, nT_period_overall))
-    s_hunt <- nimArray(NA, c(2, n_agef, n_year))
+    UCH <- nimArray(NA, c(n_sex, nT_age_surv_aah_f, nT_period_overall))
+    UCH_hunt <- nimArray(NA, c(n_sex, nT_age_surv_aah_f, nT_period_overall))
+    s_hunt <- nimArray(NA, c(n_sex, n_agef, n_year))
 
     ############################################
     ### Calculate hazards
@@ -282,7 +283,7 @@ calc_surv_harvest <- nimble::nimbleFunction(
         }
     }
   returnType(double(3))
-  return(s_hunt[1:2,1:n_agef,1:n_year])
+  return(s_hunt[1:n_sex,1:n_agef,1:n_year])
 })
 
 Ccalc_surv_harvest <- compileNimble(calc_surv_harvest)
