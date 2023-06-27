@@ -717,28 +717,28 @@ modelcode <- nimbleCode({
   ########################################
 
   #should this be different for pos/neg or m/f for study area?
-  for(i in 1:2) {
-    tau_pop[i] ~ dgamma(1, 1)
-  }
+  # for(i in 1:2) {
+  #   tau_pop[i] ~ dgamma(1, 1)
+  # }
   for(k in 1:n_study_area) {
     for (a in 1:n_agef) {
 
       #Initial population structure pop[sex,age,year] for susceptible deer
-      llpop_sus[k, 1, a, 1] ~ dnorm(f_logpop_sus[k, a], tau_pop[1])
+      llpop_sus[k, 1, a, 1] ~ dnorm(f_logpop_sus[k, a], tau_pop)#tau_pop[1]
       pop_sus[k, 1, a, 1] <- exp(llpop_sus[k, 1, a, 1])
 
       #Initial population structure pop[study_area=k,sex=i,year=t,age=a]
-      llpop_inf[k, 1, a, 1] ~ dnorm(f_logpop_inf[k, a], tau_pop[1])
+      llpop_inf[k, 1, a, 1] ~ dnorm(f_logpop_inf[k, a], tau_pop)#tau_pop[1]
       pop_inf[k, 1, a, 1] <- exp(llpop_inf[k, 1, a, 1])
     }
     for (a in 1:n_agem) {
         ### Initial population structure pop
         ### [study_area,sex,age,period(year)] for susceptible deer
-        llpop_sus[k, 2, a, 1] ~ dnorm(m_logpop_sus[k, a], tau_pop[2])
+        llpop_sus[k, 2, a, 1] ~ dnorm(m_logpop_sus[k, a], tau_pop)#tau_pop[2]
         pop_sus[k, 2, a, 1] <- exp(llpop_sus[k, 2, a, 1])
 
         #Initial population structure pop for infected deer
-        llpop_inf[k, 2, a, 1] ~ dnorm(m_logpop_inf[k, a], tau_pop[2])
+        llpop_inf[k, 2, a, 1] ~ dnorm(m_logpop_inf[k, a], tau_pop)#tau_pop[2]
         pop_inf[k, 2, a, 1] <- exp(llpop_inf[k, 2, a, 1])
     }
   }
@@ -955,7 +955,8 @@ modelcode <- nimbleCode({
           n_study_area = n_study_area,
           space = space[n_study_area],
           nT_age_surv_aah_f = nT_age_surv_aah_f,
-          nT_age_surv_aah_m = nT_age_surv_aah_m
+          nT_age_surv_aah_m = nT_age_surv_aah_m,
+          fudge_factor = .5
           )
 
   ###################################################
@@ -1112,9 +1113,11 @@ modelcode <- nimbleCode({
     ### Observation Model
     ######################################################################
 
-    for (i in 1:n_sex) {
-      tau_obs[i] ~ dgamma(1, 1)
-    }#end i
+    tau_obs ~ dgamma(1, 1)
+
+    # for (i in 1:n_sex) {
+    #   tau_obs[i] ~ dgamma(1, 1)
+    # }#end i
 
     for(k in 1:n_study_area) {
 
@@ -1160,7 +1163,7 @@ modelcode <- nimbleCode({
         ###################################
 
         for (j in 1:n_sex) {
-          lobs[k, j, t] ~ dnorm(log(mu_obs[k, j, t]), tau_obs[j])
+          lobs[k, j, t] ~ dnorm(log(mu_obs[k, j, t]), tau_obs)# tau_obs[j]
         }#end i
 
       #   ###################################
