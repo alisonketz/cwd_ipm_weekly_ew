@@ -126,7 +126,7 @@ nimConsts <- list(n_year = n_year,
     n_ageclassf = n_ageclassf,
     n_ageclassm = n_ageclassm,
     n_sex = n_sex,
-    cal = d_fit_season$ng_end - d_fit_season$yr_start,
+    # cal = d_fit_season$ng_end - d_fit_season$yr_start,
     # sizeCage_f = sizeCage_f,
     # sizeCage_m = sizeCage_m,
     report_hyp_all = report_hyp_all,
@@ -187,7 +187,7 @@ nimConsts <- list(n_year = n_year,
     interval_cause = d_fit_hh$right_period_s - 1,
     # indx_mat_pe_surv = indx_mat_pe_surv,
     intvl_step_yr = intvl_step_yr_weekly,
-    num_foi_cal = num_foi_cal
+    # num_foi_cal = num_foi_cal
     )
 
 
