@@ -793,7 +793,6 @@ modelcode <- nimbleCode({
                                               nT_period_overall_ext],
       yr_start = yr_start[1:n_year],
       yr_end = yr_end[1:n_year],
-      intvl_step_yr = intvl_step_yr,
       n_year = n_year,
       n_agef = n_agef,
       n_agem = n_agem)
@@ -816,7 +815,6 @@ modelcode <- nimbleCode({
                                               nT_period_overall_ext],
       yr_start = yr_start[1:n_year],
       yr_end = yr_end[1:n_year],
-      intvl_step_yr = intvl_step_yr,
       n_year = n_year,
       n_agef = n_agef,
       n_agem = n_agem)
@@ -837,7 +835,6 @@ modelcode <- nimbleCode({
       age_effect = age_effect_survival[1:nT_age_surv],
       period_effect = period_effect_survival[(nT_period_prestudy_ext + 1):
                                              nT_period_overall_ext],
-      intvl_step_yr = intvl_step_yr,
       n_sex = n_sex,
       n_year = n_year,
       n_agef = n_agef,
@@ -870,7 +867,6 @@ modelcode <- nimbleCode({
       age_effect = age_effect_survival[1:nT_age_surv],
       period_effect = period_effect_survival[(nT_period_prestudy_ext + 1):
                                               nT_period_overall_ext],
-      intvl_step_yr = intvl_step_yr,
       n_sex = n_sex,
       n_year = n_year,
       n_agef = n_agef,
@@ -891,24 +887,6 @@ modelcode <- nimbleCode({
   ###########################################################
   #### Annual Probability of Infection based on FOI hazards
   ###########################################################
-
-  # psi[1:n_study_area, 1:n_sex, 1:n_agef, 1:n_year] <-
-  #     calc_infect_prob(
-  #           age_lookup_f = age_lookup_f[1:nT_age_surv],
-  #           age_lookup_m = age_lookup_m[1:nT_age_surv],
-  #           n_agef = n_agef,
-  #           n_agem = n_agem,
-  #           yr_end = yr_end[1:n_year],
-  #           f_age = f_age_foi[1:n_ageclassf],
-  #           m_age = m_age_foi[1:n_ageclassm],
-  #           f_period = f_period_foi[1:n_year],
-  #           m_period = m_period_foi[1:n_year],
-  #           n_year = n_year,
-  #           n_sex = n_sex,
-  #           n_study_area = n_study_area,
-  #           space = space[n_study_area],
-  #           intvl_step_yr = intvl_step_yr
-  #           )
 
   psi[1:n_study_area, 1:n_sex, 1:n_agef, 1:n_year] <-
       calc_infect_prob(age_lookup_f = age_lookup_f[1:nT_age_surv],
@@ -979,48 +957,179 @@ modelcode <- nimbleCode({
   ###
   ######################################################################
 
-  for (k in 1:n_study_area){
-      for (t in 1:n_year){
+  # for (k in 1:n_study_area){
+  #     for (t in 2:n_year){
 
-        #Female: set projection into population model matrix
-        for (a in 2:n_agef - 1) {
-          pop_sus[k, 1, a, t] <-  pop_sus[k, 1, a - 1, t - 1] *
-                                      sn_sus[1, a - 1, t - 1] *
-                                      (1 - psi[k, 1, a - 1, t - 1])
+  #       #Female: set projection into population model matrix
+  #       for (a in 2:n_agef - 1) {
+  #         pop_sus[k, 1, a, t] <-  pop_sus[k, 1, a - 1, t - 1] *
+  #                                     sn_sus[1, a - 1, t - 1] *
+  #                                     (1 - psi[k, 1, a - 1, t - 1])
+  #       }
+  #       pop_sus[k, 1, n_agef, t] <- pop_sus[k, 1, n_agef - 1, t - 1] *
+  #                                           sn_sus[1, n_agef - 1, t - 1] *
+  #                                           (1 - psi[k, 1, n_agef - 1, t - 1]) +
+  #                                           pop_sus[k, 1,  n_agef, t - 1] *
+  #                                           sn_sus[1, n_agef, t - 1] *
+  #                                           (1 - psi[k, 1, n_agef, t - 1])
+
+  #       #Female: fawn class = total #females * unisex fawns per female/2
+  #       pop_sus[k, 1, 1, t] <- (sum(pop_sus[k, 1, 2:n_agef, t]) +
+  #                               sum(pop_inf[k, 1, 2:n_agef, t])) *
+  #                               fec[t] * .5
+
+  #       ##########
+  #       ### Males
+  #       ##########
+
+  #       #Male: set projection into population model matrix
+  #       for (a in 2:(n_agem - 1)) {
+  #         pop_sus[k, 2, a, t] <- pop_sus[k, 2, a - 1, t - 1] *
+  #                                sn_sus[2, a - 1, t - 1] *
+  #                                (1 - psi[k, 2, a - 1, t - 1])
+  #       }
+  #       #Male: accumulating age class
+  #       pop_sus_[k, 2, n_agem, t] <- pop_sus[k, 2, n_agem - 1, t - 1] *
+  #                                    sn_sus[2, n_agem - 1, t - 1] *
+  #                                    (1 - psi[k, 2, n_agem - 1, t - 1]) +
+  #                                    pop_sus[k, 2,  n_agem, t - 1] *
+  #                                    sn_sus[2, n_agem, t - 1] *
+  #                                    (1 - psi[k, 2, n_agem, t - 1])
+
+  #       # Male: fawn class = total #females * unisex fawns per female/2
+  #       pop_sus[k, 2, 1, t] <- pop_sus[k, 1, 1, t]
+
+
+  #       ###################################################
+  #       ### Infected/Infectious
+  #       ###################################################
+
+  #       ###########
+  #       ### Females
+  #       ###########
+
+  #       #Female: set projection into population model matrix
+  #       for (a in 2:(n_agef - 1)) {
+  #         pop_inf[k, 1, a, t] <- pop_inf[k, 1, a - 1, t - 1] *
+  #                                     sn_inf[1, a - 1, t - 1] +
+  #                                     pop_sus[k, 1, a - 1, t - 1] *
+  #                                     sn_sus[1, a - 1, t - 1] *
+  #                                     psi[k, 1, a - 1, t - 1]
+  #       }
+  #       ##Female: accumulating age = 9.5+ years
+  #       pop_inf[k, 1, n_agef, t] <- pop_inf[k, 1, n_agef - 1, t - 1] *
+  #                                   sn_inf[1, n_agef - 1, t - 1] +
+  #                                   pop_inf[k, 1, n_agef, t - 1] *
+  #                                   sn_inf[1, n_agef, t - 1] +
+  #                                   pop_sus[k, 1, n_agef - 1, t - 1] *
+  #                                   sn_sus[1, n_agef - 1, t - 1] *
+  #                                   psi[k, 1, n_agef - 1, t - 1] +
+  #                                   pop_sus[k, 1,  n_agef, t - 1] *
+  #                                   sn_sus[1, n_agef, t - 1] *
+  #                                   psi[k, 1, n_agef, t - 1]
+
+  #       ##Female: fawn class
+  #       ##there are no infected fawns at birth
+  #       pop_inf[k, 1, 1, t] <- 0
+
+  #       ##########
+  #       ### Males
+  #       ##########
+
+  #       ### Male: project forward anually
+  #       for (a in 2:(n_agem - 1)) {
+  #           pop_inf[k, 2, a, t] <- pop_inf[k, 2, a - 1, t - 1] *
+  #                                         sn_inf[2, a - 1, t - 1] +
+  #                                         pop_sus[k, 2, a - 1, t - 1] *
+  #                                         sn_sus[2, a - 1, t - 1] *
+  #                                         psi[k, 2, a - 1, t - 1]
+  #       }
+
+  #       ### Male: accumulating age class = 6.5+
+  #       pop_inf[k, 2, n_agem, t] <- pop_inf[k, 2, n_agem - 1, t - 1] *
+  #                                            sn_inf[2, n_agem - 1, t - 1] +
+  #                                            pop_inf[k, 2, n_agem, t - 1] *
+  #                                            sn_inf[2, n_agem, t - 1] +
+  #                                            pop_sus[k, 2, n_agem - 1, t - 1] *
+  #                                            sn_sus[2, n_agem - 1, t - 1] *
+  #                                            psi[k, 2, n_agem - 1, t - 1] +
+  #                                            pop_sus[k, 2,  n_agem, t - 1] *
+  #                                            sn_sus[2, n_agem, t - 1] *
+  #                                            psi[k, 2, n_agem, t - 1] 
+
+  #       #Male: fawn class
+  #       #there are no infected fawns at birth
+  #       pop_inf[k, 2, 1, t] <- 0
+
+  #       }
+  #       }
+
+
+    for (k in 1:n_study_area) {
+
+      ##################
+      ### Susceptible
+      ##################
+
+      for (t in 2:n_year) {
+        
+
+        ##############################################################
+        ##############################################################
+        ### AAH population model version with a projection matrix
+        ##############################################################
+        ##############################################################
+
+        #Female: project forward annually
+        for (a in 1:(n_agef - 2)) {
+          pop_sus_proj[k, 1, a, t] <- pop_sus[k, 1, a, t - 1] *
+                                      sn_sus[1, a, t - 1] *
+                                      (1 - psi[k, 1, a, t - 1])
         }
-        pop_sus[k, 1, n_agef, t] <- pop_sus[k, 1, n_agef - 1, t - 1] *
+
+        #female accumulating age class
+        pop_sus_proj[k, 1, n_agef - 1, t] <- pop_sus[k, 1, n_agef - 1, t - 1] *
                                             sn_sus[1, n_agef - 1, t - 1] *
                                             (1 - psi[k, 1, n_agef - 1, t - 1]) +
                                             pop_sus[k, 1,  n_agef, t - 1] *
                                             sn_sus[1, n_agef, t - 1] *
                                             (1 - psi[k, 1, n_agef, t - 1])
 
-        #Female: fawn class = total #females * unisex fawns per female/2
-        pop_sus[k, 1, 1, t] <- (sum(pop_sus[k, 1, 1:n_agef, t - 1]) +
-                                sum(pop_inf[k, 1, 1:n_agef, t - 1])) *
-                                fec[t] * .5
+        #Female: set projection into population model matrix
+        for (a in 2:n_agef) {
+          pop_sus[k, 1, a, t] <- pop_sus_proj[k, 1, (a - 1), t]
+        }
 
+        #Female: fawn class = total #females * unisex fawns per female/2
+        pop_sus[k, 1, 1, t] <- (sum(pop_sus_proj[k, 1, 1:(n_agef - 1), t]) +
+                                sum(pop_inf_proj[k, 1, 1:(n_agef - 1), t])) *
+                                fec[t] * .5
         ##########
         ### Males
         ##########
 
-        #Male: set projection into population model matrix
-        for (a in 2:(n_agem - 1)) {
-          pop_sus[k, 2, a, t] <- pop_sus[k, 2, a - 1, t - 1] *
-                                 sn_sus[2, a - 1, t - 1] *
-                                 (1 - psi[k, 2, a - 1, t - 1])
+        #Male: project forward anually
+        for (a in 1:(n_agem - 2)) {
+          pop_sus_proj[k, 2, a, t] <- pop_sus[k, 2, a, t - 1] *
+                                      sn_sus[2, a, t - 1] *
+                                      (1 - psi[k, 2, a, t - 1])
         }
+
         #Male: accumulating age class
-        pop_sus_[k, 2, n_agem, t] <- pop_sus[k, 2, n_agem - 1, t - 1] *
-                                     sn_sus[2, n_agem - 1, t - 1] *
-                                     (1 - psi[k, 2, n_agem - 1, t - 1]) +
-                                     pop_sus[k, 2,  n_agem, t - 1] *
-                                     sn_sus[2, n_agem, t - 1] *
-                                     (1 - psi[k, 2, n_agem, t - 1])
+        pop_sus_proj[k, 2, n_agem - 1, t] <- pop_sus[k, 2, n_agem - 1, t - 1] *
+                                            sn_sus[2, n_agem - 1, t - 1] *
+                                            (1 - psi[k, 2, n_agem - 1, t - 1]) +
+                                            pop_sus[k, 2,  n_agem, t - 1] *
+                                            sn_sus[2, n_agem, t - 1] *
+                                            (1 - psi[k, 2, n_agem, t - 1])
+
+        #Male: set projection into population model matrix
+        for (a in 2:n_agem) {
+          pop_sus[k, 2, a, t] <- pop_sus_proj[k, 2, (a - 1), t]
+        }
 
         # Male: fawn class = total #females * unisex fawns per female/2
         pop_sus[k, 2, 1, t] <- pop_sus[k, 1, 1, t]
-
 
         ###################################################
         ### Infected/Infectious
@@ -1030,26 +1139,31 @@ modelcode <- nimbleCode({
         ### Females
         ###########
 
-        #Female: set projection into population model matrix
-        for (a in 2:(n_agef - 1)) {
-          pop_inf[k, 1, a, t] <- pop_inf[k, 1, a - 1, t - 1] *
-                                      sn_inf[1, a - 1, t - 1] +
-                                      pop_sus[k, 1, a - 1, t - 1] *
-                                      sn_sus[1, a - 1, t - 1] *
-                                      psi[k, 1, a - 1, t - 1]
+        #Female: project forward anually
+        for (a in 1:(n_agef - 2)) {
+          pop_inf_proj[k, 1, a, t] <- pop_inf[k, 1, a, t - 1] *
+                                      sn_inf[1, a, t - 1] +
+                                      pop_sus[k, 1, a, t - 1] *
+                                      sn_sus[1, a, t - 1] *
+                                      psi[k, 1, a, t - 1]
         }
         ##Female: accumulating age = 9.5+ years
-        pop_inf[k, 1, n_agef, t] <- pop_inf[k, 1, n_agef - 1, t - 1] *
-                                    sn_inf[1, n_agef - 1, t - 1] +
-                                    pop_inf[k, 1, n_agef, t - 1] *
-                                    sn_inf[1, n_agef, t - 1] +
-                                    pop_sus[k, 1, n_agef - 1, t - 1] *
-                                    sn_sus[1, n_agef - 1, t - 1] *
-                                    psi[k, 1, n_agef - 1, t - 1] +
-                                    pop_sus[k, 1,  n_agef, t - 1] *
-                                    sn_sus[1, n_agef, t - 1] *
-                                    psi[k, 1, n_agef, t - 1]
+        pop_inf_proj[k, 1, n_agef - 1, t] <- pop_inf[k, 1, n_agef - 1, t - 1] *
+                                             sn_inf[1, n_agef - 1, t - 1] +
+                                             pop_inf[k, 1, n_agef, t - 1] *
+                                             sn_inf[1, n_agef, t - 1] +
+                                             pop_sus[k, 1, n_agef - 1, t - 1] *
+                                             sn_sus[1, n_agef - 1, t - 1] *
+                                             psi[k, 1, n_agef - 1, t - 1] +
+                                             pop_sus[k, 1,  n_agef, t - 1] *
+                                             sn_sus[1, n_agef, t - 1] *
+                                             psi[k, 1, n_agef, t - 1]
 
+
+        #Female: set projection into population model matrix
+        for (a in 2:n_agef) {
+          pop_inf[k, 1, a, t] <- pop_inf_proj[k, 1, (a - 1), t]
+        }
         ##Female: fawn class
         ##there are no infected fawns at birth
         pop_inf[k, 1, 1, t] <- 0
@@ -1059,16 +1173,16 @@ modelcode <- nimbleCode({
         ##########
 
         ### Male: project forward anually
-        for (a in 1:(n_agem - 1)) {
-            pop_inf[k, 2, a, t] <- pop_inf[k, 2, a - 1, t - 1] *
-                                          sn_inf[2, a - 1, t - 1] +
-                                          pop_sus[k, 2, a - 1, t - 1] *
-                                          sn_sus[2, a - 1, t - 1] *
-                                          psi[k, 2, a - 1, t - 1]
+        for (a in 1:(n_agem - 2)) {
+            pop_inf_proj[k, 2, a, t] <- pop_inf[k, 2, a, t - 1] *
+                                          sn_inf[2, a, t - 1] +
+                                          pop_sus[k, 2, a, t - 1] *
+                                          sn_sus[2, a, t - 1] *
+                                          psi[k, 2, a, t - 1]
         }
 
-        ### Male: accumulating age class = 6.5+
-        pop_inf[k, 2, n_agem, t] <- pop_inf[k, 2, n_agem - 1, t - 1] *
+        ### Male: accumulating age class
+        pop_inf_proj[k, 2, n_agem - 1, t] <- pop_inf[k, 2, n_agem - 1, t - 1] *
                                              sn_inf[2, n_agem - 1, t - 1] +
                                              pop_inf[k, 2, n_agem, t - 1] *
                                              sn_inf[2, n_agem, t - 1] +
@@ -1079,153 +1193,17 @@ modelcode <- nimbleCode({
                                              sn_sus[2, n_agem, t - 1] *
                                              psi[k, 2, n_agem, t - 1] 
 
+        ### Male: set projection into population model matrix
+        for (a in 2:n_agem) {
+          pop_inf[k, 2, a, t] <- pop_inf_proj[k, 2, (a - 1), t]
+        }
+
         #Male: fawn class
         #there are no infected fawns at birth
         pop_inf[k, 2, 1, t] <- 0
 
-        }
-        }
-
-
-    # for (k in 1:n_study_area) {
-
-    #   ##################
-    #   ### Susceptible
-    #   ##################
-
-    #   for (t in 2:n_year) {
-        
-
-    #     ##############################################################
-    #     ##############################################################
-    #     ### AAH population model version with a projection matrix
-    #     ##############################################################
-    #     ##############################################################
-
-    #     #Female: project forward annually
-    #     for (a in 1:(n_agef - 2)) {
-    #       pop_sus_proj[k, 1, a, t] <- pop_sus[k, 1, a, t - 1] *
-    #                                   sn_sus[1, a, t - 1] *
-    #                                   (1 - psi[k, 1, a, t - 1])
-    #     }
-
-    #     #female accumulating age class
-    #     pop_sus_proj[k, 1, n_agef - 1, t] <- pop_sus[k, 1, n_agef - 1, t - 1] *
-    #                                         sn_sus[1, n_agef - 1, t - 1] *
-    #                                         (1 - psi[k, 1, n_agef - 1, t - 1]) +
-    #                                         pop_sus[k, 1,  n_agef, t - 1] *
-    #                                         sn_sus[1, n_agef, t - 1] *
-    #                                         (1 - psi[k, 1, n_agef, t - 1])
-
-    #     #Female: set projection into population model matrix
-    #     for (a in 2:n_agef) {
-    #       pop_sus[k, 1, a, t] <- pop_sus_proj[k, 1, (a - 1), t]
-    #     }
-
-    #     #Female: fawn class = total #females * unisex fawns per female/2
-    #     pop_sus[k, 1, 1, t] <- (sum(pop_sus_proj[k, 1, 1:n_agef, t]) +
-    #                             sum(pop_inf_proj[k, 1, 1:n_agef, t])) *
-    #                             fec[t] * .5
-    #     ##########
-    #     ### Males
-    #     ##########
-
-    #     #Male: project forward anually
-    #     for (a in 1:(n_agem - 2)) {
-    #       pop_sus_proj[k, 2, a, t] <- pop_sus[k, 2, a, t - 1] *
-    #                                   sn_sus[2, a, t - 1] *
-    #                                   (1 - psi[k, 2, a, t - 1])
-    #     }
-
-    #     #Male: accumulating age class
-    #     pop_sus_proj[k, 2, n_agem - 1, t] <- pop_sus[k, 2, n_agem - 1, t - 1] *
-    #                                         sn_sus[2, n_agem - 1, t - 1] *
-    #                                         (1 - psi[k, 2, n_agem - 1, t - 1]) +
-    #                                         pop_sus[k, 2,  n_agem, t - 1] *
-    #                                         sn_sus[2, n_agem, t - 1] *
-    #                                         (1 - psi[k, 2, n_agem, t - 1])
-
-    #     #Male: set projection into population model matrix
-    #     for (a in 2:n_agem) {
-    #       pop_sus[k, 2, a, t] <- pop_sus_proj[k, 2, (a - 1), t]
-    #     }
-
-    #     # Male: fawn class = total #females * unisex fawns per female/2
-    #     pop_sus[k, 2, 1, t] <- pop_sus[k, 1, 1, t]
-
-    #     ###################################################
-    #     ### Infected/Infectious
-    #     ###################################################
-
-    #     ###########
-    #     ### Females
-    #     ###########
-
-    #     #Female: project forward anually
-    #     for (a in 1:(n_agef - 1)) {
-    #       pop_inf_proj[k, 1, a, t] <- pop_inf[k, 1, a, t - 1] *
-    #                                   sn_inf[1, a, t - 1] +
-    #                                   pop_sus[k, 1, a, t - 1] *
-    #                                   sn_sus[1, a, t - 1] *
-    #                                   psi[k, 1, a, t - 1]
-    #     }
-    #     ##Female: accumulating age = 9.5+ years
-    #     pop_inf_proj[k, 1, n_agef - 1, t] <- pop_inf[k, 1, n_agef - 1, t - 1] *
-    #                                          sn_inf[1, n_agef - 1, t - 1] +
-    #                                          pop_inf[k, 1, n_agef, t - 1] *
-    #                                          sn_inf[1, n_agef, t - 1] +
-    #                                          pop_sus[k, 1, n_agef - 1, t - 1] *
-    #                                          sn_sus[1, n_agef - 1, t - 1] *
-    #                                          psi[k, 1, n_agef - 1, t - 1] +
-    #                                          pop_sus[k, 1,  n_agef, t - 1] *
-    #                                          sn_sus[1, n_agef, t - 1] *
-    #                                          psi[k, 1, n_agef, t - 1] 
-
-
-    #     #Female: set projection into population model matrix
-    #     for (a in 2:n_agef) {
-    #       pop_inf[k, 1, a, t] <- pop_inf_proj[k, 1, (a - 1), t]
-    #     }
-    #     ##Female: fawn class
-    #     ##there are no infected fawns at birth
-    #     pop_inf[k, 1, 1, t] <- 0
-
-    #     ##########
-    #     ### Males
-    #     ##########
-
-    #     ### Male: project forward anually
-    #     for (a in 1:(n_agem - 1)) {
-    #         pop_inf_proj[k, 2, a, t] <- pop_inf[k, 2, a, t - 1] *
-    #                                       sn_inf[2, a, t - 1] +
-    #                                       pop_sus[k, 2, a, t - 1] *
-    #                                       sn_sus[2, a, t - 1] *
-    #                                       psi[k, 2, a, t - 1]
-    #     }
-
-    #     ### Male: accumulating age class
-    #     pop_inf_proj[k, 2, n_agem - 1, t] <- pop_inf[k, 1, n_agem - 1, t - 1] *
-    #                                          sn_inf[1, n_agem - 1, t - 1] +
-    #                                          pop_inf[k, 1, n_agem, t - 1] *
-    #                                          sn_inf[1, n_agem, t - 1] +
-    #                                          pop_sus[k, 1, n_agem - 1, t - 1] *
-    #                                          sn_sus[1, n_agem - 1, t - 1] *
-    #                                          psi[k, 1, n_agem - 1, t - 1] +
-    #                                          pop_sus[k, 1,  n_agem, t - 1] *
-    #                                          sn_sus[1, n_agem, t - 1] *
-    #                                          psi[k, 1, n_agem, t - 1] 
-
-    #     ### Male: set projection into population model matrix
-    #     for (a in 2:n_agem) {
-    #       pop_inf[k, 2, a, t] <- pop_inf_proj[k, 2, (a - 1), t]
-    #     }
-
-    #     #Male: fawn class
-    #     #there are no infected fawns at birth
-    #     pop_inf[k, 2, 1, t] <- 0
-
-    # }#end t
-    # }#end study_area
+    }#end t
+    }#end study_area
 
     ######################################################################
     ### Observation Model

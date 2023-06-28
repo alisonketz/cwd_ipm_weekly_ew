@@ -181,7 +181,7 @@ colnames(d_fit_season) <- c("yr_start",
                             "post_hunt_start",
                             "yr_end")
 
-d_fit_season$yr_end <- cumsum(interval_step_yearly)
+d_fit_season$yr_end <- cumsum(intvl_step_yearly)
 #saving for aah_disease test
 save(d_fit_season, file = paste0(filepath, "d_fit_season.Rdata"))
 
