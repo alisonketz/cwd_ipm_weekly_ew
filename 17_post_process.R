@@ -10,16 +10,18 @@
 # load("runtime.Rdata")
 # out <- mcmc.list(mcmcout)
 # fit_sum <- summarize(out)
-
-# save(results/fit_sum,file="fit_sum.Rdata")
-# load("results/mcmcout.Rdata")
-# load("results/runperiod.Rdata")
-out <- mcmcout$samples
 fit_sum <- mcmcout$summary
-# fit_sum <- mcmcout$summary$all.chains
-pdf(str_replace_all(str_replace_all(paste0("figures/traceplots_B_",Sys.time(),".pdf"), " ",""),":",""))
-traceplot(out[, "beta_male_foi"], ylab = "beta_male_foi")
-traceplot(out[, "beta_male_surv"], ylab = "beta_male_surv")
+out <- mcmcout$samples
+
+
+
+#############################
+### from single run
+#############################
+
+
+pdf(paste0("figures/traceplots_",format(Sys.time(),"%y%m%d%m%s"),".pdf"))
+traceplot(out[, "beta_male"], ylab = "beta_male")
 traceplot(out[, "tau_age_foi_female"], ylab = "tau_age_foi_female")
 traceplot(out[, "tau_age_foi_male"], ylab = "tau_age_foi_male")
 traceplot(out[, "m_age_foi[1]"], ylab = "m_age_foi[1]")
@@ -31,6 +33,8 @@ traceplot(out[, "f_age_foi[3]"], ylab = "f_age_foi[3]")
 traceplot(out[, "tau_period_foi_female"], ylab = "tau_period_foi_female")
 traceplot(out[, "tau_period_foi_male"], ylab = "tau_period_foi_male")
 traceplot(out[, "space[2]"], ylab = "space[2]")
+traceplot(out[, "beta0_sus_temp"], ylab = "beta0_sus_temp")
+traceplot(out[, "beta0_inf_temp"], ylab = "beta0_inf_temp")
 traceplot(out[, "beta0_survival_sus"], ylab = "beta0_survival_sus")
 traceplot(out[, "beta0_survival_inf"], ylab = "beta0_survival_inf")
 traceplot(out[, "tau_age_survival"], ylab = "tau_age_survival")
@@ -52,20 +56,21 @@ traceplot(out[, "fec[10]"], ylab = "fec[10]")
 traceplot(out[, "fec[25]"], ylab = "fec[25]")
 traceplot(out[, "fec[27]"], ylab = "fec[27]")
 traceplot(out[, "fec_prec_eps"], ylab = "fec_prec_eps")
-traceplot(out[, "tau_obs[1]"], ylab = "tau_obs[1]")
-traceplot(out[, "tau_obs[2]"], ylab = "tau_obs[2]")
+traceplot(out[, "tau_obs"], ylab = "tau_obs")
+# traceplot(out[, "tau_obs[1]"], ylab = "tau_obs[1]")
+# traceplot(out[, "tau_obs[2]"], ylab = "tau_obs[2]")
 # traceplot(out[, "tau_obs[1, 1]"], ylab = "tau_obs[1, 1]")
 # traceplot(out[, "tau_obs[1, 2]"], ylab = "tau_obs[1, 2]")
 # traceplot(out[, "tau_obs[2, 1]"], ylab = "tau_obs[2, 1]")
 # traceplot(out[, "tau_obs[2, 2]"], ylab = "tau_obs[2, 2]")
-traceplot(out[, "tau_pop[1]"], ylab = "tau_pop[1]")
-traceplot(out[, "tau_pop[2]"], ylab = "tau_pop[2]")
+traceplot(out[, "tau_pop"], ylab = "tau_pop")
+# traceplot(out[, "tau_pop[1]"], ylab = "tau_pop[1]")
+# traceplot(out[, "tau_pop[2]"], ylab = "tau_pop[2]")
 # traceplot(out[, "tau_pop[1, 1]"], ylab = "tau_pop[1, 1]")
 # traceplot(out[, "tau_pop[1, 2]"], ylab = "tau_pop[1, 2]")
 # traceplot(out[, "tau_pop[2, 1]"], ylab = "tau_pop[2, 1]")
 # traceplot(out[, "tau_pop[2, 2]"], ylab = "tau_pop[2, 2]")
 dev.off()
-
 
 
 #############################
