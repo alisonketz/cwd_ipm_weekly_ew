@@ -33,8 +33,8 @@ traceplot(out[, "f_age_foi[3]"], ylab = "f_age_foi[3]")
 traceplot(out[, "tau_period_foi_female"], ylab = "tau_period_foi_female")
 traceplot(out[, "tau_period_foi_male"], ylab = "tau_period_foi_male")
 traceplot(out[, "space[2]"], ylab = "space[2]")
-traceplot(out[, "beta0_sus_temp"], ylab = "beta0_sus_temp")
-traceplot(out[, "beta0_inf_temp"], ylab = "beta0_inf_temp")
+# traceplot(out[, "beta0_sus_temp"], ylab = "beta0_sus_temp")
+# traceplot(out[, "beta0_inf_temp"], ylab = "beta0_inf_temp")
 traceplot(out[, "beta0_survival_sus"], ylab = "beta0_survival_sus")
 traceplot(out[, "beta0_survival_inf"], ylab = "beta0_survival_inf")
 traceplot(out[, "tau_age_survival"], ylab = "tau_age_survival")
@@ -71,6 +71,25 @@ traceplot(out[, "tau_pop"], ylab = "tau_pop")
 # traceplot(out[, "tau_pop[2, 1]"], ylab = "tau_pop[2, 1]")
 # traceplot(out[, "tau_pop[2, 2]"], ylab = "tau_pop[2, 2]")
 dev.off()
+
+modelid <- "D"
+
+png(paste0("figures/beta0_survival_sus_traceplot_",modelid,".png"))
+traceplot(out[, "beta0_survival_sus"], ylab = "beta0_survival_sus")
+dev.off()
+
+png(paste0("figures/beta0_survival_inf_traceplot_",modelid,".png"))
+traceplot(out[, "beta0_survival_inf"], ylab = "beta0_survival_inf")
+dev.off()
+
+png(paste0("figures/tau_obs_traceplot_",modelid,".png"))
+traceplot(out[, "tau_obs"], ylab = "tau_obs")
+dev.off()
+
+png(paste0("figures/tau_pop_traceplot_",modelid,".png"))
+traceplot(out[, "tau_pop"], ylab = "tau_pop")
+dev.off()
+
 
 
 #############################

@@ -40,32 +40,33 @@ modelcode <- nimbleCode({
   tau_period_foi_male  ~ dgamma(1, 1)
   tau_period_foi_female  ~ dgamma(1, 1)
 
-  #CAR specification
-  f_period_foi[1:n_year] ~ dcar_normal(adj = adj_period[1:n_adj_period],
-                                  weights = weights_period[1:n_adj_period],
-                                  num = num_period[1:n_year],
-                                  tau = tau_period_foi_female,
-                                  zero_mean = 1)
+  ###ICAR specification
+  # f_period_foi[1:n_year] ~ dcar_normal(adj = adj_period[1:n_adj_period],
+  #                                 weights = weights_period[1:n_adj_period],
+  #                                 num = num_period[1:n_year],
+  #                                 tau = tau_period_foi_female,
+  #                                 zero_mean = 1)
   
-  m_period_foi[1:n_year] ~ dcar_normal(adj = adj_period[1:n_adj_period],
-                                  weights = weights_period[1:n_adj_period],
-                                  num = num_period[1:n_year],
-                                  tau = tau_period_foi_male,
-                                  zero_mean = 1)
-  # tau1_period_foi_f <- .0000001 * tau_period_foi_female
-  # tau1_period_foi_m <- .0000001 * tau_period_foi_male
-  # f_period_foi_temp[1] ~ dnorm(0, tau1_period_foi_f)
-  # m_period_foi_temp[1] ~ dnorm(0, tau1_period_foi_m)
-  # for (t in 2:n_year) {
-  #   f_period_foi_temp[t] ~ dnorm(f_period_foi_temp[t - 1], tau_period_foi_female)
-  #   m_period_foi_temp[t] ~ dnorm(m_period_foi_temp[t - 1], tau_period_foi_male)
-  # }
-  # f_period_foi_mu <- mean(f_period_foi_temp[1:n_year])
-  # m_period_foi_mu <- mean(m_period_foi_temp[1:n_year])
-  # for (t in 1:n_year) {
-  #   f_period_foi[t] <- f_period_foi_temp[t] - f_period_foi_mu
-  #   m_period_foi[t] <- m_period_foi_temp[t] - m_period_foi_mu
-  # }
+  # m_period_foi[1:n_year] ~ dcar_normal(adj = adj_period[1:n_adj_period],
+  #                                 weights = weights_period[1:n_adj_period],
+  #                                 num = num_period[1:n_year],
+  #                                 tau = tau_period_foi_male,
+  #                                 zero_mean = 1)
+  ### RW1 Specification
+  tau1_period_foi_f <- .0000001 * tau_period_foi_female
+  tau1_period_foi_m <- .0000001 * tau_period_foi_male
+  f_period_foi_temp[1] ~ dnorm(0, tau1_period_foi_f)
+  m_period_foi_temp[1] ~ dnorm(0, tau1_period_foi_m)
+  for (t in 2:n_year) {
+    f_period_foi_temp[t] ~ dnorm(f_period_foi_temp[t - 1], tau_period_foi_female)
+    m_period_foi_temp[t] ~ dnorm(m_period_foi_temp[t - 1], tau_period_foi_male)
+  }
+  f_period_foi_mu <- mean(f_period_foi_temp[1:n_year])
+  m_period_foi_mu <- mean(m_period_foi_temp[1:n_year])
+  for (t in 1:n_year) {
+    f_period_foi[t] <- f_period_foi_temp[t] - f_period_foi_mu
+    m_period_foi[t] <- m_period_foi_temp[t] - m_period_foi_mu
+  }
 
   ### random effect for East/West spatial model
   space[1] <- 0
@@ -84,21 +85,21 @@ modelcode <- nimbleCode({
   ### Susceptibles survival intercept
   ####################################
   
-  # beta0_survival_sus ~ dnorm(-6, .1)
-  # beta0_sus_temp ~ dnorm(-6, .1)
-  beta0_sus_temp ~ dnorm(0, .1)
-  sus_mix ~ dunif(-1, 1)
-  beta0_survival_sus <- beta0_sus_temp * sus_mix
+  # beta0_survival_sus ~ dnorm(0, .1)
+  beta0_survival_sus ~ T(dnorm(-6, .1),,0)
+  # beta0_sus_temp ~ dnorm(0, .1)
+  # sus_mix ~ dunif(-1, 1)
+  # beta0_survival_sus <- beta0_sus_temp * sus_mix
 
   ##################################
   ### Infected survival intercept
   ##################################
 
-  # beta0_survival_inf ~ dnorm(-6, .1)
-  # beta0_inf_temp ~ dnorm(-6, .1)
-  beta0_inf_temp ~ dnorm(0, .1)
-  inf_mix ~ dunif(-1, 1)
-  beta0_survival_inf <- beta0_inf_temp * inf_mix
+  # beta0_survival_inf ~ dnorm(0, .1)
+  beta0_survival_inf ~ T(dnorm(-6, .1),,0)
+  # beta0_inf_temp ~ dnorm(0, .1)
+  # inf_mix ~ dunif(-1, 1)
+  # beta0_survival_inf <- beta0_inf_temp * inf_mix
 
   ##################################
   ### Priors for Age and Period effects
@@ -715,6 +716,7 @@ modelcode <- nimbleCode({
   #######################################
   ### Initial population
   ########################################
+  tau_pop ~ dgamma(1, 1)
 
   #should this be different for pos/neg or m/f for study area?
   # for(i in 1:2) {
@@ -957,11 +959,15 @@ modelcode <- nimbleCode({
   ###
   ######################################################################
 
-  # for (k in 1:n_study_area){
-  #     for (t in 2:n_year){
+  #   #####################################
+  #   ### version without projection matrix
+  #   #####################################
+
+  # for (k in 1:n_study_area) {
+  #     for (t in 2:n_year) {
 
   #       #Female: set projection into population model matrix
-  #       for (a in 2:n_agef - 1) {
+  #       for (a in 2:(n_agef - 1)) {
   #         pop_sus[k, 1, a, t] <-  pop_sus[k, 1, a - 1, t - 1] *
   #                                     sn_sus[1, a - 1, t - 1] *
   #                                     (1 - psi[k, 1, a - 1, t - 1])
@@ -996,7 +1002,7 @@ modelcode <- nimbleCode({
   #                                    sn_sus[2, n_agem, t - 1] *
   #                                    (1 - psi[k, 2, n_agem, t - 1])
 
-  #       # Male: fawn class = total #females * unisex fawns per female/2
+  #       # Male: fawn class = # female fawns
   #       pop_sus[k, 2, 1, t] <- pop_sus[k, 1, 1, t]
 
 
@@ -1064,6 +1070,9 @@ modelcode <- nimbleCode({
   #       }
   #       }
 
+    #####################################
+    ### version with projection matrix
+    #####################################
 
     for (k in 1:n_study_area) {
 
@@ -1202,7 +1211,7 @@ modelcode <- nimbleCode({
         #there are no infected fawns at birth
         pop_inf[k, 2, 1, t] <- 0
 
-    }#end t
+      }#end t
     }#end study_area
 
     ######################################################################
