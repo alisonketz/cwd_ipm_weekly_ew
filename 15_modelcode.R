@@ -86,7 +86,7 @@ modelcode <- nimbleCode({
   ####################################
   
   # beta0_survival_sus ~ dnorm(0, .1)
-  beta0_survival_sus ~ T(dnorm(-6, .1),,0)
+  # beta0_survival_sus ~ T(dnorm(-6, .1),,0)
   # beta0_sus_temp ~ dnorm(0, .1)
   # sus_mix ~ dunif(-1, 1)
   # beta0_survival_sus <- beta0_sus_temp * sus_mix
@@ -96,7 +96,7 @@ modelcode <- nimbleCode({
   ##################################
 
   # beta0_survival_inf ~ dnorm(0, .1)
-  beta0_survival_inf ~ T(dnorm(-6, .1),,0)
+  # beta0_survival_inf ~ T(dnorm(-6, .1),,0)
   # beta0_inf_temp ~ dnorm(0, .1)
   # inf_mix ~ dunif(-1, 1)
   # beta0_survival_inf <- beta0_inf_temp * inf_mix
