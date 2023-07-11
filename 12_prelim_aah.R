@@ -33,8 +33,8 @@ df_age_before_antlered <- df_age_before_male %>% filter(age != 0)
 df_age_before_female_nofawn <- df_age_before_female %>% filter(age != 0)
 
 #ratio to calculate sex-ratio for initial population
- sum(df_age_before_female_nofawn$n)
- sum(df_age_before_antlered$n)
+#  sum(df_age_before_female_nofawn$n)
+#  sum(df_age_before_antlered$n)
 
 doe_per <- df_age_before_female_nofawn$n[
                 df_age_before_female_nofawn$age == 1] /
