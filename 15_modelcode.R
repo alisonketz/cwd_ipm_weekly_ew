@@ -716,34 +716,58 @@ modelcode <- nimbleCode({
   #######################################
   ### Initial population
   ########################################
-  tau_pop ~ dgamma(1, 1)
+  # tau_pop ~ dgamma(1, 1)
 
   #should this be different for pos/neg or m/f for study area?
   # for(i in 1:2) {
-  #   tau_pop[i] ~ dgamma(1, 1)
+  #   tau_pop[i] ~ dgamma(10, 1)
   # }
   for(k in 1:n_study_area) {
-    for (a in 1:n_agef) {
+      for (a in 1:n_agef) {
 
       #Initial population structure pop[sex,age,year] for susceptible deer
-      llpop_sus[k, 1, a, 1] ~ dnorm(f_logpop_sus[k, a], tau_pop)#tau_pop[1]
+      llpop_sus[k, 1, a, 1]  <- f_logpop_sus[k, a]
       pop_sus[k, 1, a, 1] <- exp(llpop_sus[k, 1, a, 1])
 
       #Initial population structure pop[study_area=k,sex=i,year=t,age=a]
-      llpop_inf[k, 1, a, 1] ~ dnorm(f_logpop_inf[k, a], tau_pop)#tau_pop[1]
+      llpop_inf[k, 1, a, 1] <- f_logpop_inf[k, a]
       pop_inf[k, 1, a, 1] <- exp(llpop_inf[k, 1, a, 1])
-    }
-    for (a in 1:n_agem) {
-        ### Initial population structure pop
-        ### [study_area,sex,age,period(year)] for susceptible deer
-        llpop_sus[k, 2, a, 1] ~ dnorm(m_logpop_sus[k, a], tau_pop)#tau_pop[2]
-        pop_sus[k, 2, a, 1] <- exp(llpop_sus[k, 2, a, 1])
+      }
+      for (a in 1:n_agem) {
+          ### Initial population structure pop
+          ### [study_area,sex,age,period(year)] for susceptible deer
+          llpop_sus[k, 2, a, 1]  <- m_logpop_sus[k, a]
+          pop_sus[k, 2, a, 1] <- exp(llpop_sus[k, 2, a, 1])
 
-        #Initial population structure pop for infected deer
-        llpop_inf[k, 2, a, 1] ~ dnorm(m_logpop_inf[k, a], tau_pop)#tau_pop[2]
-        pop_inf[k, 2, a, 1] <- exp(llpop_inf[k, 2, a, 1])
-    }
+          #Initial population structure pop for infected deer
+          llpop_inf[k, 2, a, 1] <- m_logpop_inf[k, a]
+          pop_inf[k, 2, a, 1] <- exp(llpop_inf[k, 2, a, 1])
+      }
   }
+
+
+  # for(k in 1:n_study_area) {
+  #   for (a in 1:n_agef) {
+
+  #     #Initial population structure pop[sex,age,year] for susceptible deer
+  #     llpop_sus[k, 1, a, 1] ~ dnorm(f_logpop_sus[k, a], tau_pop[1])#tau_pop[1]
+  #     pop_sus[k, 1, a, 1] <- exp(llpop_sus[k, 1, a, 1])
+
+  #     #Initial population structure pop[study_area=k,sex=i,year=t,age=a]
+  #     llpop_inf[k, 1, a, 1] ~ dnorm(f_logpop_inf[k, a], tau_pop[2])#tau_pop[1]
+  #     pop_inf[k, 1, a, 1] <- exp(llpop_inf[k, 1, a, 1])
+  #   }
+  #   for (a in 1:n_agem) {
+  #       ### Initial population structure pop
+  #       ### [study_area,sex,age,period(year)] for susceptible deer
+  #       llpop_sus[k, 2, a, 1] ~ dnorm(m_logpop_sus[k, a], tau_pop[1])#tau_pop[2]
+  #       pop_sus[k, 2, a, 1] <- exp(llpop_sus[k, 2, a, 1])
+
+  #       #Initial population structure pop for infected deer
+  #       llpop_inf[k, 2, a, 1] ~ dnorm(m_logpop_inf[k, a], tau_pop[2])#tau_pop[2]
+  #       pop_inf[k, 2, a, 1] <- exp(llpop_inf[k, 2, a, 1])
+  #   }
+  # }
 
   ############################
   ####Reporting Rates

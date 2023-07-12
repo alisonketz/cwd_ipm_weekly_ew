@@ -94,14 +94,14 @@ Ccalc_surv_aah <- compileNimble(calc_surv_aah)
 assign("calc_surv_aah", calc_surv_aah, envir = .GlobalEnv)
 
 # starttime <- Sys.time()
-# sn_sus <- calc_surv_aah(
+# sn_sus <- Ccalc_surv_aah(
 # 	nT_age = nT_age_surv,
 #     nT_period_overall = nT_period_overall,
 #     nT_age_short_f = nT_age_short_f,
 #     nT_age_short_m = nT_age_short_m,
 #     nT_age_surv_aah_f = nT_age_surv_aah_f,
 #     nT_age_surv_aah_m = nT_age_surv_aah_m,
-#     beta0 = beta0_survival_sus-1.5,
+#     beta0 = beta0_survival_sus-2,
 #     beta_male = beta_male,
 #     age_effect = age_effect_survival_test,        # length = 962
 #     period_effect = period_effect_survival_test[(nT_period_prestudy_ext + 1):(nT_period_overall_ext)], 
@@ -111,8 +111,8 @@ assign("calc_surv_aah", calc_surv_aah, envir = .GlobalEnv)
 #     n_agef = n_agef,
 #     n_agem = n_agem)
 # (endtime1 <- Sys.time() - starttime)
-# sn_sus[1,1:5,]
-# sn_sus[2,1:5,]
+# sn_sus[1,,]
+# sn_sus[2,,]
 
 # starttime <- Sys.time()
 # sn_inf <- Ccalc_surv_aah(
@@ -122,7 +122,7 @@ assign("calc_surv_aah", calc_surv_aah, envir = .GlobalEnv)
 #         nT_age_short_m = nT_age_short_m,
 #         nT_age_surv_aah_f = nT_age_surv_aah_f,
 #         nT_age_surv_aah_m = nT_age_surv_aah_m,
-#         beta0 = beta0_survival_inf-1,
+#         beta0 = beta0_survival_inf-2,
 #         beta_male = beta_male,
 #         age_effect = age_effect_survival_test,
 #         period_effect = period_effect_survival_test[(nT_period_prestudy_ext + 1):(nT_period_overall_ext)],
@@ -132,8 +132,14 @@ assign("calc_surv_aah", calc_surv_aah, envir = .GlobalEnv)
 #         n_agef = n_agef,
 #         n_agem = n_agem)
 # (endtime2 <- Sys.time() - starttime)
-# sn_inf[1,3,]
+# round(sn_inf[1,3,],2)
+# round(sn_inf[2,3,],2)
+
+# plot(1:28,sn_inf[1,3,])
+
+# plot(1:28,sn_inf[2,3,])
 # sn_inf[2,3,]
+
 
 
 #######################################################################
@@ -413,16 +419,16 @@ assign("calc_infect_prob", calc_infect_prob, envir = .GlobalEnv)
 # space <- space[2]
 # ##testing state.transition function as R function
 # starttime <- Sys.time()
-# psi <- calc_infect_prob(age_lookup_f = age_lookup_f,
+# psi <- Ccalc_infect_prob(age_lookup_f = age_lookup_f,
 #                         age_lookup_m = age_lookup_m,
 #                         n_agef = n_agef,
 #                         n_agem = n_agem,
 #                         yr_start = d_fit_season$yr_start,
 #                         yr_end = d_fit_season$yr_end,
-#                         f_age = f_age_foi-2,
-#                         m_age = m_age_foi-2,
-#                         f_period = f_period_foi-2,
-#                         m_period = m_period_foi-2,
+#                         f_age = f_age_foi,
+#                         m_age = m_age_foi,
+#                         f_period = f_period_foi,
+#                         m_period = m_period_foi,
 #                         nT_period_overall = nT_period_overall,
 #                         period_lookup_foi_study = period_lookup_foi_study[1:nT_period_overall],
 #                         n_year = n_year,
@@ -433,7 +439,8 @@ assign("calc_infect_prob", calc_infect_prob, envir = .GlobalEnv)
 #                         nT_age_surv_aah_m = nT_age_surv_aah_m
 #                         )
 # (endtime5 <- Sys.time() - starttime)
-# psi[1,1,,]
+# psi[1,1,2,]
+# psi[1,2,2,]
 
 #######################################################################
 ###

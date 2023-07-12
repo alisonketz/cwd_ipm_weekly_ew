@@ -72,7 +72,7 @@ traceplot(out[, "tau_pop"], ylab = "tau_pop")
 # traceplot(out[, "tau_pop[2, 2]"], ylab = "tau_pop[2, 2]")
 dev.off()
 
-modelid <- "F"
+modelid <- "G"
 
 png(paste0("figures/beta0_survival_sus_traceplot_",modelid,".png"))
 traceplot(out[, "beta0_survival_sus"], ylab = "beta0_survival_sus")
@@ -90,7 +90,18 @@ png(paste0("figures/tau_pop_traceplot_",modelid,".png"))
 traceplot(out[, "tau_pop"], ylab = "tau_pop")
 dev.off()
 
+#############################
+### from parallel run
+#############################
 
+mu_obs_out <- data.frame(mu_obs_mean = fit_sum[grep("mu_obs",rownames(fit_sum)),1],
+study_area = rep(c("east","west"),56),
+sex = rep(c("Female","Female","Male","Male"),112/4),
+year = rep(1:28,each=4)
+)
+
+mu_obs_plot <- ggplot(data = mu_obs_out) + geom_point(aes(x=year,y=mu_obs_mean)) + facet_nested_wrap(~ study_area + sex)+ theme_bw()
+ggsave(paste0("figures/mu_obs_mn_",modelid,".png"), mu_obs_plot)
 
 #############################
 ### from parallel run
