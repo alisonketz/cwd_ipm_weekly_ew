@@ -98,7 +98,7 @@ source("12_prelim_aah.R")
 ### Likelihoods
 ###########################################################
 
-source("13_distributions_check.R")
+# source("13_distributions_check.R")
 source("13_distributions.R")
 
 ###########################################################
