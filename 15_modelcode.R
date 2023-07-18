@@ -69,6 +69,23 @@ modelcode <- nimbleCode({
   # }
   
   ### removing first years prior to surveillance data
+  # tau1_period_foi_f <- .0000001 * tau_period_foi_female
+  # tau1_period_foi_m <- .0000001 * tau_period_foi_male
+  # f_period_foi_temp[9] ~ dnorm(0, tau1_period_foi_f)
+  # m_period_foi_temp[9] ~ dnorm(0, tau1_period_foi_m)
+  # for (t in 10:n_year) {
+  #   f_period_foi_temp[t] ~ dnorm(f_period_foi_temp[t - 1], tau_period_foi_female)
+  #   m_period_foi_temp[t] ~ dnorm(m_period_foi_temp[t - 1], tau_period_foi_male)
+  # }
+  # f_period_foi_mu <- mean(f_period_foi_temp[9:n_year])
+  # m_period_foi_mu <- mean(m_period_foi_temp[9:n_year])
+  # for (t in 9:n_year) {
+  #   f_period_foi[t] <- f_period_foi_temp[t] - f_period_foi_mu
+  #   m_period_foi[t] <- m_period_foi_temp[t] - m_period_foi_mu
+  # }
+
+
+  ### setting early years prior to surveillance data
   tau1_period_foi_f <- .0000001 * tau_period_foi_female
   tau1_period_foi_m <- .0000001 * tau_period_foi_male
   f_period_foi_temp[9] ~ dnorm(0, tau1_period_foi_f)
@@ -77,12 +94,17 @@ modelcode <- nimbleCode({
     f_period_foi_temp[t] ~ dnorm(f_period_foi_temp[t - 1], tau_period_foi_female)
     m_period_foi_temp[t] ~ dnorm(m_period_foi_temp[t - 1], tau_period_foi_male)
   }
-  f_period_foi_mu <- mean(f_period_foi_temp[9:n_year])
-  m_period_foi_mu <- mean(m_period_foi_temp[9:n_year])
-  for (t in 9:n_year) {
+  for(t in 1:8) {
+    f_period_foi_temp[t] <- f_period_foi_temp[9]
+    m_period_foi_temp[t] <- m_period_foi_temp[9]
+  }
+  f_period_foi_mu <- mean(f_period_foi_temp[1:n_year])
+  m_period_foi_mu <- mean(m_period_foi_temp[1:n_year])
+  for (t in 1:n_year) {
     f_period_foi[t] <- f_period_foi_temp[t] - f_period_foi_mu
     m_period_foi[t] <- m_period_foi_temp[t] - m_period_foi_mu
   }
+
 
 
   ### random effect for East/West spatial model
