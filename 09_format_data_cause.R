@@ -160,15 +160,23 @@ length(interval_step)
 intvl_step_yearly <- interval_step[(n_year_prestudy_ext + 1):n_year_ext]
 
 d_fit_season <- matrix(NA, nrow = n_year, ncol = 8)
-for(t in 1:n_year) {
-   d_fit_season[t, ] <- c(intvl_step_yearly[t] * (t - 1) + 1,
+d_fit_season[1, ]  <-  c( 1,
+                          season_ng_start[1] - 1,
+                          season_ng_start[1],
+                          season_gun_start[1],
+                          season_gun_end[1],
+                          season_ng_end[1],
+                          season_ng_end[1] + 1,
+                          intvl_step_yearly[1])
+for(t in 2:n_year) {
+   d_fit_season[t, ] <- c(sum(intvl_step_yearly[1:(t-1)]) + 1,
                           season_ng_start[t] - 1,
                           season_ng_start[t],
                           season_gun_start[t],
                           season_gun_end[t],
                           season_ng_end[t],
                           season_ng_end[t] + 1,
-                          intvl_step_yr_weekly * t)#this is changed
+                          sum(intvl_step_yearly[1:(t)]))#this is changed
 }
 
 d_fit_season <- data.frame(d_fit_season)
@@ -181,7 +189,7 @@ colnames(d_fit_season) <- c("yr_start",
                             "post_hunt_start",
                             "yr_end")
 
-d_fit_season$yr_end <- cumsum(intvl_step_yearly)
+# d_fit_season$yr_end <- cumsum(intvl_step_yearly)
 #saving for aah_disease test
 save(d_fit_season, file = paste0(filepath, "d_fit_season.Rdata"))
 
