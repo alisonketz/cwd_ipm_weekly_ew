@@ -98,6 +98,18 @@ png(paste0("figures/tau_pop_traceplot_",modelid,".png"))
 traceplot(out[, "tau_pop"], ylab = "tau_pop")
 dev.off()
 
+
+pdf("figures/traceplot_foi_period.pdf")
+for(i in 1:n_year){
+    traceplot(out[, paste0("f_period_foi[",i,"]")], ylab = paste0("f_period_foi[",i,"]"))
+}
+for(i in 1:n_year){
+    traceplot(out[, paste0("m_period_foi[",i,"]")], ylab =  paste0("m_period_foi[",i,"]"))
+}
+dev.off()
+
+
+
 #############################
 ### mu_obs
 #############################
