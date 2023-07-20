@@ -80,7 +80,7 @@ traceplot(out[, "tau_pop"], ylab = "tau_pop")
 # traceplot(out[, "tau_pop[2, 2]"], ylab = "tau_pop[2, 2]")
 dev.off()
 
-modelid <- "K"
+modelid <- "L"
 
 png(paste0("figures/beta0_survival_sus_traceplot_",modelid,".png"))
 traceplot(out[, "beta0_survival_sus"], ylab = "beta0_survival_sus")
