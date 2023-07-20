@@ -60,9 +60,11 @@ cwd_df$yearkill <- cwd_df$kill_year - year(study_start_ext) + 1
 # interval("1994-05-15","1995-01-01") %/% weeks(1)
 
 period_lookup_foi <- c(rep(1, interval("1985-05-15","1994-05-15") %/% weeks(1)),
-                       rep(1, interval("1994-05-15","1995-01-01") %/% weeks(1)),
-                       rep(2:n_year, each = intvl_step_yr_weekly))
-
+                       rep(1, interval("1994-05-15","1995-01-01") %/% weeks(1)))
+for(t in 2:n_year){
+  period_lookup_foi <- c(period_lookup_foi,
+                         rep(t,intvl_step_yearly[t]))
+}
 period_lookup_foi <- c(period_lookup_foi, rep(n_year,nT_period_overall_ext-
                                           length(period_lookup_foi)))
 
