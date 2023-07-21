@@ -13,14 +13,33 @@
 fit_sum <- mcmcout$summary
 out <- mcmcout$samples
 
+modelid <- "N"
 
-
+#############################
+### Saving Model Description
+#############################
+sink(paste0("figures/",modelid,"/model_description_",modelid,".txt"))
+cat("Model description specifics:\n")
+cat("niter:  ",reps,"\n")
+cat("burnin:  ",bin,"\n")
+cat("n_chains:  ",n_chains,"\n")
+cat("Model Variation:\n")
+cat("allowing beta0_survival_inf and beta0_Survival_sus to be estimated with parameter expansion")
+cat("Removed all aah likelihoods\n")
+cat("Removed population model\n")
+cat("removed fecundity model \n")
+cat("includes cause-specific model \n")
+cat("set all FOI period effects to 0 \n\n")
+cat("fixed bug of period_lookup_foi # of weeks in a year\n")
+cat("runtime:  ",runtime,"\n")
+print(fit_sum)
+sink()
 #############################
 ### from single run
 #############################
 
 
-pdf(paste0("figures/traceplots_",format(Sys.time(),"%y%m%d%m%s"),".pdf"))
+pdf(paste0("figures/",modelid,"/traceplots_",format(Sys.time(),"%y%m%d%m%s"),"_",modelid,".pdf"))
 traceplot(out[, "beta_male"], ylab = "beta_male")
 traceplot(out[, "tau_age_foi_female"], ylab = "tau_age_foi_female")
 traceplot(out[, "tau_age_foi_male"], ylab = "tau_age_foi_male")
@@ -80,31 +99,38 @@ traceplot(out[, "tau_pop"], ylab = "tau_pop")
 # traceplot(out[, "tau_pop[2, 2]"], ylab = "tau_pop[2, 2]")
 dev.off()
 
-modelid <- "L"
-
-png(paste0("figures/beta0_survival_sus_traceplot_",modelid,".png"))
+png(paste0("figures/",modelid,"/beta0_survival_sus_traceplot_",modelid,".png"))
 traceplot(out[, "beta0_survival_sus"], ylab = "beta0_survival_sus")
 dev.off()
 
-png(paste0("figures/beta0_survival_inf_traceplot_",modelid,".png"))
+png(paste0("figures/",modelid,"/beta0_survival_inf_traceplot_",modelid,".png"))
 traceplot(out[, "beta0_survival_inf"], ylab = "beta0_survival_inf")
 dev.off()
 
-png(paste0("figures/tau_obs_traceplot_",modelid,".png"))
+png(paste0("figures/",modelid,"/tau_obs_traceplot_",modelid,".png"))
 traceplot(out[, "tau_obs"], ylab = "tau_obs")
 dev.off()
 
-png(paste0("figures/tau_pop_traceplot_",modelid,".png"))
+png(paste0("figures/",modelid,"/tau_pop_traceplot_",modelid,".png"))
 traceplot(out[, "tau_pop"], ylab = "tau_pop")
 dev.off()
 
 
-pdf("figures/traceplot_foi_period.pdf")
+pdf(paste0("figures/",modelid,"/traceplot_foi_period_",modelid,".pdf"))
 for(i in 1:n_year){
     traceplot(out[, paste0("f_period_foi[",i,"]")], ylab = paste0("f_period_foi[",i,"]"))
 }
 for(i in 1:n_year){
     traceplot(out[, paste0("m_period_foi[",i,"]")], ylab =  paste0("m_period_foi[",i,"]"))
+}
+dev.off()
+
+pdf(paste0("figures/",modelid,"/traceplot_foi_age_",modelid,".pdf"))
+for(i in 1:n_ageclassf){
+    traceplot(out[, paste0("f_age_foi[",i,"]")], ylab = paste0("f_age_foi[",i,"]"))
+}
+for(i in 1:n_ageclassm){
+    traceplot(out[, paste0("m_age_foi[",i,"]")], ylab =  paste0("m_age_foi[",i,"]"))
 }
 dev.off()
 
@@ -114,14 +140,14 @@ dev.off()
 ### mu_obs
 #############################
 
-mu_obs_out <- data.frame(mu_obs_mean = fit_sum[grep("mu_obs",rownames(fit_sum)),1],
-study_area = rep(c("east","west"),56),
-sex = rep(c("Female","Female","Male","Male"),112/4),
-year = rep(1:28,each=4)
-)
+# mu_obs_out <- data.frame(mu_obs_mean = fit_sum[grep("mu_obs",rownames(fit_sum)),1],
+# study_area = rep(c("east","west"),56),
+# sex = rep(c("Female","Female","Male","Male"),112/4),
+# year = rep(1:28,each=4)
+# )
 
-mu_obs_plot <- ggplot(data = mu_obs_out) + geom_point(aes(x=year,y=mu_obs_mean)) + facet_nested_wrap(~ study_area + sex)+ theme_bw()
-ggsave(paste0("figures/mu_obs_mn_",modelid,".png"), mu_obs_plot)
+# mu_obs_plot <- ggplot(data = mu_obs_out) + geom_point(aes(x=year,y=mu_obs_mean)) + facet_nested_wrap(~ study_area + sex)+ theme_bw()
+# ggsave(paste0("figures/",modelid,"/mu_obs_mn_",modelid,".png"), mu_obs_plot)
 
 
 #############################
@@ -139,7 +165,7 @@ psi_out <- psi_out[!(psi_out$sex == "Male" & psi_out$age %in% c(8,9,10)),]
 
 
 psi_plot <- ggplot(data = psi_out) + geom_point(aes(x=year,y=psi,color=age)) + facet_nested_wrap(~ study_area + sex)+ theme_bw()
-ggsave(paste0("figures/psi_mn_",modelid,".png"), psi_plot)
+ggsave(paste0("figures/",modelid,"/psi_mn_",modelid,".png"), psi_plot)
 
 
 #############################
@@ -154,9 +180,8 @@ sn_sus_out <- data.frame(sn_sus = fit_sum[grep("sn_sus", rownames(fit_sum)), 1],
 sn_sus_out$age <- as.factor(sn_sus_out$age)
 sn_sus_out <- sn_sus_out[!(sn_sus_out$sex == "Male" & sn_sus_out$age %in% c(8,9,10)),] 
 
-
 sn_sus_plot <- ggplot(data = sn_sus_out) + geom_point(aes(x=year,y=sn_sus,color=age)) + facet_wrap(~ sex)+ theme_bw()
-ggsave(paste0("figures/sn_sus_mn_",modelid,".png"), sn_sus_plot,height=4,width=7)
+ggsave(paste0("figures/",modelid,"/sn_sus_mn_",modelid,".png"), sn_sus_plot,height=4,width=7)
 
 
 #############################
@@ -171,17 +196,12 @@ sn_inf_out <- data.frame(sn_inf = fit_sum[grep("sn_inf", rownames(fit_sum)), 1],
 sn_inf_out$age <- as.factor(sn_inf_out$age)
 sn_inf_out <- sn_inf_out[!(sn_inf_out$sex == "Male" & sn_inf_out$age %in% c(8,9,10)),] 
 
-
 sn_inf_plot <- ggplot(data = sn_inf_out) + geom_point(aes(x=year,y=sn_inf,color=age)) + facet_wrap(~ sex)+ theme_bw()
-ggsave(paste0("figures/sn_inf_mn_",modelid,".png"), sn_inf_plot,height=4,width=7)
-
-
-
+ggsave(paste0("figures/",modelid,"/sn_inf_mn_",modelid,".png"), sn_inf_plot,height=4,width=7)
 
 #############################
 ### sh_sus
 #############################
-
 
 sh_sus_out <- data.frame(sh_sus = fit_sum[grep("sh_sus", rownames(fit_sum)), 1],
     sex = rep(c("Female", "Male"), 560/2),
@@ -193,16 +213,11 @@ sh_sus_out <- sh_sus_out[!(sh_sus_out$sex == "Male" & sh_sus_out$age %in% c(8,9,
 
 
 sh_sus_plot <- ggplot(data = sh_sus_out) + geom_point(aes(x=year,y=sh_sus,color=age)) + facet_wrap(~ sex)+ theme_bw()
-ggsave(paste0("figures/sh_sus_mn_",modelid,".png"), sh_sus_plot,height=4,width=7)
-
-
-
-
+ggsave(paste0("figures/",modelid,"/sh_sus_mn_",modelid,".png"), sh_sus_plot,height=4,width=7)
 
 #############################
 ### sh_inf
 #############################
-
 
 sh_inf_out <- data.frame(sh_inf = fit_sum[grep("sh_inf", rownames(fit_sum)), 1],
     sex = rep(c("Female", "Male"), 560/2),
@@ -214,7 +229,17 @@ sh_inf_out <- sh_inf_out[!(sh_inf_out$sex == "Male" & sh_inf_out$age %in% c(8,9,
 
 
 sh_inf_plot <- ggplot(data = sh_inf_out) + geom_point(aes(x=year,y=sh_inf,color=age)) + facet_wrap(~ sex)+ theme_bw()
-ggsave(paste0("figures/sh_inf_mn_",modelid,".png"), sh_inf_plot,height=4,width=7)
+ggsave(paste0("figures/",modelid,"/sh_inf_mn_",modelid,".png"), sh_inf_plot,height=4,width=7)
+
+
+pdf(paste0("figures/",modelid,"/psi_surv_plots_iter250_",modelid,".pdf"))
+psi_plot
+sn_sus_plot
+sn_inf_plot
+sh_sus_plot
+sh_inf_plot
+dev.off()
+
 
 
 ##########################################################
@@ -224,14 +249,14 @@ ggsave(paste0("figures/sh_inf_mn_",modelid,".png"), sh_inf_plot,height=4,width=7
 ### mu_obs
 #############################
 
-mu_obs_out <- data.frame(mu_obs_mean = out[2,grep("mu_obs",rownames(fit_sum))],
-study_area = rep(c("east", "west"),56),
-sex = rep(c("Female", "Female", "Male", "Male"),112/4),
-year = rep(1:28, each = 4)
-)
+# mu_obs_out <- data.frame(mu_obs_mean = out[2,grep("mu_obs",rownames(fit_sum))],
+# study_area = rep(c("east", "west"),56),
+# sex = rep(c("Female", "Female", "Male", "Male"),112/4),
+# year = rep(1:28, each = 4)
+# )
 
-mu_obs_plot <- ggplot(data = mu_obs_out) + geom_point(aes(x=year,y=mu_obs_mean)) + facet_nested_wrap(~ study_area + sex)+ theme_bw()
-ggsave(paste0("figures/mu_obs_iter2_",modelid,".png"), mu_obs_plot)
+# mu_obs_plot <- ggplot(data = mu_obs_out) + geom_point(aes(x=year,y=mu_obs_mean)) + facet_nested_wrap(~ study_area + sex)+ theme_bw()
+# ggsave(paste0("figures/",modelid,"/mu_obs_iter2_",modelid,".png"), mu_obs_plot)
 
 
 #############################
@@ -249,7 +274,7 @@ psi_out <- psi_out[!(psi_out$sex == "Male" & psi_out$age %in% c(8,9,10)), ]
 
 
 psi_plot <- ggplot(data = psi_out) + geom_point(aes(x=year,y=psi,color=age)) + facet_nested_wrap(~ study_area + sex)+ theme_bw()
-ggsave(paste0("figures/psi_iter2_",modelid,".png"), psi_plot)
+ggsave(paste0("figures/",modelid,"/psi_iter2_",modelid,".png"), psi_plot)
 
 #############################
 ### sn_sus
@@ -264,7 +289,7 @@ sn_sus_out$age <- as.factor(sn_sus_out$age)
 sn_sus_out <- sn_sus_out[!(sn_sus_out$sex == "Male" & sn_sus_out$age %in% c(8,9,10)),] 
 
 sn_sus_plot <- ggplot(data = sn_sus_out) + geom_point(aes(x=year,y=sn_sus,color=age)) + facet_wrap(~ sex)+ theme_bw()
-ggsave(paste0("figures/sn_sus_iter2_",modelid,".png"), sn_sus_plot,height=4,width=7)
+ggsave(paste0("figures/",modelid,"/sn_sus_iter2_",modelid,".png"), sn_sus_plot,height=4,width=7)
 
 #############################
 ### sn_inf
@@ -280,7 +305,7 @@ sn_inf_out <- sn_inf_out[!(sn_inf_out$sex == "Male" & sn_inf_out$age %in% c(8,9,
 
 
 sn_inf_plot <- ggplot(data = sn_inf_out) + geom_point(aes(x=year,y=sn_inf,color=age)) + facet_wrap(~ sex)+ theme_bw()
-ggsave(paste0("figures/sn_inf_iter2_",modelid,".png"), sn_inf_plot,height=4,width=7)
+ggsave(paste0("figures/",modelid,"/sn_inf_iter2_",modelid,".png"), sn_inf_plot,height=4,width=7)
 
 #############################
 ### sh_sus
@@ -295,12 +320,11 @@ sh_sus_out$age <- as.factor(sh_sus_out$age)
 sh_sus_out <- sh_sus_out[!(sh_sus_out$sex == "Male" & sh_sus_out$age %in% c(8,9,10)),] 
 
 sh_sus_plot <- ggplot(data = sh_sus_out) + geom_point(aes(x=year,y=sh_sus,color=age)) + facet_wrap(~ sex)+ theme_bw()
-ggsave(paste0("figures/sh_sus_iter2_",modelid,".png"), sh_sus_plot,height=4,width=7)
+ggsave(paste0("figures/",modelid,"/sh_sus_iter2_",modelid,".png"), sh_sus_plot,height=4,width=7)
 
 #############################
 ### sh_inf
 #############################
-
 
 sh_inf_out <- data.frame(sh_inf = out[2,grep("sh_inf", rownames(fit_sum))],
     sex = rep(c("Female", "Male"), 560/2),
@@ -311,8 +335,16 @@ sh_inf_out$age <- as.factor(sh_inf_out$age)
 sh_inf_out <- sh_inf_out[!(sh_inf_out$sex == "Male" & sh_inf_out$age %in% c(8,9,10)),] 
 
 sh_inf_plot <- ggplot(data = sh_inf_out) + geom_point(aes(x=year,y=sh_inf,color=age)) + facet_wrap(~ sex)+ theme_bw()
-ggsave(paste0("figures/sh_inf_iter2_",modelid,".png"), sh_inf_plot,height=4,width=7)
+ggsave(paste0("figures/",modelid,"/sh_inf_iter2_",modelid,".png"), sh_inf_plot,height=4,width=7)
 
+
+pdf(paste0("figures/",modelid,"/psi_surv_plots_iter2_",modelid,".pdf"))
+psi_plot
+sn_sus_plot
+sn_inf_plot
+sh_sus_plot
+sh_inf_plot
+dev.off()
 
 ##########################################################
 #plots from the 250th iteration of the mcmc
@@ -321,14 +353,14 @@ ggsave(paste0("figures/sh_inf_iter2_",modelid,".png"), sh_inf_plot,height=4,widt
 ### mu_obs
 #############################
 
-mu_obs_out <- data.frame(mu_obs_mean = out[250,grep("mu_obs",rownames(fit_sum))],
-study_area = rep(c("east","west"),56),
-sex = rep(c("Female","Female","Male","Male"),112/4),
-year = rep(1:28,each=4)
-)
+# mu_obs_out <- data.frame(mu_obs_mean = out[250,grep("mu_obs",rownames(fit_sum))],
+# study_area = rep(c("east","west"),56),
+# sex = rep(c("Female","Female","Male","Male"),112/4),
+# year = rep(1:28,each=4)
+# )
 
-mu_obs_plot <- ggplot(data = mu_obs_out) + geom_point(aes(x=year,y=mu_obs_mean)) + facet_nested_wrap(~ study_area + sex)+ theme_bw()
-ggsave(paste0("figures/mu_obs_iter250_",modelid,".png"), mu_obs_plot)
+# mu_obs_plot <- ggplot(data = mu_obs_out) + geom_point(aes(x=year,y=mu_obs_mean)) + facet_nested_wrap(~ study_area + sex)+ theme_bw()
+# ggsave(paste0("figures/",modelid,"/mu_obs_iter250_",modelid,".png"), mu_obs_plot)
 
 
 #############################
@@ -346,7 +378,7 @@ psi_out <- psi_out[!(psi_out$sex == "Male" & psi_out$age %in% c(8,9,10)), ]
 
 
 psi_plot <- ggplot(data = psi_out) + geom_point(aes(x=year,y=psi,color=age)) + facet_nested_wrap(~ study_area + sex)+ theme_bw()
-ggsave(paste0("figures/psi_iter250_",modelid,".png"), psi_plot)
+ggsave(paste0("figures/",modelid,"/psi_iter250_",modelid,".png"), psi_plot)
 
 
 #############################
@@ -363,7 +395,7 @@ sn_sus_out <- sn_sus_out[!(sn_sus_out$sex == "Male" & sn_sus_out$age %in% c(8,9,
 
 
 sn_sus_plot <- ggplot(data = sn_sus_out) + geom_point(aes(x=year,y=sn_sus,color=age)) + facet_wrap(~ sex)+ theme_bw()
-ggsave(paste0("figures/sn_sus_iter250_",modelid,".png"), sn_sus_plot,height=4,width=7)
+ggsave(paste0("figures/",modelid,"/sn_sus_iter250_",modelid,".png"), sn_sus_plot,height=4,width=7)
 
 
 #############################
@@ -380,7 +412,7 @@ sn_inf_out <- sn_inf_out[!(sn_inf_out$sex == "Male" & sn_inf_out$age %in% c(8,9,
 
 
 sn_inf_plot <- ggplot(data = sn_inf_out) + geom_point(aes(x=year,y=sn_inf,color=age)) + facet_wrap(~ sex)+ theme_bw()
-ggsave(paste0("figures/sn_inf_iter250_",modelid,".png"), sn_inf_plot,height=4,width=7)
+ggsave(paste0("figures/",modelid,"/sn_inf_iter250_",modelid,".png"), sn_inf_plot,height=4,width=7)
 
 
 #############################
@@ -397,7 +429,7 @@ sh_sus_out <- sh_sus_out[!(sh_sus_out$sex == "Male" & sh_sus_out$age %in% c(8,9,
 
 
 sh_sus_plot <- ggplot(data = sh_sus_out) + geom_point(aes(x=year,y=sh_sus,color=age)) + facet_wrap(~ sex)+ theme_bw()
-ggsave(paste0("figures/sh_sus_iter250_",modelid,".png"), sh_sus_plot,height=4,width=7)
+ggsave(paste0("figures/",modelid,"/sh_sus_iter250_",modelid,".png"), sh_sus_plot,height=4,width=7)
 
 
 #############################
@@ -413,206 +445,233 @@ sh_inf_out$age <- as.factor(sh_inf_out$age)
 sh_inf_out <- sh_inf_out[!(sh_inf_out$sex == "Male" & sh_inf_out$age %in% c(8,9,10)),] 
 
 sh_inf_plot <- ggplot(data = sh_inf_out) + geom_point(aes(x=year,y=sh_inf,color=age)) + facet_wrap(~ sex)+ theme_bw()
-ggsave(paste0("figures/sh_inf_iter250_",modelid,".png"), sh_inf_plot,height=4,width=7)
-
-##########################################################
-##########################################################
-##########################################################
-#############################
-### from parallel run
-#############################
-##########################################################
-##########################################################
-##########################################################
+ggsave(paste0("figures/",modelid,"/sh_inf_iter250_",modelid,".png"), sh_inf_plot,height=4,width=7)
 
 
-out <- mcmc.list(mcmc(mcmcout1[[1]][(nb*ni+1):ni,]),mcmc(mcmcout1[[2]][(nb*ni+1):ni,]),mcmc(mcmcout1[[3]][(nb*ni+1):ni,]))
-fit_sum <- summarize(out)
-
-# load("results/fit_sum.Rdata")
-# load("results/gd.Rdata")
-# load("results/ess.Rdata")
-# parameters
-# gd <- gelman.diag(out)
-# gd
-# save(gd, file = "results/gd.Rdata")
-
-# es <- effectiveSize(out)
-# save(es, file = "results/es.Rdata")
-# gd
-# es
-
-pdf("figures/traceplots_parallel_BE.pdf")
-traceplot(out[, "beta_male_foi"], ylab = "beta_male_foi")
-traceplot(out[, "beta_male_surv"], ylab = "beta_male_surv")
-traceplot(out[, "tau_age_foi_female"], ylab = "tau_age_foi_female")
-traceplot(out[, "tau_age_foi_male"], ylab = "tau_age_foi_male")
-traceplot(out[, "m_age_foi[1]"], ylab = "m_age_foi[1]")
-traceplot(out[, "m_age_foi[2]"], ylab = "m_age_foi[2]")
-traceplot(out[, "m_age_foi[3]"], ylab = "m_age_foi[3]")
-traceplot(out[, "f_age_foi[1]"], ylab = "f_age_foi[1]")
-traceplot(out[, "f_age_foi[2]"], ylab = "f_age_foi[2]")
-traceplot(out[, "f_age_foi[3]"], ylab = "f_age_foi[3]")
-traceplot(out[, "tau_period_foi_female"], ylab = "tau_period_foi_female")
-traceplot(out[, "tau_period_foi_male"], ylab = "tau_period_foi_male")
-traceplot(out[, "space[2]"], ylab = "space[2]")
-traceplot(out[, "beta0_sus_temp"], ylab = "beta0_sus_temp")
-traceplot(out[, "beta0_inf_temp"], ylab = "beta0_inf_temp")
-traceplot(out[, "beta0_survival_sus"], ylab = "beta0_survival_sus")
-traceplot(out[, "beta0_survival_inf"], ylab = "beta0_survival_inf")
-traceplot(out[, "tau_age_survival"], ylab = "tau_age_survival")
-traceplot(out[, "tau_period_survival"], ylab = "tau_period_survival")
-traceplot(out[, "tau_period_precollar"], ylab = "tau_period_precollar")
-traceplot(out[, "beta0_cause"], ylab = "beta0_cause")
-traceplot(out[, "beta_cause_gun"], ylab = "beta_cause_gun")
-traceplot(out[, "beta_cause_ng"], ylab = "beta_cause_ng")
-traceplot(out[, "beta_cause_male"], ylab = "beta_cause_male")
-traceplot(out[, "p_nogun_f"], ylab = "p_nogun_f")
-traceplot(out[, "p_gun_f"], ylab = "p_gun_f")
-traceplot(out[, "p_nogun_m"], ylab = "p_nogun_m")
-traceplot(out[, "p_gun_m"], ylab = "p_gun_m")
-traceplot(out[, "report[10]"], ylab = "report[10]")
-traceplot(out[, "report[25]"], ylab = "report[25]")
-traceplot(out[, "report[27]"], ylab = "report[27]")
-traceplot(out[, "fec[5]"], ylab = "fec[5]")
-traceplot(out[, "fec[10]"], ylab = "fec[10]")
-traceplot(out[, "fec[25]"], ylab = "fec[25]")
-traceplot(out[, "fec[27]"], ylab = "fec[27]")
-traceplot(out[, "fec_prec_eps"], ylab = "fec_prec_eps")
-traceplot(out[, "tau_obs[1]"], ylab = "tau_obs[1]")
-traceplot(out[, "tau_obs[2]"], ylab = "tau_obs[2]")
-# traceplot(out[, "tau_obs[1, 1]"], ylab = "tau_obs[1, 1]")
-# traceplot(out[, "tau_obs[1, 2]"], ylab = "tau_obs[1, 2]")
-# traceplot(out[, "tau_obs[2, 1]"], ylab = "tau_obs[2, 1]")
-# traceplot(out[, "tau_obs[2, 2]"], ylab = "tau_obs[2, 2]")
-traceplot(out[, "tau_pop[1]"], ylab = "tau_pop[1]")
-traceplot(out[, "tau_pop[2]"], ylab = "tau_pop[2]")
-# traceplot(out[, "tau_pop[1, 1]"], ylab = "tau_pop[1, 1]")
-# traceplot(out[, "tau_pop[1, 2]"], ylab = "tau_pop[1, 2]")
-# traceplot(out[, "tau_pop[2, 1]"], ylab = "tau_pop[2, 1]")
-# traceplot(out[, "tau_pop[2, 2]"], ylab = "tau_pop[2, 2]")
+pdf(paste0("figures/",modelid,"/psi_surv_plots_iter250_",modelid,".pdf"))
+psi_plot
+sn_sus_plot
+sn_inf_plot
+sh_sus_plot
+sh_inf_plot
 dev.off()
 
 
-###################################################
-### Burn-in
-####################################################
-
-mcmcout <- mcmcout1[(ni*nb+1):ni,]
-out <- do.call("rbind",mcmcout)
-
-###################################################
-###
-### Plots of mu_obs
-###
-####################################################
-
-mu_obs_indx <- grep("mu_obs",rownames(fit_sum))
-
-mu_obs_out1 <- fit_sum[mu_obs_indx,]
-mu_obs_east <- mu_obs_out1[seq(1,nrow(mu_obs_out1),by=2),]
-mu_obs_west <- mu_obs_out1[seq(2,nrow(mu_obs_out1),by=2),]
-mu_obs_east$study_area <- "East"
-mu_obs_west$study_area <- "West"
-mu_obs_east_f <- mu_obs_east[seq(1,nrow(mu_obs_east),by=2),]
-mu_obs_east_m <- mu_obs_east[seq(2,nrow(mu_obs_east),by=2),]
-mu_obs_west_f <- mu_obs_west[seq(1,nrow(mu_obs_west),by=2),]
-mu_obs_west_m <- mu_obs_west[seq(2,nrow(mu_obs_west),by=2),]
-mu_obs_east_f$sex <- mu_obs_west_f$sex <- "Female"
-mu_obs_east_m$sex <- mu_obs_west_m$sex <- "Male"
-mu_obs_east_f$year <- mu_obs_west_f$year <- 1994:2021
-mu_obs_east_m$year <- mu_obs_west_m$year <- 1994:2021
-mu_obs_out <- rbind(mu_obs_east_f,mu_obs_east_m,mu_obs_west_f,mu_obs_west_m)
-mu_obs_out$sex <- as.factor(mu_obs_out$sex)
-mu_obs_out$study_area <- as.factor(mu_obs_out$study_area)
-
-mu_obs_plot <- ggplot(data = mu_obs_out, aes(x=year,y=mean)) +
-               geom_ribbon(aes(ymin=lower,ymax=upper),alpha=.2,linetype=0)+
-               geom_line() +
-               geom_point() +
-               facet_nested(study_area ~ sex)+
-               theme_bw()
-mu_obs_plot
-ggsave("figures/mu_obs_plot_B.png",mu_obs_plot)
 
 
-
-###################################################
-###
-### Plots of cause-specific mortality probabilities
-###
-####################################################
-
-tau_indx <- grep("tau",rownames(fit_sum))
-tau_out <- data.frame(out[,tau_indx]) %>% pivot_longer(cols=everything())
-
-tau_plot <- ggplot(tau_out, aes(x = value, y = name)) +
-                geom_density_ridges(scale = .8) +
-                ylab("Precision Parameters") +
-                xlab("Posterior Density") +
-                theme_bw()
-tau_plot
-ggsave("figures/tau_posteriors_B.png", tau_plot)
+# ##########################################################
+# ##########################################################
+# ##########################################################
+# #############################
+# ### from parallel run
+# #############################
+# ##########################################################
+# ##########################################################
+# ##########################################################
 
 
+# out <- mcmc.list(mcmc(mcmcout1[[1]][(nb*ni+1):ni,]),mcmc(mcmcout1[[2]][(nb*ni+1):ni,]),mcmc(mcmcout1[[3]][(nb*ni+1):ni,]))
+# fit_sum <- summarize(out)
+
+# # load("results/fit_sum.Rdata")
+# # load("results/gd.Rdata")
+# # load("results/ess.Rdata")
+# # parameters
+# # gd <- gelman.diag(out)
+# # gd
+# # save(gd, file = "results/gd.Rdata")
+
+# # es <- effectiveSize(out)
+# # save(es, file = "results/es.Rdata")
+# # gd
+# # es
+
+# pdf("figures/traceplots_parallel_BE.pdf")
+# traceplot(out[, "beta_male_foi"], ylab = "beta_male_foi")
+# traceplot(out[, "beta_male_surv"], ylab = "beta_male_surv")
+# traceplot(out[, "tau_age_foi_female"], ylab = "tau_age_foi_female")
+# traceplot(out[, "tau_age_foi_male"], ylab = "tau_age_foi_male")
+# traceplot(out[, "m_age_foi[1]"], ylab = "m_age_foi[1]")
+# traceplot(out[, "m_age_foi[2]"], ylab = "m_age_foi[2]")
+# traceplot(out[, "m_age_foi[3]"], ylab = "m_age_foi[3]")
+# traceplot(out[, "f_age_foi[1]"], ylab = "f_age_foi[1]")
+# traceplot(out[, "f_age_foi[2]"], ylab = "f_age_foi[2]")
+# traceplot(out[, "f_age_foi[3]"], ylab = "f_age_foi[3]")
+# traceplot(out[, "tau_period_foi_female"], ylab = "tau_period_foi_female")
+# traceplot(out[, "tau_period_foi_male"], ylab = "tau_period_foi_male")
+# traceplot(out[, "space[2]"], ylab = "space[2]")
+# traceplot(out[, "beta0_sus_temp"], ylab = "beta0_sus_temp")
+# traceplot(out[, "beta0_inf_temp"], ylab = "beta0_inf_temp")
+# traceplot(out[, "beta0_survival_sus"], ylab = "beta0_survival_sus")
+# traceplot(out[, "beta0_survival_inf"], ylab = "beta0_survival_inf")
+# traceplot(out[, "tau_age_survival"], ylab = "tau_age_survival")
+# traceplot(out[, "tau_period_survival"], ylab = "tau_period_survival")
+# traceplot(out[, "tau_period_precollar"], ylab = "tau_period_precollar")
+# traceplot(out[, "beta0_cause"], ylab = "beta0_cause")
+# traceplot(out[, "beta_cause_gun"], ylab = "beta_cause_gun")
+# traceplot(out[, "beta_cause_ng"], ylab = "beta_cause_ng")
+# traceplot(out[, "beta_cause_male"], ylab = "beta_cause_male")
+# traceplot(out[, "p_nogun_f"], ylab = "p_nogun_f")
+# traceplot(out[, "p_gun_f"], ylab = "p_gun_f")
+# traceplot(out[, "p_nogun_m"], ylab = "p_nogun_m")
+# traceplot(out[, "p_gun_m"], ylab = "p_gun_m")
+# traceplot(out[, "report[10]"], ylab = "report[10]")
+# traceplot(out[, "report[25]"], ylab = "report[25]")
+# traceplot(out[, "report[27]"], ylab = "report[27]")
+# traceplot(out[, "fec[5]"], ylab = "fec[5]")
+# traceplot(out[, "fec[10]"], ylab = "fec[10]")
+# traceplot(out[, "fec[25]"], ylab = "fec[25]")
+# traceplot(out[, "fec[27]"], ylab = "fec[27]")
+# traceplot(out[, "fec_prec_eps"], ylab = "fec_prec_eps")
+# traceplot(out[, "tau_obs[1]"], ylab = "tau_obs[1]")
+# traceplot(out[, "tau_obs[2]"], ylab = "tau_obs[2]")
+# # traceplot(out[, "tau_obs[1, 1]"], ylab = "tau_obs[1, 1]")
+# # traceplot(out[, "tau_obs[1, 2]"], ylab = "tau_obs[1, 2]")
+# # traceplot(out[, "tau_obs[2, 1]"], ylab = "tau_obs[2, 1]")
+# # traceplot(out[, "tau_obs[2, 2]"], ylab = "tau_obs[2, 2]")
+# traceplot(out[, "tau_pop[1]"], ylab = "tau_pop[1]")
+# traceplot(out[, "tau_pop[2]"], ylab = "tau_pop[2]")
+# # traceplot(out[, "tau_pop[1, 1]"], ylab = "tau_pop[1, 1]")
+# # traceplot(out[, "tau_pop[1, 2]"], ylab = "tau_pop[1, 2]")
+# # traceplot(out[, "tau_pop[2, 1]"], ylab = "tau_pop[2, 1]")
+# # traceplot(out[, "tau_pop[2, 2]"], ylab = "tau_pop[2, 2]")
+# dev.off()
 
 
-###################################################
-###
-### Plots of precision posteriors
-###
-####################################################
+# ###################################################
+# ### Burn-in
+# ####################################################
 
-tau_indx <- grep("tau",rownames(fit_sum))
-tau_out <- data.frame(out[,tau_indx]) %>% pivot_longer(cols=everything())
+# mcmcout <- mcmcout1[(ni*nb+1):ni,]
+# out <- do.call("rbind",mcmcout)
 
-tau_plot <- ggplot(tau_out, aes(x = value, y = name)) +
-                geom_density_ridges(scale = .8) +
-                ylab("Precision Parameters") +
-                xlab("Posterior Density") +
-                theme_bw()
-tau_plot
-ggsave("figures/tau_posteriors_B.png", tau_plot)
+# ###################################################
+# ###
+# ### Plots of mu_obs
+# ###
+# ####################################################
 
+# mu_obs_indx <- grep("mu_obs",rownames(fit_sum))
 
+# mu_obs_out1 <- fit_sum[mu_obs_indx,]
+# mu_obs_east <- mu_obs_out1[seq(1,nrow(mu_obs_out1),by=2),]
+# mu_obs_west <- mu_obs_out1[seq(2,nrow(mu_obs_out1),by=2),]
+# mu_obs_east$study_area <- "East"
+# mu_obs_west$study_area <- "West"
+# mu_obs_east_f <- mu_obs_east[seq(1,nrow(mu_obs_east),by=2),]
+# mu_obs_east_m <- mu_obs_east[seq(2,nrow(mu_obs_east),by=2),]
+# mu_obs_west_f <- mu_obs_west[seq(1,nrow(mu_obs_west),by=2),]
+# mu_obs_west_m <- mu_obs_west[seq(2,nrow(mu_obs_west),by=2),]
+# mu_obs_east_f$sex <- mu_obs_west_f$sex <- "Female"
+# mu_obs_east_m$sex <- mu_obs_west_m$sex <- "Male"
+# mu_obs_east_f$year <- mu_obs_west_f$year <- 1994:2021
+# mu_obs_east_m$year <- mu_obs_west_m$year <- 1994:2021
+# mu_obs_out <- rbind(mu_obs_east_f,mu_obs_east_m,mu_obs_west_f,mu_obs_west_m)
+# mu_obs_out$sex <- as.factor(mu_obs_out$sex)
+# mu_obs_out$study_area <- as.factor(mu_obs_out$study_area)
 
-
-###################################################
-###
-### Plots of Beta posteriors
-###
-####################################################
-
-beta_indx <- grep("beta",rownames(fit_sum))
-beta_out <- data.frame(out[,beta_indx]) %>% pivot_longer(cols=everything())
-
-beta_plot <- ggplot(beta_out, aes(x = value, y = name)) +
-                geom_density_ridges(scale = .8) +
-                ylab("Coefficients") +
-                xlab("Posterior Density") +
-                theme_bw()
-beta_plot
-ggsave("figures/beta_posteriors_B.png", beta_plot)
-
-
-###################################################
-###
-### Plots of Space posterior for east study area
-###
-####################################################
+# mu_obs_plot <- ggplot(data = mu_obs_out, aes(x=year,y=mean)) +
+#                geom_ribbon(aes(ymin=lower,ymax=upper),alpha=.2,linetype=0)+
+#                geom_line() +
+#                geom_point() +
+#                facet_nested(study_area ~ sex)+
+#                theme_bw()
+# mu_obs_plot
+# ggsave("figures/mu_obs_plot_B.png",mu_obs_plot)
 
 
-space_indx <- grep("space",rownames(fit_sum))[2]
-space_out <- data.frame(out[,space_indx])
-names(space_out)="Space_West"
-space_plot <- ggplot(space_out, aes(x = Space_West)) +
-                geom_density() +
-                ylab("Space[2] West") +
-                xlab("Posterior Density") +
-                theme_bw()
-space_plot
-ggsave("figures/space_posterior_B.png", space_plot)
 
+# ###################################################
+# ###
+# ### Plots of cause-specific mortality probabilities
+# ###
+# ####################################################
+
+# tau_indx <- grep("tau",rownames(fit_sum))
+# tau_out <- data.frame(out[,tau_indx]) %>% pivot_longer(cols=everything())
+
+# tau_plot <- ggplot(tau_out, aes(x = value, y = name)) +
+#                 geom_density_ridges(scale = .8) +
+#                 ylab("Precision Parameters") +
+#                 xlab("Posterior Density") +
+#                 theme_bw()
+# tau_plot
+# ggsave("figures/tau_posteriors_B.png", tau_plot)
+
+
+
+
+# ###################################################
+# ###
+# ### Plots of precision posteriors
+# ###
+# ####################################################
+
+# tau_indx <- grep("tau",rownames(fit_sum))
+# tau_out <- data.frame(out[,tau_indx]) %>% pivot_longer(cols=everything())
+
+# tau_plot <- ggplot(tau_out, aes(x = value, y = name)) +
+#                 geom_density_ridges(scale = .8) +
+#                 ylab("Precision Parameters") +
+#                 xlab("Posterior Density") +
+#                 theme_bw()
+# tau_plot
+# ggsave("figures/tau_posteriors_B.png", tau_plot)
+
+
+
+
+# ###################################################
+# ###
+# ### Plots of Beta posteriors
+# ###
+# ####################################################
+
+# beta_indx <- grep("beta",rownames(fit_sum))
+# beta_out <- data.frame(out[,beta_indx]) %>% pivot_longer(cols=everything())
+
+# beta_plot <- ggplot(beta_out, aes(x = value, y = name)) +
+#                 geom_density_ridges(scale = .8) +
+#                 ylab("Coefficients") +
+#                 xlab("Posterior Density") +
+#                 theme_bw()
+# beta_plot
+# ggsave("figures/beta_posteriors_B.png", beta_plot)
+
+
+# ###################################################
+# ###
+# ### Plots of Space posterior for east study area
+# ###
+# ####################################################
+
+
+# space_indx <- grep("space",rownames(fit_sum))[2]
+# space_out <- data.frame(out[,space_indx])
+# names(space_out)="Space_West"
+# space_plot <- ggplot(space_out, aes(x = Space_West)) +
+#                 geom_density() +
+#                 ylab("Space[2] West") +
+#                 xlab("Posterior Density") +
+#                 theme_bw()
+# space_plot
+# ggsave("figures/space_posterior_B.png", space_plot)
+
+
+
+##############################################################################################################################
+##############################################################################################################################
+##############################################################################################################################
+##############################################################################################################################
+##############################################################################################################################
+##############################################################################################################################
+##############################################################################################################################
+##############################################################################################################################
+##############################################################################################################################
+##############################################################################################################################
+##############################################################################################################################
+##############################################################################################################################
+##############################################################################################################################
 
 
 

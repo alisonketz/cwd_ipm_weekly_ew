@@ -192,7 +192,7 @@ nimConsts <- list(n_year = n_year,
     # indx_mat_pe_surv = indx_mat_pe_surv,
     intvl_step_yr = intvl_step_yr_weekly,
     m_period_foi = rep(0,n_year),
-    f_period_foi = rep(0,n_year),
+    f_period_foi = rep(0,n_year)
     # num_foi_cal = num_foi_cal
     )
 
@@ -202,12 +202,12 @@ nimConsts <- list(n_year = n_year,
 #######################################
 
 initsFun <- function()list(beta_male = rnorm(1, -.5, .01),
-    # beta0_sus_temp = rnorm(1, -8.5, 0.0001),
-    beta0_survival_sus = rnorm(1, -8.5, 0.0001),
-    # sus_mix = 1,
-    # beta0_inf_temp = rnorm(1, -8, 0.0001),
-    beta0_survival_inf = rnorm(1, -8, 0.0001),
-    # inf_mix = 1,
+    beta0_sus_temp = rnorm(1, -8.5, 0.0001),
+    # beta0_survival_sus = rnorm(1, -8.5, 0.0001),
+    sus_mix = 1,
+    beta0_inf_temp = rnorm(1, -8, 0.0001),
+    # beta0_survival_inf = rnorm(1, -8, 0.0001),
+    inf_mix = 1,
     ln_b_age_survival = rnorm(nknots_age) * 10^-4,
     b_period_survival = rnorm(nknots_period) * 10^-4,
     tau_period_survival = runif(1, .1, 1),
@@ -294,7 +294,7 @@ parameters <- c(
               "space_mix",
             #   "beta0_sus_temp",
             #   "sus_mix",
-            #   "beta0_survival_sus",
+              "beta0_survival_sus",
               "tau_age_survival",
               # "age_effect_survival",
               "ln_b_age_survival",
@@ -304,7 +304,7 @@ parameters <- c(
               # "period_effect_survival",
             #   "beta0_inf_temp",
             #   "inf_mix",
-            #   "beta0_survival_inf",
+              "beta0_survival_inf",
               "beta0_cause",
               "beta_cause_gun",
               "beta_cause_ng",
@@ -338,12 +338,16 @@ CnimMCMC <- compileNimble(nimMCMC,
                          project = Rmodel)
 for(i in 1:10){beepr::beep(1)}
 
+reps <- 500
+bin <- 0
+n_chains <- 1
+
 set.seed(1001)
 starttime <- Sys.time()
 mcmcout <- runMCMC(CnimMCMC,
-                  niter = 300,
-                  nburnin = 0,
-                  nchains = 1,
+                  niter = reps,
+                  nburnin = bin,
+                  nchains = n_chains,
                   inits = initsFun,
                   samplesAsCodaMCMC = TRUE,
                   summary = TRUE
@@ -354,11 +358,11 @@ runtime <- difftime(Sys.time(),
 runtime
 for (i in 1:10) {beepr::beep(1)}
 
-mcmcout$summary
+# mcmcout$summary
 # end_Rmodel
 # endtime_rmodel_compile
 # endtime_mcmc
-runtime
+# runtime
 
 # sink("runtime_allsteps.txt")
 # cat("Rmodel:\n")
