@@ -13,7 +13,7 @@
 fit_sum <- mcmcout$summary
 out <- mcmcout$samples
 
-modelid <- "N"
+modelid <- "O"
 
 #############################
 ### Saving Model Description
@@ -24,12 +24,14 @@ cat("niter:  ",reps,"\n")
 cat("burnin:  ",bin,"\n")
 cat("n_chains:  ",n_chains,"\n")
 cat("Model Variation:\n")
-cat("allowing beta0_survival_inf and beta0_Survival_sus to be estimated with parameter expansion")
+cat("allowing beta0_survival_inf and beta0_Survival_sus to be estimated with parameter expansion \n")
 cat("Removed all aah likelihoods\n")
 cat("Removed population model\n")
 cat("removed fecundity model \n")
 cat("includes cause-specific model \n")
 cat("set all FOI period effects to 0 \n\n")
+cat("set all survival period effects to 0 \n\n")
+cat("set all survival age effects to 0 \n\n")
 cat("fixed bug of period_lookup_foi # of weeks in a year\n")
 cat("runtime:  ",runtime,"\n")
 print(fit_sum)
