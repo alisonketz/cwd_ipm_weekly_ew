@@ -75,16 +75,17 @@ calc_surv_aah <- nimble::nimbleFunction(
     ############################################
     for (t in 1:n_year) {
         for (a in 1:n_agef) {
-            s_aah[1, a, t] <- exp(-sum(UCH[1,
+            s_aah[1, a, t] <- exp(-sum(diag(UCH[1,
                                yr_start[a]:yr_end[a],
-                               yr_start[t]:yr_end[t]]))
+                               yr_start[t]:yr_end[t]])))
         }
         for(a in 1:n_agem) {
-            s_aah[2, a, t] <- exp(-sum(UCH[2,
+            s_aah[2, a, t] <- exp(-sum(diag(UCH[2,
                                yr_start[a]:yr_end[a],
-                               yr_start[t]:yr_end[t]]))
+                               yr_start[t]:yr_end[t]])))
         }
     }
+
   returnType(double(3))
   return(s_aah[1:2, 1:n_agef, 1:n_year])
 })
@@ -126,8 +127,8 @@ assign("calc_surv_aah", calc_surv_aah, envir = .GlobalEnv)
 #         beta_male = beta_male,
 #         age_effect = age_effect_survival_test,
 #         period_effect = period_effect_survival_test[(nT_period_prestudy_ext + 1):(nT_period_overall_ext)],
-#         yr_end = d_fit_season$yr_end,
-#         yr_start = d_fit_season$yr_start,
+        # yr_end = d_fit_season$yr_end,
+        # yr_start = d_fit_season$yr_start,
 #         n_year = n_year,
 #         n_agef = n_agef,
 #         n_agem = n_agem)
@@ -140,7 +141,25 @@ assign("calc_surv_aah", calc_surv_aah, envir = .GlobalEnv)
 # plot(1:28,sn_inf[2,3,])
 # sn_inf[2,3,]
 
-
+starttime <- Sys.time()
+sn_sus <- calc_surv_aah(
+	nT_age = nT_age_surv,
+    nT_period_overall = nT_period_overall,
+    nT_age_short_f = nT_age_short_f,
+    nT_age_short_m = nT_age_short_m,
+    nT_age_surv_aah_f = nT_age_surv_aah_f,
+    nT_age_surv_aah_m = nT_age_surv_aah_m,
+    beta0 = -10.5,
+    beta_male = .5,
+    age_effect = rep(0,nT_age_surv),        # length = 962
+    period_effect = rep(0,length((nT_period_prestudy_ext + 1):(nT_period_overall_ext))),
+	yr_start = d_fit_season$yr_start,
+    yr_end = d_fit_season$yr_end,
+    n_year = n_year,
+    n_agef = n_agef,
+    n_agem = n_agem)
+sn_sus[1,2,]
+(endtime1 <- Sys.time() - starttime)
 
 #######################################################################
 ###
@@ -276,14 +295,14 @@ calc_surv_harvest <- nimble::nimbleFunction(
 	############################################
     for (t in 1:n_year) {
         for (a in 1:n_agef) {
-            s_hunt[1, a, t] <- exp(-sum(UCH_hunt[1,
+            s_hunt[1, a, t] <- exp(-sum(diag(UCH_hunt[1,
                                 yr_start[a]:yr_end[a],
-                                yr_start[t]:yr_end[t]]))
+                                yr_start[t]:yr_end[t]])))
         }
         for(a in 1:n_agem) {
-            s_hunt[2, a, t] <- exp(-sum(UCH_hunt[2,
+            s_hunt[2, a, t] <- exp(-sum(diag(UCH_hunt[2,
                                 yr_start[a]:yr_end[a],
-                                yr_start[t]:yr_end[t]]))
+                                yr_start[t]:yr_end[t]])))
         }
     }
   returnType(double(3))
@@ -393,11 +412,11 @@ calc_infect_prob <- nimbleFunction(
         for (t in 1:n_year) {
             for (a in 1:n_agef) {
                 p_inf[k, 1, a, t] <- 
-                    1 - exp(-sum(gam[k, 1, yr_start[a]:yr_end[a], yr_start[t]:yr_end[t]]))
+                    1 - exp(-sum(diag(gam[k, 1, yr_start[a]:yr_end[a], yr_start[t]:yr_end[t]])))
             }
             for (a in 1:n_agem) {
                 p_inf[k, 2, a, t] <- 
-                    1 - exp(-sum(gam[k, 2, yr_start[a]:yr_end[a], yr_start[t]:yr_end[t]]))
+                    1 - exp(-sum(diag(gam[k, 2, yr_start[a]:yr_end[a], yr_start[t]:yr_end[t]])))
             }
         }
     }
@@ -513,11 +532,11 @@ calc_infect_prob_hunt <- nimbleFunction(
         for (t in 1:n_year) {
             for (a in 1:n_agef) {
                 p_inf[k, 1, a, t] <- 
-                    (1 - exp(-sum(gam[k, 1, yr_start[a]:ng_end[a], yr_start[t]:ng_end[t]]))) * fudge_factor
+                    (1 - exp(-sum(diag(gam[k, 1, yr_start[a]:ng_end[a], yr_start[t]:ng_end[t]])))) * fudge_factor
             }
             for (a in 1:n_agem) {
                 p_inf[k, 2, a, t] <- 
-                    (1 - exp(-sum(gam[k, 2, yr_start[a]:ng_end[a], yr_start[t]:ng_end[t]]))) * fudge_factor
+                    (1 - exp(-sum(diag(gam[k, 2, yr_start[a]:ng_end[a], yr_start[t]:ng_end[t]])))) * fudge_factor
             }
         }
     }

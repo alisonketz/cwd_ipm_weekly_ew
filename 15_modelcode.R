@@ -123,7 +123,7 @@ modelcode <- nimbleCode({
   ####################################
   ### Susceptibles survival intercept
   ####################################
-  
+
   # beta0_survival_sus ~ dnorm(0, .1)
   # beta0_survival_sus ~ T(dnorm(-6, .1),,0)
   beta0_sus_temp ~ dnorm(0, .1)
