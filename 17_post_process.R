@@ -13,7 +13,7 @@
 fit_sum <- mcmcout$summary
 out <- mcmcout$samples
 
-modelid <- "O"
+modelid <- "P"
 
 #############################
 ### Saving Model Description
@@ -32,7 +32,7 @@ cat("includes cause-specific model \n")
 cat("set all FOI period effects to 0 \n\n")
 cat("set all survival period effects to 0 \n\n")
 cat("set all survival age effects to 0 \n\n")
-cat("fixed bug of period_lookup_foi # of weeks in a year\n")
+cat("fixed bug of survival/infection prob calculations with diag \n")
 cat("runtime:  ",runtime,"\n")
 print(fit_sum)
 sink()
@@ -234,7 +234,7 @@ sh_inf_plot <- ggplot(data = sh_inf_out) + geom_point(aes(x=year,y=sh_inf,color=
 ggsave(paste0("figures/",modelid,"/sh_inf_mn_",modelid,".png"), sh_inf_plot,height=4,width=7)
 
 
-pdf(paste0("figures/",modelid,"/psi_surv_plots_iter250_",modelid,".pdf"))
+pdf(paste0("figures/",modelid,"/psi_surv_plots_mn_",modelid,".pdf"))
 psi_plot
 sn_sus_plot
 sn_inf_plot
@@ -244,219 +244,219 @@ dev.off()
 
 
 
-##########################################################
-#plots from the second iteration of the mcmc
-##########################################################
-#############################
-### mu_obs
-#############################
+# ##########################################################
+# #plots from the second iteration of the mcmc
+# ##########################################################
+# #############################
+# ### mu_obs
+# #############################
 
-# mu_obs_out <- data.frame(mu_obs_mean = out[2,grep("mu_obs",rownames(fit_sum))],
-# study_area = rep(c("east", "west"),56),
-# sex = rep(c("Female", "Female", "Male", "Male"),112/4),
-# year = rep(1:28, each = 4)
+# # mu_obs_out <- data.frame(mu_obs_mean = out[2,grep("mu_obs",rownames(fit_sum))],
+# # study_area = rep(c("east", "west"),56),
+# # sex = rep(c("Female", "Female", "Male", "Male"),112/4),
+# # year = rep(1:28, each = 4)
+# # )
+
+# # mu_obs_plot <- ggplot(data = mu_obs_out) + geom_point(aes(x=year,y=mu_obs_mean)) + facet_nested_wrap(~ study_area + sex)+ theme_bw()
+# # ggsave(paste0("figures/",modelid,"/mu_obs_iter2_",modelid,".png"), mu_obs_plot)
+
+
+# #############################
+# ### psi
+# #############################
+
+# psi_out <- data.frame(psi = out[2,grep("psi", rownames(fit_sum))],
+#     study_area = rep(c("east", "west"), 1120/2),
+#     sex = rep(c("Female", "Female", "Male", "Male"), 1120/4),
+#     age = rep(rep(1:10, each = 4), 28),
+#     year = rep(1:28, each = 40)
 # )
-
-# mu_obs_plot <- ggplot(data = mu_obs_out) + geom_point(aes(x=year,y=mu_obs_mean)) + facet_nested_wrap(~ study_area + sex)+ theme_bw()
-# ggsave(paste0("figures/",modelid,"/mu_obs_iter2_",modelid,".png"), mu_obs_plot)
-
-
-#############################
-### psi
-#############################
-
-psi_out <- data.frame(psi = out[2,grep("psi", rownames(fit_sum))],
-    study_area = rep(c("east", "west"), 1120/2),
-    sex = rep(c("Female", "Female", "Male", "Male"), 1120/4),
-    age = rep(rep(1:10, each = 4), 28),
-    year = rep(1:28, each = 40)
-)
-psi_out$age <- as.factor(psi_out$age)
-psi_out <- psi_out[!(psi_out$sex == "Male" & psi_out$age %in% c(8,9,10)), ] 
+# psi_out$age <- as.factor(psi_out$age)
+# psi_out <- psi_out[!(psi_out$sex == "Male" & psi_out$age %in% c(8,9,10)), ] 
 
 
-psi_plot <- ggplot(data = psi_out) + geom_point(aes(x=year,y=psi,color=age)) + facet_nested_wrap(~ study_area + sex)+ theme_bw()
-ggsave(paste0("figures/",modelid,"/psi_iter2_",modelid,".png"), psi_plot)
+# psi_plot <- ggplot(data = psi_out) + geom_point(aes(x=year,y=psi,color=age)) + facet_nested_wrap(~ study_area + sex)+ theme_bw()
+# ggsave(paste0("figures/",modelid,"/psi_iter2_",modelid,".png"), psi_plot)
 
-#############################
-### sn_sus
-#############################
+# #############################
+# ### sn_sus
+# #############################
 
-sn_sus_out <- data.frame(sn_sus = out[2,grep("sn_sus", rownames(fit_sum))],
-    sex = rep(c("Female", "Male"), 560/2),
-    age = rep(rep(1:10, each = 2), 28),
-    year = rep(1:28, each = 20)
-)
-sn_sus_out$age <- as.factor(sn_sus_out$age)
-sn_sus_out <- sn_sus_out[!(sn_sus_out$sex == "Male" & sn_sus_out$age %in% c(8,9,10)),] 
-
-sn_sus_plot <- ggplot(data = sn_sus_out) + geom_point(aes(x=year,y=sn_sus,color=age)) + facet_wrap(~ sex)+ theme_bw()
-ggsave(paste0("figures/",modelid,"/sn_sus_iter2_",modelid,".png"), sn_sus_plot,height=4,width=7)
-
-#############################
-### sn_inf
-#############################
-
-sn_inf_out <- data.frame(sn_inf = out[2,grep("sn_inf", rownames(fit_sum))],
-    sex = rep(c("Female", "Male"), 560/2),
-    age = rep(rep(1:10, each = 2), 28),
-    year = rep(1:28, each = 20)
-)
-sn_inf_out$age <- as.factor(sn_inf_out$age)
-sn_inf_out <- sn_inf_out[!(sn_inf_out$sex == "Male" & sn_inf_out$age %in% c(8,9,10)),] 
-
-
-sn_inf_plot <- ggplot(data = sn_inf_out) + geom_point(aes(x=year,y=sn_inf,color=age)) + facet_wrap(~ sex)+ theme_bw()
-ggsave(paste0("figures/",modelid,"/sn_inf_iter2_",modelid,".png"), sn_inf_plot,height=4,width=7)
-
-#############################
-### sh_sus
-#############################
-
-sh_sus_out <- data.frame(sh_sus = out[2,grep("sh_sus", rownames(fit_sum))],
-    sex = rep(c("Female", "Male"), 560/2),
-    age = rep(rep(1:10, each = 2), 28),
-    year = rep(1:28, each = 20)
-)
-sh_sus_out$age <- as.factor(sh_sus_out$age)
-sh_sus_out <- sh_sus_out[!(sh_sus_out$sex == "Male" & sh_sus_out$age %in% c(8,9,10)),] 
-
-sh_sus_plot <- ggplot(data = sh_sus_out) + geom_point(aes(x=year,y=sh_sus,color=age)) + facet_wrap(~ sex)+ theme_bw()
-ggsave(paste0("figures/",modelid,"/sh_sus_iter2_",modelid,".png"), sh_sus_plot,height=4,width=7)
-
-#############################
-### sh_inf
-#############################
-
-sh_inf_out <- data.frame(sh_inf = out[2,grep("sh_inf", rownames(fit_sum))],
-    sex = rep(c("Female", "Male"), 560/2),
-    age = rep(rep(1:10, each = 2), 28),
-    year = rep(1:28, each = 20)
-)
-sh_inf_out$age <- as.factor(sh_inf_out$age)
-sh_inf_out <- sh_inf_out[!(sh_inf_out$sex == "Male" & sh_inf_out$age %in% c(8,9,10)),] 
-
-sh_inf_plot <- ggplot(data = sh_inf_out) + geom_point(aes(x=year,y=sh_inf,color=age)) + facet_wrap(~ sex)+ theme_bw()
-ggsave(paste0("figures/",modelid,"/sh_inf_iter2_",modelid,".png"), sh_inf_plot,height=4,width=7)
-
-
-pdf(paste0("figures/",modelid,"/psi_surv_plots_iter2_",modelid,".pdf"))
-psi_plot
-sn_sus_plot
-sn_inf_plot
-sh_sus_plot
-sh_inf_plot
-dev.off()
-
-##########################################################
-#plots from the 250th iteration of the mcmc
-##########################################################
-#############################
-### mu_obs
-#############################
-
-# mu_obs_out <- data.frame(mu_obs_mean = out[250,grep("mu_obs",rownames(fit_sum))],
-# study_area = rep(c("east","west"),56),
-# sex = rep(c("Female","Female","Male","Male"),112/4),
-# year = rep(1:28,each=4)
+# sn_sus_out <- data.frame(sn_sus = out[2,grep("sn_sus", rownames(fit_sum))],
+#     sex = rep(c("Female", "Male"), 560/2),
+#     age = rep(rep(1:10, each = 2), 28),
+#     year = rep(1:28, each = 20)
 # )
+# sn_sus_out$age <- as.factor(sn_sus_out$age)
+# sn_sus_out <- sn_sus_out[!(sn_sus_out$sex == "Male" & sn_sus_out$age %in% c(8,9,10)),] 
 
-# mu_obs_plot <- ggplot(data = mu_obs_out) + geom_point(aes(x=year,y=mu_obs_mean)) + facet_nested_wrap(~ study_area + sex)+ theme_bw()
-# ggsave(paste0("figures/",modelid,"/mu_obs_iter250_",modelid,".png"), mu_obs_plot)
+# sn_sus_plot <- ggplot(data = sn_sus_out) + geom_point(aes(x=year,y=sn_sus,color=age)) + facet_wrap(~ sex)+ theme_bw()
+# ggsave(paste0("figures/",modelid,"/sn_sus_iter2_",modelid,".png"), sn_sus_plot,height=4,width=7)
 
+# #############################
+# ### sn_inf
+# #############################
 
-#############################
-### psi
-#############################
-
-psi_out <- data.frame(psi = out[250,grep("psi", rownames(fit_sum))],
-    study_area = rep(c("east", "west"), 1120/2),
-    sex = rep(c("Female", "Female", "Male", "Male"), 1120/4),
-    age = rep(rep(1:10, each = 4), 28),
-    year = rep(1:28, each = 40)
-)
-psi_out$age <- as.factor(psi_out$age)
-psi_out <- psi_out[!(psi_out$sex == "Male" & psi_out$age %in% c(8,9,10)), ] 
-
-
-psi_plot <- ggplot(data = psi_out) + geom_point(aes(x=year,y=psi,color=age)) + facet_nested_wrap(~ study_area + sex)+ theme_bw()
-ggsave(paste0("figures/",modelid,"/psi_iter250_",modelid,".png"), psi_plot)
+# sn_inf_out <- data.frame(sn_inf = out[2,grep("sn_inf", rownames(fit_sum))],
+#     sex = rep(c("Female", "Male"), 560/2),
+#     age = rep(rep(1:10, each = 2), 28),
+#     year = rep(1:28, each = 20)
+# )
+# sn_inf_out$age <- as.factor(sn_inf_out$age)
+# sn_inf_out <- sn_inf_out[!(sn_inf_out$sex == "Male" & sn_inf_out$age %in% c(8,9,10)),] 
 
 
-#############################
-### sn_sus
-#############################
+# sn_inf_plot <- ggplot(data = sn_inf_out) + geom_point(aes(x=year,y=sn_inf,color=age)) + facet_wrap(~ sex)+ theme_bw()
+# ggsave(paste0("figures/",modelid,"/sn_inf_iter2_",modelid,".png"), sn_inf_plot,height=4,width=7)
 
-sn_sus_out <- data.frame(sn_sus = out[250,grep("sn_sus", rownames(fit_sum))],
-    sex = rep(c("Female", "Male"), 560/2),
-    age = rep(rep(1:10, each = 2), 28),
-    year = rep(1:28, each = 20)
-)
-sn_sus_out$age <- as.factor(sn_sus_out$age)
-sn_sus_out <- sn_sus_out[!(sn_sus_out$sex == "Male" & sn_sus_out$age %in% c(8,9,10)),] 
+# #############################
+# ### sh_sus
+# #############################
 
+# sh_sus_out <- data.frame(sh_sus = out[2,grep("sh_sus", rownames(fit_sum))],
+#     sex = rep(c("Female", "Male"), 560/2),
+#     age = rep(rep(1:10, each = 2), 28),
+#     year = rep(1:28, each = 20)
+# )
+# sh_sus_out$age <- as.factor(sh_sus_out$age)
+# sh_sus_out <- sh_sus_out[!(sh_sus_out$sex == "Male" & sh_sus_out$age %in% c(8,9,10)),] 
 
-sn_sus_plot <- ggplot(data = sn_sus_out) + geom_point(aes(x=year,y=sn_sus,color=age)) + facet_wrap(~ sex)+ theme_bw()
-ggsave(paste0("figures/",modelid,"/sn_sus_iter250_",modelid,".png"), sn_sus_plot,height=4,width=7)
+# sh_sus_plot <- ggplot(data = sh_sus_out) + geom_point(aes(x=year,y=sh_sus,color=age)) + facet_wrap(~ sex)+ theme_bw()
+# ggsave(paste0("figures/",modelid,"/sh_sus_iter2_",modelid,".png"), sh_sus_plot,height=4,width=7)
 
+# #############################
+# ### sh_inf
+# #############################
 
-#############################
-### sn_inf
-#############################
+# sh_inf_out <- data.frame(sh_inf = out[2,grep("sh_inf", rownames(fit_sum))],
+#     sex = rep(c("Female", "Male"), 560/2),
+#     age = rep(rep(1:10, each = 2), 28),
+#     year = rep(1:28, each = 20)
+# )
+# sh_inf_out$age <- as.factor(sh_inf_out$age)
+# sh_inf_out <- sh_inf_out[!(sh_inf_out$sex == "Male" & sh_inf_out$age %in% c(8,9,10)),] 
 
-sn_inf_out <- data.frame(sn_inf = out[250,grep("sn_inf", rownames(fit_sum))],
-    sex = rep(c("Female", "Male"), 560/2),
-    age = rep(rep(1:10, each = 2), 28),
-    year = rep(1:28, each = 20)
-)
-sn_inf_out$age <- as.factor(sn_inf_out$age)
-sn_inf_out <- sn_inf_out[!(sn_inf_out$sex == "Male" & sn_inf_out$age %in% c(8,9,10)),] 
-
-
-sn_inf_plot <- ggplot(data = sn_inf_out) + geom_point(aes(x=year,y=sn_inf,color=age)) + facet_wrap(~ sex)+ theme_bw()
-ggsave(paste0("figures/",modelid,"/sn_inf_iter250_",modelid,".png"), sn_inf_plot,height=4,width=7)
-
-
-#############################
-### sh_sus
-#############################
-
-sh_sus_out <- data.frame(sh_sus = out[250,grep("sh_sus", rownames(fit_sum))],
-    sex = rep(c("Female", "Male"), 560/2),
-    age = rep(rep(1:10, each = 2), 28),
-    year = rep(1:28, each = 20)
-)
-sh_sus_out$age <- as.factor(sh_sus_out$age)
-sh_sus_out <- sh_sus_out[!(sh_sus_out$sex == "Male" & sh_sus_out$age %in% c(8,9,10)),] 
+# sh_inf_plot <- ggplot(data = sh_inf_out) + geom_point(aes(x=year,y=sh_inf,color=age)) + facet_wrap(~ sex)+ theme_bw()
+# ggsave(paste0("figures/",modelid,"/sh_inf_iter2_",modelid,".png"), sh_inf_plot,height=4,width=7)
 
 
-sh_sus_plot <- ggplot(data = sh_sus_out) + geom_point(aes(x=year,y=sh_sus,color=age)) + facet_wrap(~ sex)+ theme_bw()
-ggsave(paste0("figures/",modelid,"/sh_sus_iter250_",modelid,".png"), sh_sus_plot,height=4,width=7)
+# pdf(paste0("figures/",modelid,"/psi_surv_plots_iter2_",modelid,".pdf"))
+# psi_plot
+# sn_sus_plot
+# sn_inf_plot
+# sh_sus_plot
+# sh_inf_plot
+# dev.off()
+
+# ##########################################################
+# #plots from the 250th iteration of the mcmc
+# ##########################################################
+# #############################
+# ### mu_obs
+# #############################
+
+# # mu_obs_out <- data.frame(mu_obs_mean = out[250,grep("mu_obs",rownames(fit_sum))],
+# # study_area = rep(c("east","west"),56),
+# # sex = rep(c("Female","Female","Male","Male"),112/4),
+# # year = rep(1:28,each=4)
+# # )
+
+# # mu_obs_plot <- ggplot(data = mu_obs_out) + geom_point(aes(x=year,y=mu_obs_mean)) + facet_nested_wrap(~ study_area + sex)+ theme_bw()
+# # ggsave(paste0("figures/",modelid,"/mu_obs_iter250_",modelid,".png"), mu_obs_plot)
 
 
-#############################
-### sh_inf
-#############################
+# #############################
+# ### psi
+# #############################
 
-sh_inf_out <- data.frame(sh_inf = out[250,grep("sh_inf", rownames(fit_sum))],
-    sex = rep(c("Female", "Male"), 560/2),
-    age = rep(rep(1:10, each = 2), 28),
-    year = rep(1:28, each = 20)
-)
-sh_inf_out$age <- as.factor(sh_inf_out$age)
-sh_inf_out <- sh_inf_out[!(sh_inf_out$sex == "Male" & sh_inf_out$age %in% c(8,9,10)),] 
-
-sh_inf_plot <- ggplot(data = sh_inf_out) + geom_point(aes(x=year,y=sh_inf,color=age)) + facet_wrap(~ sex)+ theme_bw()
-ggsave(paste0("figures/",modelid,"/sh_inf_iter250_",modelid,".png"), sh_inf_plot,height=4,width=7)
+# psi_out <- data.frame(psi = out[250,grep("psi", rownames(fit_sum))],
+#     study_area = rep(c("east", "west"), 1120/2),
+#     sex = rep(c("Female", "Female", "Male", "Male"), 1120/4),
+#     age = rep(rep(1:10, each = 4), 28),
+#     year = rep(1:28, each = 40)
+# )
+# psi_out$age <- as.factor(psi_out$age)
+# psi_out <- psi_out[!(psi_out$sex == "Male" & psi_out$age %in% c(8,9,10)), ] 
 
 
-pdf(paste0("figures/",modelid,"/psi_surv_plots_iter250_",modelid,".pdf"))
-psi_plot
-sn_sus_plot
-sn_inf_plot
-sh_sus_plot
-sh_inf_plot
-dev.off()
+# psi_plot <- ggplot(data = psi_out) + geom_point(aes(x=year,y=psi,color=age)) + facet_nested_wrap(~ study_area + sex)+ theme_bw()
+# ggsave(paste0("figures/",modelid,"/psi_iter250_",modelid,".png"), psi_plot)
+
+
+# #############################
+# ### sn_sus
+# #############################
+
+# sn_sus_out <- data.frame(sn_sus = out[250,grep("sn_sus", rownames(fit_sum))],
+#     sex = rep(c("Female", "Male"), 560/2),
+#     age = rep(rep(1:10, each = 2), 28),
+#     year = rep(1:28, each = 20)
+# )
+# sn_sus_out$age <- as.factor(sn_sus_out$age)
+# sn_sus_out <- sn_sus_out[!(sn_sus_out$sex == "Male" & sn_sus_out$age %in% c(8,9,10)),] 
+
+
+# sn_sus_plot <- ggplot(data = sn_sus_out) + geom_point(aes(x=year,y=sn_sus,color=age)) + facet_wrap(~ sex)+ theme_bw()
+# ggsave(paste0("figures/",modelid,"/sn_sus_iter250_",modelid,".png"), sn_sus_plot,height=4,width=7)
+
+
+# #############################
+# ### sn_inf
+# #############################
+
+# sn_inf_out <- data.frame(sn_inf = out[250,grep("sn_inf", rownames(fit_sum))],
+#     sex = rep(c("Female", "Male"), 560/2),
+#     age = rep(rep(1:10, each = 2), 28),
+#     year = rep(1:28, each = 20)
+# )
+# sn_inf_out$age <- as.factor(sn_inf_out$age)
+# sn_inf_out <- sn_inf_out[!(sn_inf_out$sex == "Male" & sn_inf_out$age %in% c(8,9,10)),] 
+
+
+# sn_inf_plot <- ggplot(data = sn_inf_out) + geom_point(aes(x=year,y=sn_inf,color=age)) + facet_wrap(~ sex)+ theme_bw()
+# ggsave(paste0("figures/",modelid,"/sn_inf_iter250_",modelid,".png"), sn_inf_plot,height=4,width=7)
+
+
+# #############################
+# ### sh_sus
+# #############################
+
+# sh_sus_out <- data.frame(sh_sus = out[250,grep("sh_sus", rownames(fit_sum))],
+#     sex = rep(c("Female", "Male"), 560/2),
+#     age = rep(rep(1:10, each = 2), 28),
+#     year = rep(1:28, each = 20)
+# )
+# sh_sus_out$age <- as.factor(sh_sus_out$age)
+# sh_sus_out <- sh_sus_out[!(sh_sus_out$sex == "Male" & sh_sus_out$age %in% c(8,9,10)),] 
+
+
+# sh_sus_plot <- ggplot(data = sh_sus_out) + geom_point(aes(x=year,y=sh_sus,color=age)) + facet_wrap(~ sex)+ theme_bw()
+# ggsave(paste0("figures/",modelid,"/sh_sus_iter250_",modelid,".png"), sh_sus_plot,height=4,width=7)
+
+
+# #############################
+# ### sh_inf
+# #############################
+
+# sh_inf_out <- data.frame(sh_inf = out[250,grep("sh_inf", rownames(fit_sum))],
+#     sex = rep(c("Female", "Male"), 560/2),
+#     age = rep(rep(1:10, each = 2), 28),
+#     year = rep(1:28, each = 20)
+# )
+# sh_inf_out$age <- as.factor(sh_inf_out$age)
+# sh_inf_out <- sh_inf_out[!(sh_inf_out$sex == "Male" & sh_inf_out$age %in% c(8,9,10)),] 
+
+# sh_inf_plot <- ggplot(data = sh_inf_out) + geom_point(aes(x=year,y=sh_inf,color=age)) + facet_wrap(~ sex)+ theme_bw()
+# ggsave(paste0("figures/",modelid,"/sh_inf_iter250_",modelid,".png"), sh_inf_plot,height=4,width=7)
+
+
+# pdf(paste0("figures/",modelid,"/psi_surv_plots_iter250_",modelid,".pdf"))
+# psi_plot
+# sn_sus_plot
+# sn_inf_plot
+# sh_sus_plot
+# sh_inf_plot
+# dev.off()
 
 
 

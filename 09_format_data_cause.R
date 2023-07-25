@@ -195,9 +195,11 @@ save(d_fit_season, file = paste0(filepath, "d_fit_season.Rdata"))
 
 d_fit_season$year <- 1994:2021
 
+##########################################################################
 ###
 ### Preliminaries gun season
 ###
+##########################################################################
 
 Z_cause_ng <- rep(0,nT_period_collar)
 Z_cause_gun <- rep(0,nT_period_collar)

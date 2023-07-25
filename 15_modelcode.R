@@ -929,7 +929,7 @@ modelcode <- nimbleCode({
       nT_age_short_m = nT_age_short_m,
       nT_age_surv_aah_f = nT_age_surv_aah_f,
       nT_age_surv_aah_m = nT_age_surv_aah_m,
-      beta0 = beta0_survival_sus,
+      beta0 = beta0_survival_inf,
       beta_male = beta_male,
       age_effect = age_effect_survival[1:nT_age_surv],
       period_effect = period_effect_survival[(nT_period_prestudy_ext + 1):
