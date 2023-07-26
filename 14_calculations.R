@@ -114,7 +114,7 @@ assign("calc_surv_aah", calc_surv_aah, envir = .GlobalEnv)
 #     nT_age_short_m = nT_age_short_m,
 #     nT_age_surv_aah_f = nT_age_surv_aah_f,
 #     nT_age_surv_aah_m = nT_age_surv_aah_m,
-#     beta0 = beta0_survival_sus-2,
+#     beta0 = beta0_survival_sus+2.3,
 #     beta_male = beta_male,
 #     age_effect = age_effect_survival_test,        # length = 962
 #     period_effect = period_effect_survival_test[(nT_period_prestudy_ext + 1):(nT_period_overall_ext)], 
@@ -124,7 +124,7 @@ assign("calc_surv_aah", calc_surv_aah, envir = .GlobalEnv)
 #     n_agef = n_agef,
 #     n_agem = n_agem)
 # (endtime1 <- Sys.time() - starttime)
-# sn_sus[1,,]
+# sn_sus[1,3,]
 # sn_sus[2,,]
 
 # starttime <- Sys.time()
@@ -135,12 +135,12 @@ assign("calc_surv_aah", calc_surv_aah, envir = .GlobalEnv)
 #         nT_age_short_m = nT_age_short_m,
 #         nT_age_surv_aah_f = nT_age_surv_aah_f,
 #         nT_age_surv_aah_m = nT_age_surv_aah_m,
-#         beta0 = beta0_survival_inf-2,
+#         beta0 = beta0_survival_inf + 3,
 #         beta_male = beta_male,
 #         age_effect = age_effect_survival_test,
 #         period_effect = period_effect_survival_test[(nT_period_prestudy_ext + 1):(nT_period_overall_ext)],
-        # yr_end = d_fit_season$yr_end,
-        # yr_start = d_fit_season$yr_start,
+#         yr_end = d_fit_season$yr_end,
+#         yr_start = d_fit_season$yr_start,
 #         n_year = n_year,
 #         n_agef = n_agef,
 #         n_agem = n_agem)

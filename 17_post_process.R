@@ -13,7 +13,7 @@
 fit_sum <- mcmcout$summary
 out <- mcmcout$samples
 
-modelid <- "P"
+modelid <- "R"
 
 #############################
 ### Saving Model Description
@@ -32,8 +32,9 @@ cat("includes cause-specific model \n")
 cat("set all FOI period effects to 0 \n\n")
 cat("set all survival period effects to 0 \n\n")
 cat("set all survival age effects to 0 \n\n")
-cat("fixed bug of survival/infection prob calculations with diag \n")
+cat("fixed bug of survival/infection prob calculations with diag with +length solution \n")
 cat("runtime:  ",runtime,"\n")
+cat("Summary Stats:  \n")
 print(fit_sum)
 sink()
 #############################
