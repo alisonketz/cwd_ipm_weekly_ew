@@ -215,10 +215,12 @@ initsFun <- function()list(beta_male = rnorm(1, -.5, .01),
     # b_period_survival = rnorm(nknots_period) * 10^-4,
     # tau_period_survival = runif(1, .1, 1),
     # tau_age_survival = runif(1, .1, .4),
-    tau_age_foi_male = runif(1, 1.5, 1.7),
-    tau_age_foi_female = runif(1, 2.7, 4.2),
+    # tau_age_foi_male = runif(1, 1.5, 1.7),
+    # tau_age_foi_female = runif(1, 2.7, 4.2),
     # tau_period_foi_male = runif(1, 4.2, 6.8),
     # tau_period_foi_female = runif(1, 2.27, 3.44),
+    # m_period_foi = seq(-.25, .25, length = n_year),
+    # f_period_foi = seq(-.25, .25, length = n_year),
     # m_period_foi_temp = seq(-.25, .25, length = n_year),
     # f_period_foi_temp = seq(-.25, .25, length = n_year),
     # m_period_foi = c(rep(NA,8),seq(-.25, .25, length = n_year - 8)),
@@ -341,7 +343,7 @@ CnimMCMC <- compileNimble(nimMCMC,
                          project = Rmodel)
 for(i in 1:10){beepr::beep(1)}
 
-reps <- 2000
+reps <- 1000
 bin <- 0
 n_chains <- 1
 

@@ -676,27 +676,27 @@ modelcode <- nimbleCode({
 #######################################################################
 
 
-  # y_aah ~ dAAH(
-  #     n_samples = nAAH,
-  #     a = aah_ageweeks[1:nAAH],
-  #     sex = aah_sex[1:nAAH],
-  #     age2date = aah_age2date[1:nAAH],
-  #     n_cases = aah_n[1:nAAH],
-  #     beta_male = beta_male,
-  #     beta0_sus = beta0_survival_sus,
-  #     beta0_inf = beta0_survival_inf,
-  #     age_effect_surv = age_effect_survival[1:nT_age_surv],
-  #     period_effect_surv = period_effect_survival[1:nT_period_overall_ext],
-  #     f_age_foi = f_age_foi[1:n_ageclassf],
-  #     m_age_foi = m_age_foi[1:n_ageclassm],
-  #     age_lookup_f = age_lookup_f[1:nT_age_surv],
-  #     age_lookup_m = age_lookup_m[1:nT_age_surv],
-  #     period_lookup_foi = period_lookup_foi[1:nT_period_overall_ext],
-  #     f_period_foi = f_period_foi[1:n_year],
-  #     m_period_foi = m_period_foi[1:n_year],
-  #     space = space[1:n_study_area],
-  #     sect = sect_aah[1:nAAH]
-  #     )
+  y_aah ~ dAAH(
+      n_samples = nAAH,
+      a = aah_ageweeks[1:nAAH],
+      sex = aah_sex[1:nAAH],
+      age2date = aah_age2date[1:nAAH],
+      n_cases = aah_n[1:nAAH],
+      beta_male = beta_male,
+      beta0_sus = beta0_survival_sus,
+      beta0_inf = beta0_survival_inf,
+      age_effect_surv = age_effect_survival[1:nT_age_surv],
+      period_effect_surv = period_effect_survival[1:nT_period_overall_ext],
+      f_age_foi = f_age_foi[1:n_ageclassf],
+      m_age_foi = m_age_foi[1:n_ageclassm],
+      age_lookup_f = age_lookup_f[1:nT_age_surv],
+      age_lookup_m = age_lookup_m[1:nT_age_surv],
+      period_lookup_foi = period_lookup_foi[1:nT_period_overall_ext],
+      f_period_foi = f_period_foi[1:n_year],
+      m_period_foi = m_period_foi[1:n_year],
+      space = space[1:n_study_area],
+      sect = sect_aah[1:nAAH]
+      )
 
   #######################################################
   #######################################################
