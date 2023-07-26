@@ -13,7 +13,7 @@
 fit_sum <- mcmcout$summary
 out <- mcmcout$samples
 
-modelid <- "S"
+modelid <- "T"
 
 #############################
 ### Saving Model Description
@@ -25,11 +25,11 @@ cat("burnin:  ",bin,"\n")
 cat("n_chains:  ",n_chains,"\n")
 cat("Model Variation:\n")
 cat("allowing beta0_survival_inf and beta0_Survival_sus to be estimated with parameter expansion \n")
-cat("Removed all aah likelihoods\n")
+cat("Removed both aah likelihoods\n")
 cat("Removed population model\n")
 cat("removed fecundity model \n")
 cat("includes cause-specific model \n")
-cat("set all FOI period effects to 0 \n")
+cat("includes FOI period effects \n")
 cat("set all survival period effects to 0 \n")
 cat("set all survival age effects to 0 \n")
 cat("fixed bug of survival/infection prob calculations with diag \n")

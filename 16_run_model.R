@@ -343,7 +343,7 @@ CnimMCMC <- compileNimble(nimMCMC,
                          project = Rmodel)
 for(i in 1:10){beepr::beep(1)}
 
-reps <- 1000
+reps <- 2000
 bin <- 0
 n_chains <- 1
 
