@@ -84,14 +84,14 @@ m_age_foi = c(rnorm(1, -6, sd = .1),
                 rnorm(1, -5, sd = .1),
                 rnorm(1, -5.5, sd = .1),
                 rnorm(1, -6, sd = .1),
-                rnorm(1, -7.2, sd = .1)) - 5
+                rnorm(1, -7.2, sd = .1)) - 1.5
 f_age_foi = c(rnorm(1, -6, sd = .1),
                 rnorm(1, -5.5, sd = .1),
                 rnorm(1, -6, sd = .1),
                 rnorm(1, -6.5, sd = .1),
                 rnorm(1, -6.8, sd = .1),
                 rnorm(1, -7.2, sd = .1),
-                rnorm(1, -8, sd = .1)) - 6
+                rnorm(1, -8, sd = .1)) - 1.5
 tau_period_precollar = rgamma(1, 1, 1)
 period_annual_survival = rnorm(n_year_precollar + 1, .1)
 beta0_cause = rnorm(1, -2.8, .1)
@@ -107,9 +107,10 @@ mu_fec = rnorm(1, mu_fec_init, .01)
 fec_prec_eps = runif(1, 5, 10)
 space_temp = rnorm(1, -.55, .01)
 space_mix = 1
+space = c(0, space_temp * space_mix)
 
-
-
+# period_effect_survival_test <- rep(0,nT_period_overall_ext)
+# age_effect_survival_test <- rep(0, nT_age_surv)
 
 
 #Period effects for survival from collar data
