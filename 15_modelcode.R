@@ -37,8 +37,8 @@ modelcode <- nimbleCode({
   f_age_foi_mu <- mean(f_age_foi[1:n_ageclassf])
 
   # Period effects 
-  # tau_period_foi_male  ~ dgamma(1, 1)
-  # tau_period_foi_female  ~ dgamma(1, 1)
+  tau_period_foi_male  ~ dgamma(1, 1)
+  tau_period_foi_female  ~ dgamma(1, 1)
 
   ###ICAR specification
   # f_period_foi[1:n_year] ~ dcar_normal(adj = adj_period[1:n_adj_period],
@@ -53,20 +53,20 @@ modelcode <- nimbleCode({
   #                                 tau = tau_period_foi_male,
   #                                 zero_mean = 1)
   ### RW1 Specification
-  # tau1_period_foi_f <- .0000001 * tau_period_foi_female
-  # tau1_period_foi_m <- .0000001 * tau_period_foi_male
-  # f_period_foi_temp[1] ~ dnorm(0, tau1_period_foi_f)
-  # m_period_foi_temp[1] ~ dnorm(0, tau1_period_foi_m)
-  # for (t in 2:n_year) {
-  #   f_period_foi_temp[t] ~ dnorm(f_period_foi_temp[t - 1], tau_period_foi_female)
-  #   m_period_foi_temp[t] ~ dnorm(m_period_foi_temp[t - 1], tau_period_foi_male)
-  # }
-  # f_period_foi_mu <- mean(f_period_foi_temp[1:n_year])
-  # m_period_foi_mu <- mean(m_period_foi_temp[1:n_year])
-  # for (t in 1:n_year) {
-  #   f_period_foi[t] <- f_period_foi_temp[t] - f_period_foi_mu
-  #   m_period_foi[t] <- m_period_foi_temp[t] - m_period_foi_mu
-  # }
+  tau1_period_foi_f <- .0000001 * tau_period_foi_female
+  tau1_period_foi_m <- .0000001 * tau_period_foi_male
+  f_period_foi_temp[1] ~ dnorm(0, tau1_period_foi_f)
+  m_period_foi_temp[1] ~ dnorm(0, tau1_period_foi_m)
+  for (t in 2:n_year) {
+    f_period_foi_temp[t] ~ dnorm(f_period_foi_temp[t - 1], tau_period_foi_female)
+    m_period_foi_temp[t] ~ dnorm(m_period_foi_temp[t - 1], tau_period_foi_male)
+  }
+  f_period_foi_mu <- mean(f_period_foi_temp[1:n_year])
+  m_period_foi_mu <- mean(m_period_foi_temp[1:n_year])
+  for (t in 1:n_year) {
+    f_period_foi[t] <- f_period_foi_temp[t] - f_period_foi_mu
+    m_period_foi[t] <- m_period_foi_temp[t] - m_period_foi_mu
+  }
   
   ### removing first years prior to surveillance data
   # tau1_period_foi_f <- .0000001 * tau_period_foi_female
@@ -144,68 +144,68 @@ modelcode <- nimbleCode({
   ### Priors for Age and Period effects
   ##################################
   #Age effects
-#   for (k in 1:nknots_age) {
-#     # b_age_survival[k] ~ dnorm(0, tau_age_survival)
-#     ln_b_age_survival[k] ~ dnorm(0, tau_age_survival)
-#     b_age_survival[k] <- exp(ln_b_age_survival[k])
-#   }
-#   tau_age_survival ~ dgamma(1, 1)
+  for (k in 1:nknots_age) {
+    # b_age_survival[k] ~ dnorm(0, tau_age_survival)
+    ln_b_age_survival[k] ~ dnorm(0, tau_age_survival)
+    b_age_survival[k] <- exp(ln_b_age_survival[k])
+  }
+  tau_age_survival ~ dgamma(1, 1)
 
-#   for (t in 1:nT_age_surv) {
-#     age_effect_survival_temp[t] <- inprod(b_age_survival[1:nknots_age],
-#                                      Z_age[t, 1:nknots_age])
-#   }
-#   mu_age_effect_survival_temp <- mean(age_effect_survival_temp[1:nT_age_surv])
-# for (t in 1:nT_age_surv) {
-#     age_effect_survival[t] <-  age_effect_survival_temp[t] -
-#                                mu_age_effect_survival_temp
-#   }
+  for (t in 1:nT_age_surv) {
+    age_effect_survival_temp[t] <- inprod(b_age_survival[1:nknots_age],
+                                     Z_age[t, 1:nknots_age])
+  }
+  mu_age_effect_survival_temp <- mean(age_effect_survival_temp[1:nT_age_surv])
+for (t in 1:nT_age_surv) {
+    age_effect_survival[t] <-  age_effect_survival_temp[t] -
+                               mu_age_effect_survival_temp
+  }
 
-#   #Period effects from collar data
-#   for (k in 1:nknots_period) {
-#     b_period_survival[k] ~ dnorm(0, tau_period_survival)
-#   }
-#   tau_period_survival ~ dgamma(1, 1)
-#   for (t in 1:nT_period_collar) {
-#     period_effect_surv[t] <- inprod(b_period_survival[1:nknots_period],
-#                                     Z_period[t, 1:nknots_period])
-#   }
+  #Period effects from collar data
+  for (k in 1:nknots_period) {
+    b_period_survival[k] ~ dnorm(0, tau_period_survival)
+  }
+  tau_period_survival ~ dgamma(1, 1)
+  for (t in 1:nT_period_collar) {
+    period_effect_surv[t] <- inprod(b_period_survival[1:nknots_period],
+                                    Z_period[t, 1:nknots_period])
+  }
 
-#   #Period effects from aah data
-#   tau_period_precollar ~ dgamma(1,1)
-#   for (k in 1:(n_year_precollar + 1)) {
-#     period_annual_survival[k] ~ dnorm(0, tau_period_precollar)
-#   }
+  #Period effects from aah data
+  tau_period_precollar ~ dgamma(1,1)
+  for (k in 1:(n_year_precollar + 1)) {
+    period_annual_survival[k] ~ dnorm(0, tau_period_precollar)
+  }
 
-  # period_effect_survival[1:nT_period_overall_ext] <- set_period_effects_constant(
-  #       n_year_precollar = n_year_precollar,
-  #       n_year_precollar_ext = n_year_precollar_ext,
-  #       n_year_prestudy_ext = n_year_prestudy_ext,
-  #       nT_period_precollar_ext = nT_period_precollar_ext,
-  #       nT_period_precollar = nT_period_precollar,
-  #       nT_period_collar = nT_period_collar,
-  #       nT_period_overall_ext = nT_period_overall_ext,
-  #       nT_period_prestudy_ext = nT_period_prestudy_ext,
-  #       yr_start = yr_start[1:n_year],
-  #       yr_end = yr_end[1:n_year],
-  #       period_effect_surv = period_effect_surv[1:nT_period_collar],
-  #       period_annual_survival = period_annual_survival[1:(n_year_precollar + 1)]
-  # )
+  period_effect_survival[1:nT_period_overall_ext] <- set_period_effects_constant(
+        n_year_precollar = n_year_precollar,
+        n_year_precollar_ext = n_year_precollar_ext,
+        n_year_prestudy_ext = n_year_prestudy_ext,
+        nT_period_precollar_ext = nT_period_precollar_ext,
+        nT_period_precollar = nT_period_precollar,
+        nT_period_collar = nT_period_collar,
+        nT_period_overall_ext = nT_period_overall_ext,
+        nT_period_prestudy_ext = nT_period_prestudy_ext,
+        yr_start = yr_start[1:n_year],
+        yr_end = yr_end[1:n_year],
+        period_effect_surv = period_effect_surv[1:nT_period_collar],
+        period_annual_survival = period_annual_survival[1:(n_year_precollar + 1)]
+  )
 
-  # period_effect_survival[1:nT_period_overall_ext] <- set_period_effects_ave(
-  #       n_year_precollar = n_year_precollar,
-  #       nT_period_precollar = nT_period_precollar,
-  #       nT_period_collar = nT_period_collar,
-  #       nT_period_overall = nT_period_overall,
-  #       nT_period_overall_ext = nT_period_overall_ext,
-  #       nT_period_prestudy_ext = nT_period_prestudy_ext,
-  #       yr_start = yr_start[1:n_year],
-  #       yr_end = yr_end[1:n_year],
-  #       period_effect_surv = period_effect_surv[1:nT_period_collar],
-  #       period_annual_survival = period_annual_survival[1:(n_year_precollar + 1)],
-  #       indx_mat_pe_surv = indx_mat_pe_surv[1:6,1:intvl_step_yr],
-  #       intvl_step_yr = intvl_step_yr
-  # )
+  period_effect_survival[1:nT_period_overall_ext] <- set_period_effects_ave(
+        n_year_precollar = n_year_precollar,
+        nT_period_precollar = nT_period_precollar,
+        nT_period_collar = nT_period_collar,
+        nT_period_overall = nT_period_overall,
+        nT_period_overall_ext = nT_period_overall_ext,
+        nT_period_prestudy_ext = nT_period_prestudy_ext,
+        yr_start = yr_start[1:n_year],
+        yr_end = yr_end[1:n_year],
+        period_effect_surv = period_effect_surv[1:nT_period_collar],
+        period_annual_survival = period_annual_survival[1:(n_year_precollar + 1)],
+        indx_mat_pe_surv = indx_mat_pe_surv[1:6,1:intvl_step_yr],
+        intvl_step_yr = intvl_step_yr
+  )
 
   #######################################################################
   #######################################################################
@@ -223,27 +223,27 @@ modelcode <- nimbleCode({
   ###
   #######################################################################
 
-  # y_hunt_pos ~ dInfHarvest(
-  #                 n_cases = hunt_pos_n_cases[1:nInfHarvest],
-  #                 n_samples = nInfHarvest,
-  #                 a = hunt_pos_ageweeks[1:nInfHarvest], #age (weeks) at harvest
-  #                 sex = hunt_pos_sex[1:nInfHarvest],
-  #                 age2date = hunt_pos_age2date[1:nInfHarvest],
-  #                 beta_male = beta_male,
-  #                 beta0_sus = beta0_survival_sus,
-  #                 beta0_inf = beta0_survival_inf,
-  #                 age_effect_surv = age_effect_survival[1:nT_age_surv],
-  #                 period_effect_surv = period_effect_survival[1:nT_period_overall_ext],
-  #                 f_age_foi = f_age_foi[1:n_ageclassf],
-  #                 m_age_foi = m_age_foi[1:n_ageclassm],
-  #                 age_lookup_f = age_lookup_f[1:nT_age_surv],
-  #                 age_lookup_m = age_lookup_m[1:nT_age_surv],
-  #                 period_lookup_foi = period_lookup_foi[1:nT_period_overall_ext],
-  #                 f_period_foi = f_period_foi[1:n_year],
-  #                 m_period_foi = m_period_foi[1:n_year],
-  #                 space = space[1:n_study_area],
-  #                 sect = sect_hunt_pos[1:nInfHarvest]
-  #                 )
+  y_hunt_pos ~ dInfHarvest(
+                  n_cases = hunt_pos_n_cases[1:nInfHarvest],
+                  n_samples = nInfHarvest,
+                  a = hunt_pos_ageweeks[1:nInfHarvest], #age (weeks) at harvest
+                  sex = hunt_pos_sex[1:nInfHarvest],
+                  age2date = hunt_pos_age2date[1:nInfHarvest],
+                  beta_male = beta_male,
+                  beta0_sus = beta0_survival_sus,
+                  beta0_inf = beta0_survival_inf,
+                  age_effect_surv = age_effect_survival[1:nT_age_surv],
+                  period_effect_surv = period_effect_survival[1:nT_period_overall_ext],
+                  f_age_foi = f_age_foi[1:n_ageclassf],
+                  m_age_foi = m_age_foi[1:n_ageclassm],
+                  age_lookup_f = age_lookup_f[1:nT_age_surv],
+                  age_lookup_m = age_lookup_m[1:nT_age_surv],
+                  period_lookup_foi = period_lookup_foi[1:nT_period_overall_ext],
+                  f_period_foi = f_period_foi[1:n_year],
+                  m_period_foi = m_period_foi[1:n_year],
+                  space = space[1:n_study_area],
+                  sect = sect_hunt_pos[1:nInfHarvest]
+                  )
 
 #######################################################################
 ###
@@ -676,27 +676,27 @@ modelcode <- nimbleCode({
 #######################################################################
 
 
-  y_aah ~ dAAH(
-      n_samples = nAAH,
-      a = aah_ageweeks[1:nAAH],
-      sex = aah_sex[1:nAAH],
-      age2date = aah_age2date[1:nAAH],
-      n_cases = aah_n[1:nAAH],
-      beta_male = beta_male,
-      beta0_sus = beta0_survival_sus,
-      beta0_inf = beta0_survival_inf,
-      age_effect_surv = age_effect_survival[1:nT_age_surv],
-      period_effect_surv = period_effect_survival[1:nT_period_overall_ext],
-      f_age_foi = f_age_foi[1:n_ageclassf],
-      m_age_foi = m_age_foi[1:n_ageclassm],
-      age_lookup_f = age_lookup_f[1:nT_age_surv],
-      age_lookup_m = age_lookup_m[1:nT_age_surv],
-      period_lookup_foi = period_lookup_foi[1:nT_period_overall_ext],
-      f_period_foi = f_period_foi[1:n_year],
-      m_period_foi = m_period_foi[1:n_year],
-      space = space[1:n_study_area],
-      sect = sect_aah[1:nAAH]
-      )
+  # y_aah ~ dAAH(
+  #     n_samples = nAAH,
+  #     a = aah_ageweeks[1:nAAH],
+  #     sex = aah_sex[1:nAAH],
+  #     age2date = aah_age2date[1:nAAH],
+  #     n_cases = aah_n[1:nAAH],
+  #     beta_male = beta_male,
+  #     beta0_sus = beta0_survival_sus,
+  #     beta0_inf = beta0_survival_inf,
+  #     age_effect_surv = age_effect_survival[1:nT_age_surv],
+  #     period_effect_surv = period_effect_survival[1:nT_period_overall_ext],
+  #     f_age_foi = f_age_foi[1:n_ageclassf],
+  #     m_age_foi = m_age_foi[1:n_ageclassm],
+  #     age_lookup_f = age_lookup_f[1:nT_age_surv],
+  #     age_lookup_m = age_lookup_m[1:nT_age_surv],
+  #     period_lookup_foi = period_lookup_foi[1:nT_period_overall_ext],
+  #     f_period_foi = f_period_foi[1:n_year],
+  #     m_period_foi = m_period_foi[1:n_year],
+  #     space = space[1:n_study_area],
+  #     sect = sect_aah[1:nAAH]
+  #     )
 
   #######################################################
   #######################################################
