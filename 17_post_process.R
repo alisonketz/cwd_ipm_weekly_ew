@@ -13,11 +13,7 @@
 fit_sum <- mcmcout$summary
 out <- mcmcout$samples
 
-<<<<<<< HEAD
 modelid <- "R"
-=======
-modelid <- "S"
->>>>>>> cdabb129206506421933a7ccffeb64a688de8dde
 
 #############################
 ### Saving Model Description
@@ -33,21 +29,12 @@ cat("Removed both aah likelihoods\n")
 cat("Removed population model\n")
 cat("removed fecundity model \n")
 cat("includes cause-specific model \n")
-<<<<<<< HEAD
 cat("set all FOI period effects to 0 \n\n")
 cat("set all survival period effects to 0 \n\n")
 cat("set all survival age effects to 0 \n\n")
 cat("fixed bug of survival/infection prob calculations with diag with +length solution \n")
 cat("runtime:  ",runtime,"\n")
 cat("Summary Stats:  \n")
-=======
-cat("includes FOI period effects \n")
-cat("set all survival period effects to 0 \n")
-cat("set all survival age effects to 0 \n")
-cat("fixed bug of survival/infection prob calculations with diag +52\n")
-cat("runtime:  ",runtime,"\n\n")
-cat("results: \n")
->>>>>>> cdabb129206506421933a7ccffeb64a688de8dde
 print(fit_sum)
 sink()
 

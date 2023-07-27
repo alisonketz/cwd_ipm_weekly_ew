@@ -423,11 +423,17 @@ calc_infect_prob <- nimbleFunction(
         for (t in 1:n_year) {
             for (a in 1:n_agef) {
                 p_inf[k, 1, a, t] <- 
-                    1 - exp(-sum(diag(gam[k, 1, yr_start[a]:yr_end[a], yr_start[t]:yr_end[t]])))
+                    1 - exp(-sum(diag(gam[k,
+                                          1,
+                                          yr_start[a]:(yr_start[a] + 52),
+                                          yr_start[t]:(yr_start[t] + 52)])))
             }
             for (a in 1:n_agem) {
                 p_inf[k, 2, a, t] <- 
-                    1 - exp(-sum(diag(gam[k, 2, yr_start[a]:yr_end[a], yr_start[t]:yr_end[t]])))
+                    1 - exp(-sum(diag(gam[k,
+                                          2,
+                                          yr_start[a]:(yr_start[a] + 52),
+                                          yr_start[t]:(yr_start[t] + 52)])))
             }
         }
     }
@@ -543,11 +549,17 @@ calc_infect_prob_hunt <- nimbleFunction(
         for (t in 1:n_year) {
             for (a in 1:n_agef) {
                 p_inf[k, 1, a, t] <- 
-                    (1 - exp(-sum(diag(gam[k, 1, yr_start[a]:ng_end[a], yr_start[t]:ng_end[t]])))) * fudge_factor
+                    (1 - exp(-sum(diag(gam[k,
+                                           1,
+                                           yr_start[a]:(yr_start[a] + length(yr_start[t]:ng_end[t]) - 1),
+                                           yr_start[t]:ng_end[t]])))) * fudge_factor
             }
             for (a in 1:n_agem) {
                 p_inf[k, 2, a, t] <- 
-                    (1 - exp(-sum(diag(gam[k, 2, yr_start[a]:ng_end[a], yr_start[t]:ng_end[t]])))) * fudge_factor
+                    (1 - exp(-sum(diag(gam[k,
+                                           2,
+                                           yr_start[a]:(yr_start[a] + length(yr_start[t]:ng_end[t]) - 1),
+                                           yr_start[t]:ng_end[t]])))) * fudge_factor
             }
         }
     }
