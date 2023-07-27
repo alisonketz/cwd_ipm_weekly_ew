@@ -2758,10 +2758,10 @@ dAAH <- nimble::nimbleFunction(
                 exp(-sum(lam_sus[1:(a[i] - 1)])) *
                 lam_inf[a[i]]
 
-            sumllik <- sumllik + n_cases[i] * (log(lam_sus[a[i]]) +
-                                        -sum(lam_sus[1:(a[i] - 1)]) +
-                                        -sum(lam_foi[1:(a[i] - 1)]) +
-                                        log(sum(lik_temp[1:a[i]])))
+            sumllik <- sumllik + n_cases[i] * log(lam_sus[a[i]] *
+                                        exp(-sum(lam_sus[1:(a[i] - 1)])) *
+                                        exp(-sum(lam_foi[1:(a[i] - 1)])) +
+                                        sum(lik_temp[1:a[i]]))
         }
         returnType(double(0))
         if (log) {
