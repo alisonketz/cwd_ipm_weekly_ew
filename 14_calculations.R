@@ -73,30 +73,30 @@ calc_surv_aah <- nimble::nimbleFunction(
     ############################################
     # calculate survival from cummulative haz
     ############################################
-    # for (t in 1:n_year) {
-    #     for (a in 1:n_agef) {
-    #         s_aah[1, a, t] <- exp(-sum(diag(UCH[1,
-    #                            yr_start[a]:(yr_start[a] + 52),
-    #                            yr_start[t]:(yr_start[t] + 52)])))
-    #     }
-    #     for(a in 1:n_agem) {
-    #         s_aah[2, a, t] <- exp(-sum(diag(UCH[2,
-    #                            yr_start[a]:(yr_start[a] + 52),
-    #                            yr_start[t]:(yr_start[t] + 52)])))
-    #     }
-    # }
     for (t in 1:n_year) {
         for (a in 1:n_agef) {
             s_aah[1, a, t] <- exp(-sum(diag(UCH[1,
-                               yr_start[a]:(yr_start[a] + length(yr_start[t]:yr_end[t]) - 1),
-                               yr_start[t]:yr_end[t]])))
+                               yr_start[a]:(yr_start[a] + 52),
+                               yr_start[t]:(yr_start[t] + 52)])))
         }
         for(a in 1:n_agem) {
             s_aah[2, a, t] <- exp(-sum(diag(UCH[2,
-                               yr_start[a]:(yr_start[a] + length(yr_start[t]:yr_end[t]) - 1),
-                               yr_start[t]:(yr_end[t])])))
+                               yr_start[a]:(yr_start[a] + 52),
+                               yr_start[t]:(yr_start[t] + 52)])))
         }
     }
+    # for (t in 1:n_year) {
+    #     for (a in 1:n_agef) {
+    #         s_aah[1, a, t] <- exp(-sum(diag(UCH[1,
+    #                            yr_start[a]:(yr_start[a] + length(yr_start[t]:yr_end[t]) - 1),
+    #                            yr_start[t]:yr_end[t]])))
+    #     }
+    #     for(a in 1:n_agem) {
+    #         s_aah[2, a, t] <- exp(-sum(diag(UCH[2,
+    #                            yr_start[a]:(yr_start[a] + length(yr_start[t]:yr_end[t]) - 1),
+    #                            yr_start[t]:(yr_end[t])])))
+    #     }
+    # }
 
   returnType(double(3))
   return(s_aah[1:2, 1:n_agef, 1:n_year])
