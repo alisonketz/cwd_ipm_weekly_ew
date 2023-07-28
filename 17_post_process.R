@@ -5,15 +5,15 @@
 ###############################################################################################
 
 # source("summarize.R")
-
 # load("mcmcout.Rdata")
 # load("runtime.Rdata")
 # out <- mcmc.list(mcmcout)
 # fit_sum <- summarize(out)
+
 fit_sum <- mcmcout$summary
 out <- mcmcout$samples
 
-modelid <- "X"
+modelid <- "A"
 
 #############################
 ### Saving Model Description
