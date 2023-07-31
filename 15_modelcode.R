@@ -177,20 +177,20 @@ modelcode <- nimbleCode({
   #   period_annual_survival[k] ~ dnorm(0, tau_period_precollar)
   # }
 
-  period_effect_survival[1:nT_period_overall_ext] <- set_period_effects_constant(
-        n_year_precollar = n_year_precollar,
-        n_year_precollar_ext = n_year_precollar_ext,
-        n_year_prestudy_ext = n_year_prestudy_ext,
-        nT_period_precollar_ext = nT_period_precollar_ext,
-        nT_period_precollar = nT_period_precollar,
-        nT_period_collar = nT_period_collar,
-        nT_period_overall_ext = nT_period_overall_ext,
-        nT_period_prestudy_ext = nT_period_prestudy_ext,
-        yr_start = yr_start[1:n_year],
-        yr_end = yr_end[1:n_year],
-        period_effect_surv = period_effect_surv[1:nT_period_collar],
-        period_annual_survival = period_annual_survival[1:(n_year_precollar + 1)]
-  )
+  # period_effect_survival[1:nT_period_overall_ext] <- set_period_effects_constant(
+  #       n_year_precollar = n_year_precollar,
+  #       n_year_precollar_ext = n_year_precollar_ext,
+  #       n_year_prestudy_ext = n_year_prestudy_ext,
+  #       nT_period_precollar_ext = nT_period_precollar_ext,
+  #       nT_period_precollar = nT_period_precollar,
+  #       nT_period_collar = nT_period_collar,
+  #       nT_period_overall_ext = nT_period_overall_ext,
+  #       nT_period_prestudy_ext = nT_period_prestudy_ext,
+  #       yr_start = yr_start[1:n_year],
+  #       yr_end = yr_end[1:n_year],
+  #       period_effect_surv = period_effect_surv[1:nT_period_collar],
+  #       period_annual_survival = period_annual_survival[1:(n_year_precollar + 1)]
+  # )
 
 #   period_effect_survival[1:nT_period_overall_ext] <- set_period_effects_ave(
 #         n_year_precollar = n_year_precollar,

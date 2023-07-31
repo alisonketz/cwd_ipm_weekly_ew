@@ -299,7 +299,7 @@ parameters <- c(
               "space_mix",
             #   "beta0_sus_temp",
             #   "sus_mix",
-              # "beta0_survival_sus",
+              "beta0_survival_sus",
               # "tau_age_survival",
               # "age_effect_survival",
               # "ln_b_age_survival",
