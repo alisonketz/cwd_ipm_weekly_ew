@@ -13,7 +13,7 @@
 fit_sum <- mcmcout$summary
 out <- mcmcout$samples
 
-modelid <- "D"
+modelid <- "G"
 
 #############################
 ### Saving Model Description
@@ -29,8 +29,8 @@ cat("includes ageing data aah likelihoods\n")
 cat("removed population model\n")
 cat("removed fecundity model \n")
 cat("includes cause-specific model \n")
-cat("includes FOI period effects\n")
-cat("includes survival period effects\n")
+cat("no FOI period effects\n")
+cat("no survival period effects\n")
 cat("includes survival age effects \n")
 cat("runtime:  ",runtime,"\n")
 cat("Summary Stats:  \n")
@@ -852,6 +852,8 @@ out_age_effect_sus_int$disease = "Susceptible"
 
 age_effect_plot_sus_int <- ggplot(data =out_age_effect_sus_int,aes(x = weeks))+
   geom_line(aes(x = weeks,y=age_effect_mean),size=1)+
+#   geom_line(aes(x = weeks,y=age_effect_lower),size=1, linetype = "dashed")+
+#     geom_line(aes(x = weeks,y=age_effect_upper),size=1,linetype = "dashed")+
   geom_ribbon(aes(ymin=age_effect_lower,ymax=age_effect_upper),alpha=.2,linetype=0)+
   ggtitle("Susceptible Age Effect Posterior")+xlab("Age (Years)")+ylab("Effect Size")+
   theme_bw()#+
@@ -889,7 +891,7 @@ age_effect_plot_combo_int
  
 # ggsave("figures/age_effect_combo_int.pdf",age_effect_plot_combo_int,height=4,width=8)
 # ggsave("figures/age_effect_combo_int.png",age_effect_plot_combo_int,height=4,width=8)
-ggsave(paste0("figures/",modelid,"/age_effect_sus_int",modelid,".png"),age_effect_plot_sus_int)
+ggsave(paste0("figures/",modelid,"/age_effect_plot_combo_int",modelid,".png"),age_effect_plot_combo_int)
 
 
 

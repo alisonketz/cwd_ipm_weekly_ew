@@ -36,22 +36,22 @@ modelcode <- nimbleCode({
   m_age_foi_mu <- mean(m_age_foi[1:n_ageclassm])
   f_age_foi_mu <- mean(f_age_foi[1:n_ageclassf])
 
-  # Period effects 
-  tau_period_foi_male  ~ dgamma(1, 1)
-  tau_period_foi_female  ~ dgamma(1, 1)
+  ### Period effects 
+  # tau_period_foi_male  ~ dgamma(1, 1)
+  # tau_period_foi_female  ~ dgamma(1, 1)
 
   ###ICAR specification
-  f_period_foi[1:n_year] ~ dcar_normal(adj = adj_period[1:n_adj_period],
-                                  weights = weights_period[1:n_adj_period],
-                                  num = num_period[1:n_year],
-                                  tau = tau_period_foi_female,
-                                  zero_mean = 1)
+  # f_period_foi[1:n_year] ~ dcar_normal(adj = adj_period[1:n_adj_period],
+  #                                 weights = weights_period[1:n_adj_period],
+  #                                 num = num_period[1:n_year],
+  #                                 tau = tau_period_foi_female,
+  #                                 zero_mean = 1)
   
-  m_period_foi[1:n_year] ~ dcar_normal(adj = adj_period[1:n_adj_period],
-                                  weights = weights_period[1:n_adj_period],
-                                  num = num_period[1:n_year],
-                                  tau = tau_period_foi_male,
-                                  zero_mean = 1)
+  # m_period_foi[1:n_year] ~ dcar_normal(adj = adj_period[1:n_adj_period],
+  #                                 weights = weights_period[1:n_adj_period],
+  #                                 num = num_period[1:n_year],
+  #                                 tau = tau_period_foi_male,
+  #                                 zero_mean = 1)
   ### RW1 Specification
   # tau1_period_foi_f <- .0000001 * tau_period_foi_female
   # tau1_period_foi_m <- .0000001 * tau_period_foi_male
@@ -144,22 +144,22 @@ modelcode <- nimbleCode({
 #   ### Priors for Age and Period effects
 #   ########################################
 
-#   #Age effects
-#   for (k in 1:nknots_age) {
-#     ln_b_age_survival[k] ~ dnorm(0, tau_age_survival)
-#     b_age_survival[k] <- exp(ln_b_age_survival[k])
-#   }
-#   tau_age_survival ~ dgamma(1, 1)
+  #Age effects
+  for (k in 1:nknots_age) {
+    ln_b_age_survival[k] ~ dnorm(0, tau_age_survival)
+    b_age_survival[k] <- exp(ln_b_age_survival[k])
+  }
+  tau_age_survival ~ dgamma(1, 1)
 
-#   for (t in 1:nT_age_surv) {
-#     age_effect_survival_temp[t] <- inprod(b_age_survival[1:nknots_age],
-#                                      Z_age[t, 1:nknots_age])
-#   }
-#   mu_age_effect_survival_temp <- mean(age_effect_survival_temp[1:nT_age_surv])
-# for (t in 1:nT_age_surv) {
-#     age_effect_survival[t] <-  age_effect_survival_temp[t] -
-#                                mu_age_effect_survival_temp
-#   }
+  for (t in 1:nT_age_surv) {
+    age_effect_survival_temp[t] <- inprod(b_age_survival[1:nknots_age],
+                                     Z_age[t, 1:nknots_age])
+  }
+  mu_age_effect_survival_temp <- mean(age_effect_survival_temp[1:nT_age_surv])
+for (t in 1:nT_age_surv) {
+    age_effect_survival[t] <-  age_effect_survival_temp[t] -
+                               mu_age_effect_survival_temp
+  }
 
   # #Period effects from collar data
   # for (k in 1:nknots_period) {

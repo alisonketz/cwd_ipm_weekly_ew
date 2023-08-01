@@ -317,8 +317,7 @@ dSusHarvest <- nimble::nimbleFunction(
             #######################################
 
             sumllik <- sumllik +
-                (-sum_haz + lam_foi + log(lam_sus)) * n_cases[i]
-         if(is.na(sumllik)){stop("ack")}
+                (-sum_haz - lam_foi + log(lam_sus)) * n_cases[i]
         }
         returnType(double(0))
         if (log) {
