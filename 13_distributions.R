@@ -509,9 +509,6 @@ dSusHarvest <- nimble::nimbleFunction(
                 lam_sus <- exp(beta0_sus +
                     age_effect_surv[a[i] - 1] +
                     period_effect_surv[age2date[i] + a[i] - 1])
-                lam_foi <- exp(space[sect[i]] +
-                    f_age_foi[age_lookup_f[a[i] - 1]] +
-                    f_period_foi[period_lookup_foi[age2date[i] + a[i] - 1]])
             } else { # age loops for males
                 for (j in 1:(a[i] - 2)) {
                     # sum up foi and sus hazards from 1  to a-1
@@ -529,9 +526,6 @@ dSusHarvest <- nimble::nimbleFunction(
                     age_effect_surv[a[i] - 1] +
                     period_effect_surv[age2date[i] + a[i] - 1] +
                     beta_male)
-                lam_foi <- exp(space[sect[i]] +
-                    m_age_foi[age_lookup_f[a[i] - 1]] +
-                    m_period_foi[period_lookup_foi[age2date[i] + a[i] - 1]])
             }
 
             #######################################
@@ -541,7 +535,7 @@ dSusHarvest <- nimble::nimbleFunction(
             #######################################
 
             sumllik <- sumllik +
-                (-sum_haz - lam_foi + log(lam_sus)) * n_cases[i]
+                (-sum_haz + log(lam_sus)) * n_cases[i]
         }
         returnType(double(0))
         if (log) {
