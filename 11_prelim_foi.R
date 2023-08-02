@@ -142,3 +142,66 @@ cwd_df_agg <- cwd_df %>%
               summarise(n_cases = n(), .groups = 'drop')
 d_fit_hunt_neg <- cwd_df_agg[cwd_df_agg$teststatus == 0, ]
 d_fit_hunt_pos <- cwd_df_agg[cwd_df_agg$teststatus == 1, ]
+
+
+
+
+################################################################
+###
+### Function for Basis Expansion - 
+### Convex shape neither decreasing or increasing
+### From Meyer et al (2008), and BCGAM R package
+###
+################################################################
+
+#' @keywords internal
+incconvex=function(x,t)
+{
+	n=length(x)
+	k=length(t)-2
+	m=k+3
+	sigma=matrix(1:m*n,nrow=m,ncol=n)
+	for(j in 1:(k-1)){
+		i1=x<=t[j]
+		sigma[j,i1] = 0
+	 	i2=x>t[j]&x<=t[j+1]
+	 	sigma[j,i2] = (x[i2]-t[j])^3 / (t[j+2]-t[j]) / (t[j+1]-t[j])/3
+	    i3=x>t[j+1]&x<=t[j+2]
+	    sigma[j,i3] = x[i3]-t[j+1]-(x[i3]-t[j+2])^3/(t[j+2]-t[j])/(t[j+2]-t[j+1])/3+(t[j+1]-t[j])^2/3/(t[j+2]-t[j])-(t[j+2]-t[j+1])^2/3/(t[j+2]-t[j])
+	    i4=x>t[j+2]
+	    sigma[j,i4]=(x[i4]-t[j+1])+(t[j+1]-t[j])^2/3/(t[j+2]-t[j])-(t[j+2]-t[j+1])^2/3/(t[j+2]-t[j])
+	}
+	i1=x<=t[k]
+	sigma[k,i1] = 0
+	i2=x>t[k]&x<=t[k+1]
+	sigma[k,i2] = (x[i2]-t[k])^3 / (t[k+2]-t[k]) / (t[k+1]-t[k])/3
+	i3=x>t[k+1]
+	sigma[k,i3] = x[i3]-t[k+1]-(x[i3]-t[k+2])^3/(t[k+2]-t[k])/(t[k+2]-t[k+1])/3+(t[k+1]-t[k])^2/3/(t[k+2]-t[k])-(t[k+2]-t[k+1])^2/3/(t[k+2]-t[k])
+	i1=x<=t[2]
+	sigma[k+1,i1]=x[i1]-t[1]+(t[2]-x[i1])^3/(t[2]-t[1])^2/3
+	i2=x>t[2]
+	sigma[k+1,i2]=x[i2]-t[1]
+	i1=x<=t[k+1]
+	sigma[k+2,i1]=0
+	i2=x>t[k+1]
+	sigma[k+2,i2]=(x[i2]-t[k+1])^3/(t[k+2]-t[k+1])^2/3
+	sigma[k+3,]=x
+
+	center.vector=apply(sigma,1,mean)
+	
+	list(sigma=sigma, center.vector=center.vector)
+}
+
+
+##############################################################
+###
+### Basis calculated from Meyer (2008) and
+### bcgam R-package
+###
+##############################################################
+
+knots_foi_cgam <- round(seq(2, n_year, length = 6))
+delta_i <- incconvex(1:n_year, knots_foi_cgam)
+delta <- t(delta_i$sigma - delta_i$center.vector)
+Z_foi_cgam <- delta / max(delta)
+nknots_foi_cgam <- dim(Z_foi_cgam)[2]
