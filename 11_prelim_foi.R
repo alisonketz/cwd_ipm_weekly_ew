@@ -205,3 +205,5 @@ delta_i <- incconvex(1:n_year, knots_foi_cgam)
 delta <- t(delta_i$sigma - delta_i$center.vector)
 Z_foi_cgam <- delta / max(delta)
 nknots_foi_cgam <- dim(Z_foi_cgam)[2]
+
+

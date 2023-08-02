@@ -105,6 +105,48 @@ modelcode <- nimbleCode({
   #   m_period_foi[t] <- m_period_foi_temp[t] - m_period_foi_mu
   # }
 
+  ##########################################################
+  ### FOI period effect cgam, sex-specific
+  ##########################################################
+
+  for (k in 1:nknots_foi_cgam) {
+    ln_b_foi_cgam_m[k] ~ dnorm(0, tau_period_foi_male)
+    b_foi_cgam_m[k] <- exp(ln_b_foi_cgam_m[k])
+  }
+  tau_period_foi_male ~ dgamma(1, 1)
+  for (t in 1:n_year) {
+    m_period_foi_cgam_temp[t] <- inprod(b_foi_cgam_m[1:nknots_foi_cgam],
+                                 Z_foi_cgam[t, 1:nknots_foi_cgam])
+    m_period_foi[t] <- m_period_foi_cgam_temp[t] - m_mu_foi_cgam
+  }
+  m_mu_foi_cgam <- mean(m_period_foi_cgam_temp[1:n_year])
+
+
+  for (k in 1:nknots_foi_cgam) {
+    ln_b_foi_cgam_f[k] ~ dnorm(0, tau_period_foi_female)
+    b_foi_cgam_f[k] <- exp(ln_b_foi_cgam_f[k])
+  }
+  tau_period_foi_female ~ dgamma(1, 1)
+  for (t in 1:n_year) {
+    f_period_foi_cgam_temp[t] <- inprod(b_foi_cgam_f[1:nknots_foi_cgam],
+                                 Z_foi_cgam[t, 1:nknots_foi_cgam])
+    f_period_foi[t] <- f_period_foi_cgam_temp[t] - f_mu_foi_cgam
+  }
+  f_mu_foi_cgam <- mean(f_period_foi_cgam_temp[1:n_year])
+
+
+  ##########################################################
+  ### Age effect spline
+  ##########################################################
+
+  # for (k in 1:nknots_age_spline) {
+  #   b_age_spline[k] ~ ddexp(0, tau_age_spline)
+  # }
+  # tau_age_spline ~ dgamma(.01, .01)
+  # for (t in 1:nT_age) {
+  #   age_effect_spline[t] <- inprod(b_age_spline[1:nknots_age_spline],
+  #                                  Z_age_spline[t, 1:nknots_age_spline])
+  # }
 
 
   ### random effect for East/West spatial model
