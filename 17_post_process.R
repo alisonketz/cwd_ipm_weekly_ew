@@ -13,7 +13,7 @@
 fit_sum <- mcmcout$summary
 out <- mcmcout$samples
 
-modelid <- "G"
+modelid <- "J"
 
 #############################
 ### Saving Model Description
@@ -31,7 +31,9 @@ cat("removed fecundity model \n")
 cat("includes cause-specific model \n")
 cat("no FOI period effects\n")
 cat("no survival period effects\n")
-cat("includes survival age effects \n")
+cat("no survival age effects \n")
+cat("removed idead likelihood\n")
+
 cat("runtime:  ",runtime,"\n")
 cat("Summary Stats:  \n")
 print(fit_sum)
