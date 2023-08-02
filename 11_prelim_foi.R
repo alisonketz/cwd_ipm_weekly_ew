@@ -207,3 +207,17 @@ Z_foi_cgam <- delta / max(delta)
 nknots_foi_cgam <- dim(Z_foi_cgam)[2]
 
 
+#############################################
+###
+### Spline basis matrix for Period Effects
+###
+#############################################
+
+knots_foi_spline <- round(seq(2, round(n_year * .5), length = 6))
+splinebasis <- bs(1:(n_year * .5), knots = knots_foi_spline)
+constr_sumzero <- matrix(1, 1, nrow(splinebasis)) %*% splinebasis
+qrc <- qr(t(constr_sumzero))
+Z <- qr.Q(qrc,complete=TRUE)[,(nrow(constr_sumzero)+1):ncol(constr_sumzero)]
+Z_foi_spline <- splinebasis%*%Z
+nknots_foi_spline <- dim(Z_foi_spline)[2]
+

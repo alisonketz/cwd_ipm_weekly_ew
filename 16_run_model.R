@@ -195,10 +195,11 @@ nimConsts <- list(n_year = n_year,
     # m_period_foi = rep(0,n_year),
     # f_period_foi = rep(0,n_year),
     age_effect_survival = rep(0,nT_age_surv),
+    period_effect_survival = rep(0,nT_period_overall_ext),
     Z_foi_cgam = Z_foi_cgam,
-    nknots_foi_cgam = nknots_foi_cgam
-        # period_effect_survival = rep(0,nT_period_overall_ext)
-    # num_foi_cal = num_foi_cal
+    nknots_foi_cgam = nknots_foi_cgam,
+    Z_foi_spline = Z_foi_spline,
+    nknots_foi_spline = nknots_foi_spline
     )
 
 
@@ -229,8 +230,12 @@ initsFun <- function()list(beta_male = rnorm(1, -.5, .01),
     # f_period_foi = c(rep(NA,8),seq(-.25, .25, length = n_year - 8)),
     ln_b_foi_cgam_m = rnorm(nknots_foi_cgam) * 10^-4,
     ln_b_foi_cgam_f = rnorm(nknots_foi_cgam) * 10^-4,
+    f_b_foi_spline = rnorm(nknots_foi_spline) * 10^-4,
+    m_b_foi_spline = rnorm(nknots_foi_spline) * 10^-4,
     tau_age_foi_male = runif(1, 1.5, 1.7),
     tau_age_foi_female = runif(1, 2.7, 4.2),
+    tau_foi_spline_male = runif(1, .1, 1),
+    tau_foi_spline_female = runif(1, .1, 1),
     m_age_foi = c(rnorm(1, -10.7, sd = .1),
                   rnorm(1, -7.55, sd = .1),
                   rnorm(1, -6.15, sd = .1),
