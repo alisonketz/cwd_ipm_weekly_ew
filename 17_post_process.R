@@ -13,7 +13,7 @@
 fit_sum <- mcmcout$summary
 out <- mcmcout$samples
 
-modelid <- "K"
+modelid <- "O"
 
 #############################
 ### Saving Model Description
@@ -29,9 +29,9 @@ cat("includes ageing data aah likelihoods\n")
 cat("removed population model\n")
 cat("removed fecundity model \n")
 cat("includes cause-specific model \n")
-cat("no FOI period effects\n")
-cat("includes survival period effects\n")
-cat("no survival age effects \n")
+cat("includes FOI period effects CS\n")
+cat("no survival period effects\n")
+cat("includes survival age effects \n")
 
 cat("runtime:  ",runtime,"\n")
 cat("Summary Stats:  \n")
@@ -70,6 +70,8 @@ traceplot(out[, "beta0_survival_sus"], ylab = "beta0_survival_sus")
 traceplot(out[, "beta0_survival_inf"], ylab = "beta0_survival_inf")
 traceplot(out[, "tau_age_survival"], ylab = "tau_age_survival")
 traceplot(out[, "tau_period_survival"], ylab = "tau_period_survival")
+# traceplot(out[, "period_int_survival[1]"], ylab = "period_int_survival[1]")
+# traceplot(out[, "period_int_survival[2]"], ylab = "period_int_survival[2]")
 traceplot(out[, "tau_period_precollar"], ylab = "tau_period_precollar")
 traceplot(out[, "beta0_cause"], ylab = "beta0_cause")
 traceplot(out[, "beta_cause_gun"], ylab = "beta_cause_gun")
