@@ -214,14 +214,14 @@ modelcode <- nimbleCode({
   # }
 
   ### Period effects from collar data
-  for (k in 1:nknots_period) {
-    b_period_survival[k] ~ dnorm(0, tau_period_survival)
-  }
-  tau_period_survival ~ dgamma(1, 1)
-  for (t in 1:nT_period_collar) {
-    period_effect_surv[t] <- inprod(b_period_survival[1:nknots_period],
-                                    Z_period[t, 1:nknots_period])
-  }
+  # for (k in 1:nknots_period) {
+  #   b_period_survival[k] ~ dnorm(0, tau_period_survival)
+  # }
+  # tau_period_survival ~ dgamma(1, 1)
+  # for (t in 1:nT_period_collar) {
+  #   period_effect_surv[t] <- inprod(b_period_survival[1:nknots_period],
+  #                                   Z_period[t, 1:nknots_period])
+  # }
 
   # #Period effects from aah data
   # tau_period_precollar ~ dgamma(1,1)
@@ -231,11 +231,9 @@ modelcode <- nimbleCode({
 
   #Period effects from aah data - multiple intercepts version
   tau_period_precollar ~ dgamma(1, 1)
-  for (k in 1:2) {
-    period_int_survival[k] ~ dnorm(0, tau_period_precollar)
-  }
-  period_annual_survival[1:18] <- period_int_survival[1]
-  period_annual_survival[19:(n_year_precollar+1)] <- period_int_survival[2]
+  period_int_survival ~ dnorm(0, tau_period_precollar)
+  period_annual_survival[1:18] <- period_int_survival
+  period_annual_survival[19:(n_year_precollar+1)] <- 0
 
 
   period_effect_survival[1:nT_period_overall_ext] <- set_period_effects_constant(
