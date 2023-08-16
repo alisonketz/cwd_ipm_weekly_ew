@@ -13,7 +13,7 @@
 fit_sum <- mcmcout$summary
 out <- mcmcout$samples
 
-modelid <- "O"
+modelid <- "W"
 
 #############################
 ### Saving Model Description
@@ -29,10 +29,9 @@ cat("includes ageing data aah likelihoods\n")
 cat("removed population model\n")
 cat("removed fecundity model \n")
 cat("includes cause-specific model \n")
-cat("includes FOI period effects CS\n")
-cat("no survival period effects\n")
-cat("includes survival age effects \n")
-
+cat("no FOI period effects\n")
+cat("collar only survival period effects, no precollar period effects survival\n")
+cat("NO survival age effects cgam convex \n\n")
 cat("runtime:  ",runtime,"\n")
 cat("Summary Stats:  \n")
 print(fit_sum)
@@ -70,8 +69,8 @@ traceplot(out[, "beta0_survival_sus"], ylab = "beta0_survival_sus")
 traceplot(out[, "beta0_survival_inf"], ylab = "beta0_survival_inf")
 traceplot(out[, "tau_age_survival"], ylab = "tau_age_survival")
 traceplot(out[, "tau_period_survival"], ylab = "tau_period_survival")
-# traceplot(out[, "period_int_survival[1]"], ylab = "period_int_survival[1]")
-# traceplot(out[, "period_int_survival[2]"], ylab = "period_int_survival[2]")
+traceplot(out[, "period_int_survival[1]"], ylab = "period_int_survival[1]")
+traceplot(out[, "period_int_survival[2]"], ylab = "period_int_survival[2]")
 traceplot(out[, "tau_period_precollar"], ylab = "tau_period_precollar")
 traceplot(out[, "beta0_cause"], ylab = "beta0_cause")
 traceplot(out[, "beta_cause_gun"], ylab = "beta_cause_gun")
@@ -810,14 +809,14 @@ beta0mn_inf
 
 ae_indx <- grep("age_effect",rownames(fit_sum))
 
-age_effect_mean <- fit_sum[ae_indx,1] + beta0mn_inf
+age_effect_mean <- fit_sum[ae_indx,2] + beta0mn_inf
 age_effect_lower <- fit_sum[ae_indx,4] + beta0mn_inf
 age_effect_upper <- fit_sum[ae_indx,5] + beta0mn_inf
 
 weeks <- 1:nT_age_surv
 
 out_age_effect_inf_int <- data.frame(weeks,age_effect_mean,age_effect_lower,age_effect_upper)
-out_age_effect_inf_int$disease = "Infected"
+out_age_effect_inf_int$disease <- "Infected"
 
 age_effect_plot_inf_int <- ggplot(data =out_age_effect_inf_int,aes(x = weeks))+
   geom_line(aes(x = weeks,y=age_effect_mean),size=1)+

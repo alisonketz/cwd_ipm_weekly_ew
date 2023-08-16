@@ -19,6 +19,7 @@ modelcode <- nimbleCode({
   ##############################
   ### Force of infection model
   ##############################
+
   tau_age_foi_male  ~ dgamma(1, 1)
   tau_age_foi_female  ~ dgamma(1, 1)
   tau1_age_foi_male <- .0000001 * tau_age_foi_male
@@ -52,6 +53,7 @@ modelcode <- nimbleCode({
   #                                 num = num_period[1:n_year],
   #                                 tau = tau_period_foi_male,
   #                                 zero_mean = 1)
+
   ### RW1 Specification
   # tau1_period_foi_f <- .0000001 * tau_period_foi_female
   # tau1_period_foi_m <- .0000001 * tau_period_foi_male
@@ -84,7 +86,6 @@ modelcode <- nimbleCode({
   #   m_period_foi[t] <- m_period_foi_temp[t] - m_period_foi_mu
   # }
 
-
   ### setting early years prior to surveillance data
   # tau1_period_foi_f <- .0000001 * tau_period_foi_female
   # tau1_period_foi_m <- .0000001 * tau_period_foi_male
@@ -109,52 +110,50 @@ modelcode <- nimbleCode({
   ### FOI period effect cgam, sex-specific
   ##########################################################
 
+  tau_period_foi_male ~ dgamma(1, 1)
+  tau_period_foi_female ~ dgamma(1, 1)
 
-  # tau_period_foi_male ~ dgamma(1, 1)
-  # tau_period_foi_female ~ dgamma(1, 1)
-
-  # for (k in 1:nknots_foi_cgam) {
-  #   ln_b_foi_cgam_f[k] ~ dnorm(0, tau_period_foi_female)
-  #   b_foi_cgam_f[k] <- exp(ln_b_foi_cgam_f[k])
+  for (k in 1:nknots_foi_cgam) {
+    ln_b_foi_cgam_f[k] ~ dnorm(0, tau_period_foi_female)
+    b_foi_cgam_f[k] <- exp(ln_b_foi_cgam_f[k])
     
-  #   ln_b_foi_cgam_m[k] ~ dnorm(0, tau_period_foi_male)
-  #   b_foi_cgam_m[k] <- exp(ln_b_foi_cgam_m[k])
-  # }
-  # for (t in 1:n_year) {
-  #   m_period_foi_cgam_temp[t] <- inprod(b_foi_cgam_m[1:nknots_foi_cgam],
-  #                                Z_foi_cgam[t, 1:nknots_foi_cgam])
-  #   m_period_foi_cgam[t] <- m_period_foi_cgam_temp[t] - m_mu_foi_cgam
+    ln_b_foi_cgam_m[k] ~ dnorm(0, tau_period_foi_male)
+    b_foi_cgam_m[k] <- exp(ln_b_foi_cgam_m[k])
+  }
+  for (t in 1:n_year) {
+    m_period_foi_cgam_temp[t] <- inprod(b_foi_cgam_m[1:nknots_foi_cgam],
+                                 Z_foi_cgam[t, 1:nknots_foi_cgam])
+    m_period_foi_cgam[t] <- m_period_foi_cgam_temp[t] - m_mu_foi_cgam
 
-  #   f_period_foi_cgam_temp[t] <- inprod(b_foi_cgam_f[1:nknots_foi_cgam],
-  #                                Z_foi_cgam[t, 1:nknots_foi_cgam])
-  #   f_period_foi_cgam[t] <- f_period_foi_cgam_temp[t] - f_mu_foi_cgam
+    f_period_foi_cgam_temp[t] <- inprod(b_foi_cgam_f[1:nknots_foi_cgam],
+                                 Z_foi_cgam[t, 1:nknots_foi_cgam])
+    f_period_foi_cgam[t] <- f_period_foi_cgam_temp[t] - f_mu_foi_cgam
 
-  # }
-  # m_mu_foi_cgam <- mean(m_period_foi_cgam_temp[1:n_year])
-  # f_mu_foi_cgam <- mean(f_period_foi_cgam_temp[1:n_year])
+  }
+  m_mu_foi_cgam <- mean(m_period_foi_cgam_temp[1:n_year])
+  f_mu_foi_cgam <- mean(f_period_foi_cgam_temp[1:n_year])
 
-  # ##########################################################
-  # ### FOI period effect additive spline
-  # ##########################################################
+  ##########################################################
+  ### FOI period effect additive spline
+  ##########################################################
 
+  tau_foi_spline_male ~ dgamma(.01, .01)
+  tau_foi_spline_female ~ dgamma(.01, .01)
+  for (k in 1:nknots_foi_spline) {
+    f_b_foi_spline[k] ~ ddexp(0, tau_foi_spline_female)
+    m_b_foi_spline[k] ~ ddexp(0, tau_foi_spline_male)
+  }
+  for (t in 1:(n_year/2)) {
+    m_period_foi_spline[t] <- inprod(m_b_foi_spline[1:nknots_foi_spline],
+                                   Z_foi_spline[t, 1:nknots_foi_spline])
+    f_period_foi_spline[t] <- inprod(f_b_foi_spline[1:nknots_foi_spline],
+                                   Z_foi_spline[t, 1:nknots_foi_spline])
+  }
 
-  # tau_foi_spline_male ~ dgamma(.01, .01)
-  # tau_foi_spline_female ~ dgamma(.01, .01)
-  # for (k in 1:nknots_foi_spline) {
-  #   f_b_foi_spline[k] ~ ddexp(0, tau_foi_spline_female)
-  #   m_b_foi_spline[k] ~ ddexp(0, tau_foi_spline_male)
-  # }
-  # for (t in 1:(n_year/2)) {
-  #   m_period_foi_spline[t] <- inprod(m_b_foi_spline[1:nknots_foi_spline],
-  #                                  Z_foi_spline[t, 1:nknots_foi_spline])
-  #   f_period_foi_spline[t] <- inprod(f_b_foi_spline[1:nknots_foi_spline],
-  #                                  Z_foi_spline[t, 1:nknots_foi_spline])
-  # }
-
-  # f_period_foi[1:(n_year/2)] <- f_period_foi_cgam[1:(n_year/2)]
-  # m_period_foi[1:(n_year/2)] <- m_period_foi_cgam[1:(n_year/2)]
-  # f_period_foi[(n_year * .5 + 1):n_year]<- f_period_foi_cgam[(n_year * .5 + 1):n_year] + f_period_foi_spline[1:(n_year * .5)]
-  # m_period_foi[(n_year * .5 + 1):n_year]<- m_period_foi_cgam[(n_year * .5 + 1):n_year] + m_period_foi_spline[1:(n_year * .5)]
+  f_period_foi[1:(n_year/2)] <- f_period_foi_cgam[1:(n_year/2)]
+  m_period_foi[1:(n_year/2)] <- m_period_foi_cgam[1:(n_year/2)]
+  f_period_foi[(n_year * .5 + 1):n_year]<- f_period_foi_cgam[(n_year * .5 + 1):n_year] + f_period_foi_spline[1:(n_year * .5)]
+  m_period_foi[(n_year * .5 + 1):n_year]<- m_period_foi_cgam[(n_year * .5 + 1):n_year] + m_period_foi_spline[1:(n_year * .5)]
 
   ##########################################################
   ### Random effect for East/West spatial model
@@ -192,7 +191,7 @@ modelcode <- nimbleCode({
   beta0_survival_inf <- beta0_inf_temp * inf_mix
 
   ########################################
-  ### Priors for Age and Period effects
+  ### Priors for Age Effects Survival
   ########################################
 
   # ### Age effects
@@ -213,6 +212,10 @@ modelcode <- nimbleCode({
   #                              mu_age_effect_survival_temp
   # }
 
+  ########################################
+  ### Priors for Period Effects Survival
+  ########################################
+
   ### Period effects from collar data
   for (k in 1:nknots_period) {
     b_period_survival[k] ~ dnorm(0, tau_period_survival)
@@ -223,17 +226,25 @@ modelcode <- nimbleCode({
                                     Z_period[t, 1:nknots_period])
   }
 
-  # #Period effects from aah data
+  # ### Period effects from aah data
   # tau_period_precollar ~ dgamma(1,1)
   # for (k in 1:(n_year_precollar + 1)) {
   #   period_annual_survival[k] ~ dnorm(0, tau_period_precollar)
   # }
 
+<<<<<<< HEAD
+  # ### Period effects from aah data - multiple intercepts version
+  # tau_period_precollar ~ dgamma(1, 1)
+  # period_int_survival ~ dnorm(0, tau_period_precollar)
+  # period_annual_survival[1:18] <- period_int_survival
+  # period_annual_survival[19:(n_year_precollar+1)] <- 0
+=======
   #Period effects from aah data - multiple intercepts version
   tau_period_precollar ~ dgamma(1, 1)
   period_int_survival ~ dnorm(0, tau_period_precollar)
   period_annual_survival[1:18] <- period_int_survival
   period_annual_survival[19:(n_year_precollar+1)] <- 0
+>>>>>>> b93a35672d5207b38a76a5936005e5a6c9ef23bc
 
 
   period_effect_survival[1:nT_period_overall_ext] <- set_period_effects_constant(
@@ -265,6 +276,36 @@ modelcode <- nimbleCode({
 #         indx_mat_pe_surv = indx_mat_pe_surv[1:6,1:intvl_step_yr],
 #         intvl_step_yr = intvl_step_yr
 #   )
+
+
+
+  #######################################################################
+  ###
+  ###   User defined distribution for likelihood for
+  ###   all harvested deer without joint estimation w/ survival
+  ###
+  ###   d_fit_hunt
+  ###
+  #######################################################################
+
+  # y_hunt ~ dFOIhunt(
+  #                 test_status = hunt_test_status[1:nHarvest],
+  #                 n_cases = hunt_n_cases[1:nHarvest],
+  #                 n_samples = nHarvest,
+  #                 a = hunt_ageweeks[1:nHarvest], #age (weeks) at harvest
+  #                 sex = hunt_sex[1:nHarvest],
+  #                 age2date = hunt_age2date[1:nHarvest],
+  #                 f_age_foi = f_age_foi[1:n_ageclassf],
+  #                 m_age_foi = m_age_foi[1:n_ageclassm],
+  #                 age_lookup_f = age_lookup_f[1:nT_age_surv],
+  #                 age_lookup_m = age_lookup_m[1:nT_age_surv],
+  #                 period_lookup_foi = period_lookup_foi[1:nT_period_overall_ext],
+  #                 f_period_foi = f_period_foi[1:n_year],
+  #                 m_period_foi = m_period_foi[1:n_year],
+  #                 space = space[1:n_study_area],
+  #                 sect = sect_hunt[1:nHarvest]
+  #                 )
+
 
   #######################################################################
   #######################################################################
@@ -304,14 +345,14 @@ modelcode <- nimbleCode({
                   sect = sect_hunt_pos[1:nInfHarvest]
                   )
 
-#######################################################################
-###
-###   User defined distribution for likelihood for
-###   uninfected harvest deer
-###   d_fit_hunt_neg
-###   Overleaf Equation (5)
-###
-#######################################################################
+######################################################################
+##
+##   User defined distribution for likelihood for
+##   uninfected harvest deer
+##   d_fit_hunt_neg
+##   Overleaf Equation (5)
+##
+######################################################################
 
   y_hunt_neg ~ dSusHarvest(
                   n_cases = hunt_neg_n_cases[1:nInfHarvest],

@@ -102,10 +102,13 @@ nknots_period <- dim(Z_period)[2]
 
 ################################################################
 ###
-### Function for Basis Expansion - 
-### Convex shape neither decreasing or increasing
+### Functions for Basis Expansion - 
 ### From Meyer et al (2008)
 ###
+################################################################
+
+################################################################
+### Convex shape neither decreasing or increasing
 ################################################################
 
 convex = function(x, t, pred.new=TRUE){
@@ -150,11 +153,62 @@ convex = function(x, t, pred.new=TRUE){
 }
 
 
+################################################################
+### Decreasing Convex shape 
+################################################################
+
+decconvex=function(x,t)
+{
+  n=length(x)
+  k=length(t)-2
+  m=k+3
+  sigma=matrix(1:(m*n)*0,nrow=m,ncol=n)
+  for(j in 1:k){
+    i1=x<=t[j]
+    sigma[j,i1] = x[i1]-t[1]
+    i2=x>t[j]&x<=t[j+1]
+    sigma[j,i2] = t[j]-t[1]+((t[j+1]-t[j])^3-(t[j+1]-x[i2])^3)/3/(t[j+1]-t[j])/(t[j+2]-t[j]) +(x[i2]-t[j])*(t[j+2]-t[j+1])/(t[j+2]-t[j])
+    i3=x>t[j+1]&x<=t[j+2]
+    sigma[j,i3] = t[j]-t[1] + (t[j+1]-t[j])^2/3/(t[j+2]-t[j]) + (t[j+2]-t[j+1])*(t[j+1]-t[j])/(t[j+2]-t[j]) +((t[j+2]-t[j+1])^3-(t[j+2]-x[i3])^3)/3/(t[j+2]-t[j+1])/(t[j+2]-t[j])
+    i4=x>=t[j+2]
+    sigma[j,i4] = t[j]-t[1] + (t[j+1]-t[j])^2/3/(t[j+2]-t[j]) + (t[j+2]-t[j+1])*(t[j+1]-t[j])/(t[j+2]-t[j]) +(t[j+2]-t[j+1])^2/3/(t[j+2]-t[j])
+  }
+  i1=x<=t[2]
+  sigma[k+1,i1]=-(t[2]-x[i1])^3/3/(t[2]-t[1])^2
+  i2=x>t[2]
+  sigma[k+1,i2]=0
+  i1=x<=t[k+1]
+  sigma[k+2,i1]=x[i1]-t[1]
+  i2=x>t[k+1]&x<=t[k+2]
+  sigma[k+2,i2]=t[k+1]-t[1]+((t[k+2]-t[k+1])^2*(x[i2]-t[k+1])-(x[i2]-t[k+1])^3/3)/(t[k+2]-t[k+1])^2
+  i3=x>t[k+2]
+  sigma[k+2,i3]=t[k+1]-t[1]+((t[k+2]-t[k+1])^2*(t[k+2]-t[k+1])-(t[k+2]-t[k+1])^3/3)/(t[k+2]-t[k+1])^2
+  sigma[k+3,]=x
+  
+  center.vector=apply(sigma,1,mean)
+  
+  list(sigma=-sigma, center.vector=-center.vector)
+}
+
 ##############################################################
-###
-### Basis calculated from the BCGAM Meyer (2008) and
-### bcgam R-package
-###
+### Caculating the basis expansion CONVEX
+##############################################################
+
+# quant_age <- .2
+# knots_age <- c(1, round(quantile(d_surv$right_age_r,
+#                        c(seq(quant_age, .99, by = quant_age),
+#                        .99))))
+# knots_age <- unique(knots_age)
+# delta_i <- convex(1:nT_age_surv, knots_age, pred.new = FALSE)
+# delta <- t(rbind(delta_i$sigma - 
+#                 t(delta_i$x.mat %*%
+#                 delta_i$center.vector)))
+# delta <- delta / max(delta)
+# Z_age <- delta
+# nknots_age <- dim(Z_age)[2]
+
+##############################################################
+### Caculating the basis expansion CONVEX DECREASING
 ##############################################################
 
 quant_age <- .2
@@ -162,13 +216,11 @@ knots_age <- c(1, round(quantile(d_surv$right_age_r,
                        c(seq(quant_age, .99, by = quant_age),
                        .99))))
 knots_age <- unique(knots_age)
-delta_i <- convex(1:nT_age_surv, knots_age, pred.new = FALSE)
-delta <- t(rbind(delta_i$sigma - 
-                t(delta_i$x.mat %*%
-                delta_i$center.vector)))
-delta <- delta / max(delta)
-Z_age <- delta
+delta_i <- decconvex(1:nT_age_surv, knots_age)
+delta <- t(delta_i$sigma - delta_i$center.vector)
+Z_age <- delta / max(delta)
 nknots_age <- dim(Z_age)[2]
+
 
 # #############################################################
 # ###
