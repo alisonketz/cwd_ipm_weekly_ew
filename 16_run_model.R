@@ -223,15 +223,9 @@ initsFun <- function()list(beta_male = rnorm(1, -.2, .01),
     # tau_age_survival = runif(1, .1, 1),
     b_period_survival = rnorm(nknots_period) * 10^-4,
     tau_period_survival = runif(1, .1, 1),
-<<<<<<< HEAD
     # tau_period_precollar = rgamma(1, 1, 1),
     # period_annual_survival = rnorm(n_year_precollar + 1, 0, .1),
     # period_int_survival = rnorm(1, 0, .1),
-=======
-    tau_period_precollar = rgamma(1, 1, 1),
-    # period_annual_survival = rnorm(n_year_precollar + 1, 0, .1),
-    period_int_survival = rnorm(1, 0, .1),
->>>>>>> b93a35672d5207b38a76a5936005e5a6c9ef23bc
     # m_period_foi = seq(-.25, .25, length = n_year),
     # f_period_foi = seq(-.25, .25, length = n_year),
     # m_period_foi_temp = seq(-.25, .25, length = n_year),

@@ -232,19 +232,11 @@ modelcode <- nimbleCode({
   #   period_annual_survival[k] ~ dnorm(0, tau_period_precollar)
   # }
 
-<<<<<<< HEAD
-  # ### Period effects from aah data - multiple intercepts version
+  #Period effects from aah data - multiple intercepts version
   # tau_period_precollar ~ dgamma(1, 1)
   # period_int_survival ~ dnorm(0, tau_period_precollar)
   # period_annual_survival[1:18] <- period_int_survival
   # period_annual_survival[19:(n_year_precollar+1)] <- 0
-=======
-  #Period effects from aah data - multiple intercepts version
-  tau_period_precollar ~ dgamma(1, 1)
-  period_int_survival ~ dnorm(0, tau_period_precollar)
-  period_annual_survival[1:18] <- period_int_survival
-  period_annual_survival[19:(n_year_precollar+1)] <- 0
->>>>>>> b93a35672d5207b38a76a5936005e5a6c9ef23bc
 
 
   period_effect_survival[1:nT_period_overall_ext] <- set_period_effects_constant(
