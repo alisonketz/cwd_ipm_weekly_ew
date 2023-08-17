@@ -223,8 +223,15 @@ modelcode <- nimbleCode({
   tau_period_survival ~ dgamma(1, 1)
   for (t in 1:nT_period_collar) {
     period_effect_surv[t] <- inprod(b_period_survival[1:nknots_period],
-                                    Z_period[t, 1:nknots_period])
+                                    Z_period[t, 1:nknots_period]) +
+                              Z_cause_gun[t] * beta_harvest_gun + 
+                              Z_cause_ng[t] * beta_harvest_ng
+
   }
+
+  #additive effect of harvest on total mortality hazard
+  beta_harvest_gun ~ dnorm(0, .01)
+  beta_harvest_ng ~ dnorm(0, .01)
 
   # ### Period effects from aah data
   # tau_period_precollar ~ dgamma(1,1)
@@ -237,7 +244,6 @@ modelcode <- nimbleCode({
   # period_int_survival ~ dnorm(0, tau_period_precollar)
   # period_annual_survival[1:18] <- period_int_survival
   # period_annual_survival[19:(n_year_precollar+1)] <- 0
-
 
   period_effect_survival[1:nT_period_overall_ext] <- set_period_effects_constant(
         n_year_precollar = n_year_precollar,

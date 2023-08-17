@@ -13,7 +13,7 @@
 fit_sum <- mcmcout$summary
 out <- mcmcout$samples
 
-modelid <- "W"
+modelid <- "Z"
 
 #############################
 ### Saving Model Description
@@ -25,12 +25,12 @@ cat("burnin:  ",bin,"\n")
 cat("n_chains:  ",n_chains,"\n")
 cat("Model Variation:\n")
 cat("allowing beta0_survival_inf and beta0_Survival_sus to be estimated with parameter expansion \n")
-cat("includes ageing data aah likelihoods\n")
+cat("includes aging data aah likelihoods\n")
 cat("removed population model\n")
 cat("removed fecundity model \n")
 cat("includes cause-specific model \n")
-cat("no FOI period effects\n")
-cat("collar only survival period effects, no precollar period effects survival\n")
+cat("includes FOI period effects\n")
+cat("collar only survival period effects, no precollar period effects survival, additive effect of harvest season time varying step fun\n")
 cat("NO survival age effects cgam convex \n\n")
 cat("runtime:  ",runtime,"\n")
 cat("Summary Stats:  \n")
@@ -67,10 +67,13 @@ traceplot(out[, "space[2]"], ylab = "space[2]")
 # traceplot(out[, "beta0_inf_temp"], ylab = "beta0_inf_temp")
 traceplot(out[, "beta0_survival_sus"], ylab = "beta0_survival_sus")
 traceplot(out[, "beta0_survival_inf"], ylab = "beta0_survival_inf")
+traceplot(out[, "beta_male"], ylab = "beta_male")
+traceplot(out[, "beta_harvest_gun"], ylab = "beta_harvest_gun")
+traceplot(out[, "beta_harvest_ng"], ylab = "beta_harvest_ng")
 traceplot(out[, "tau_age_survival"], ylab = "tau_age_survival")
 traceplot(out[, "tau_period_survival"], ylab = "tau_period_survival")
-traceplot(out[, "period_int_survival[1]"], ylab = "period_int_survival[1]")
-traceplot(out[, "period_int_survival[2]"], ylab = "period_int_survival[2]")
+traceplot(out[, "period_survival[1]"], ylab = "period_survival[1]")
+traceplot(out[, "period_survival[2]"], ylab = "period_survival[2]")
 traceplot(out[, "tau_period_precollar"], ylab = "tau_period_precollar")
 traceplot(out[, "beta0_cause"], ylab = "beta0_cause")
 traceplot(out[, "beta_cause_gun"], ylab = "beta_cause_gun")
@@ -245,6 +248,76 @@ sh_sus_plot
 sh_inf_plot
 dev.off()
 
+
+# ######################################################################
+# ###
+# ### Including intercept in the above plots
+# ###
+# #######################################################################
+###############################################
+###
+### Plots of age effects for mortality hazard
+###
+###############################################
+
+ae_indx <- grep("age_effect",rownames(fit_sum))
+
+age_effect_mean <- fit_sum[ae_indx,2]
+age_effect_lower <- fit_sum[ae_indx,4]
+age_effect_upper <- fit_sum[ae_indx,5]
+
+weeks <- 1:nT_age_surv
+
+out_age_effect <- data.frame(weeks,age_effect_mean,age_effect_lower,age_effect_upper)
+
+age_effect_plot <- ggplot(data =out_age_effect,aes(x = weeks))+
+  geom_line(aes(x = weeks,y=age_effect_mean),size=1)+
+  geom_ribbon(aes(ymin=age_effect_lower,ymax=age_effect_upper),alpha=.2,linetype=0)+
+  ggtitle("Age Effect Posterior")+xlab("Age (Years)")+ylab("Effect Size")+
+  theme_bw()#+
+  #scale_x_continuous(breaks = seq(0,nT_age_surv,by=104),labels=seq(0,n_year,by=2))+
+  #scale_color_manual("Year",values = met.brewer("Kandinsky", 2)) +
+  #scale_fill_manual("Year",values = met.brewer("Kandinsky", 2))
+  # theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+age_effect_plot
+
+# ggsave("figures/age_effect_inf_int.pdf",age_effect_plot_inf_int)
+ggsave(paste0("figures/",modelid,"/age_effect_",modelid,".png"),age_effect_plot)
+
+###############################################
+###############################################
+###
+### Plots of period effects for mortality hazard
+###
+###############################################
+###############################################
+
+te_indx <- grep("period_effect",rownames(fit_sum))[(nT_period_precollar_ext + 1):(nT_period_overall_ext)]
+
+period_effect_mean <- fit_sum[te_indx,1] 
+period_effect_lower <- fit_sum[te_indx,4] 
+period_effect_upper <- fit_sum[te_indx,5]
+
+weeks <- 1:nT_period_collar
+
+out_period_effect <- data.frame(weeks,period_effect_mean,period_effect_lower,period_effect_upper)
+# out_period_effect_inf_int$disease <- "Infected"
+
+period_effect_plot <- ggplot(data =out_period_effect,aes(x = weeks))+
+  geom_line(aes(x = weeks,y=period_effect_mean),size=1)+
+  geom_ribbon(aes(ymin=period_effect_lower,ymax=period_effect_upper),alpha=.2,linetype=0)+
+  ggtitle("Log Hazard Period Effect Posterior")+xlab("Period (Weeks)")+ylab("Effect Size")+
+  theme_bw()
+  # scale_x_continuous(breaks = seq(0,inf_nT_period,by=104),labels=seq(0,18,by=2))+
+  # scale_color_manual("CWD\nStatus",values = met.brewer("Kandinsky", 2)) +
+  # scale_fill_manual("CWD\nStatus",values = met.brewer("Kandinsky", 2))
+  # theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+period_effect_plot
+
+# ggsave("figures/period_effect_inf_int.pdf",period_effect_plot_inf_int)
+ggsave(paste0("figures/",modelid,"/period_effects_",modelid,".png"),period_effect_plot)
 
 
 # ##########################################################
@@ -791,144 +864,174 @@ dev.off()
 # ggsave("figures/beta_sex_plot_combo.png",beta_sex_plot_combo,height=5,width=6)
 
 
-# ######################################################################
+# # ######################################################################
+# # ###
+# # ### Including intercept in the above plots
+# # ###
+# # #######################################################################
+# ###############################################
 # ###
-# ### Including intercept in the above plots
+# ### Plots of age effects for mortality hazard
 # ###
-# #######################################################################
+# ###############################################
+
+# ae_indx <- grep("age_effect",rownames(fit_sum))
+
+# age_effect_mean <- fit_sum[ae_indx,2]
+# age_effect_lower <- fit_sum[ae_indx,4]
+# age_effect_upper <- fit_sum[ae_indx,5]
+
+# weeks <- 1:nT_age_surv
+
+# out_age_effect <- data.frame(weeks,age_effect_mean,age_effect_lower,age_effect_upper)
+
+# age_effect_plot <- ggplot(data =out_age_effect,aes(x = weeks))+
+#   geom_line(aes(x = weeks,y=age_effect_mean),size=1)+
+#   geom_ribbon(aes(ymin=age_effect_lower,ymax=age_effect_upper),alpha=.2,linetype=0)+
+#   ggtitle("Age Effect Posterior")+xlab("Age (Years)")+ylab("Effect Size")+
+#   theme_bw()#+
+#   #scale_x_continuous(breaks = seq(0,nT_age_surv,by=104),labels=seq(0,n_year,by=2))+
+#   #scale_color_manual("Year",values = met.brewer("Kandinsky", 2)) +
+#   #scale_fill_manual("Year",values = met.brewer("Kandinsky", 2))
+#   # theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+# age_effect_plot
+
+# # ggsave("figures/age_effect_inf_int.pdf",age_effect_plot_inf_int)
+# ggsave(paste0("figures/",modelid,"/age_effect_",modelid,".png"),age_effect_plot)
 
 
-###############################################
-###
-### Plots of age effects for mortality hazard
-###
-###############################################
+# ###############################################
+# ###
+# ### Plots of age effects for mortality hazard
+# ###
+# ###############################################
 
-beta0mn_inf <- fit_sum[grep("beta0_survival_inf", rownames(fit_sum)),1]
-beta0mn_inf
+# beta0mn_inf <- fit_sum[grep("beta0_survival_inf", rownames(fit_sum)),1]
+# beta0mn_inf
 
-ae_indx <- grep("age_effect",rownames(fit_sum))
+# ae_indx <- grep("age_effect",rownames(fit_sum))
 
-age_effect_mean <- fit_sum[ae_indx,2] + beta0mn_inf
-age_effect_lower <- fit_sum[ae_indx,4] + beta0mn_inf
-age_effect_upper <- fit_sum[ae_indx,5] + beta0mn_inf
+# age_effect_mean <- fit_sum[ae_indx,2] + beta0mn_inf
+# age_effect_lower <- fit_sum[ae_indx,4] + beta0mn_inf
+# age_effect_upper <- fit_sum[ae_indx,5] + beta0mn_inf
 
-weeks <- 1:nT_age_surv
+# weeks <- 1:nT_age_surv
 
-out_age_effect_inf_int <- data.frame(weeks,age_effect_mean,age_effect_lower,age_effect_upper)
-out_age_effect_inf_int$disease <- "Infected"
+# out_age_effect_inf_int <- data.frame(weeks,age_effect_mean,age_effect_lower,age_effect_upper)
+# out_age_effect_inf_int$disease <- "Infected"
 
-age_effect_plot_inf_int <- ggplot(data =out_age_effect_inf_int,aes(x = weeks))+
-  geom_line(aes(x = weeks,y=age_effect_mean),size=1)+
-  geom_ribbon(aes(ymin=age_effect_lower,ymax=age_effect_upper),alpha=.2,linetype=0)+
-  ggtitle("Infected Age Effect Posterior")+xlab("Age (Years)")+ylab("Effect Size")+
-  theme_bw()#+
-  #scale_x_continuous(breaks = seq(0,nT_age_surv,by=104),labels=seq(0,n_year,by=2))+
-  #scale_color_manual("Year",values = met.brewer("Kandinsky", 2)) +
-  #scale_fill_manual("Year",values = met.brewer("Kandinsky", 2))
-  # theme(axis.text.x = element_text(angle = 90, hjust = 1))
+# age_effect_plot_inf_int <- ggplot(data =out_age_effect_inf_int,aes(x = weeks))+
+#   geom_line(aes(x = weeks,y=age_effect_mean),size=1)+
+#   geom_ribbon(aes(ymin=age_effect_lower,ymax=age_effect_upper),alpha=.2,linetype=0)+
+#   ggtitle("Infected Age Effect Posterior")+xlab("Age (Years)")+ylab("Effect Size")+
+#   theme_bw()#+
+#   #scale_x_continuous(breaks = seq(0,nT_age_surv,by=104),labels=seq(0,n_year,by=2))+
+#   #scale_color_manual("Year",values = met.brewer("Kandinsky", 2)) +
+#   #scale_fill_manual("Year",values = met.brewer("Kandinsky", 2))
+#   # theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
-age_effect_plot_inf_int
+# age_effect_plot_inf_int
 
-# ggsave("figures/age_effect_inf_int.pdf",age_effect_plot_inf_int)
-ggsave(paste0("figures/",modelid,"/age_effect_inf_int_",modelid,".png"),age_effect_plot_inf_int)
+# # ggsave("figures/age_effect_inf_int.pdf",age_effect_plot_inf_int)
+# ggsave(paste0("figures/",modelid,"/age_effect_inf_int_",modelid,".png"),age_effect_plot_inf_int)
 
-###############################################
-###
-### Plots of age effects for mortality hazard
-###
-###############################################
-beta0mn_sus <- fit_sum[grep("beta0_survival_sus", rownames(fit_sum)),1]
-beta0mn_sus
+# ###############################################
+# ###
+# ### Plots of age effects for mortality hazard
+# ###
+# ###############################################
+# beta0mn_sus <- fit_sum[grep("beta0_survival_sus", rownames(fit_sum)),1]
+# beta0mn_sus
 
-ae_indx <- grep("age_effect",rownames(fit_sum))
+# ae_indx <- grep("age_effect",rownames(fit_sum))
 
-age_effect_mean <- fit_sum[ae_indx,1] + beta0mn_sus
-age_effect_lower <- fit_sum[ae_indx,4] + beta0mn_sus
-age_effect_upper <- fit_sum[ae_indx,5] + beta0mn_sus
+# age_effect_mean <- fit_sum[ae_indx,1] + beta0mn_sus
+# age_effect_lower <- fit_sum[ae_indx,4] + beta0mn_sus
+# age_effect_upper <- fit_sum[ae_indx,5] + beta0mn_sus
 
-weeks <- 1:nT_age_surv
+# weeks <- 1:nT_age_surv
 
-out_age_effect_sus_int <- data.frame(weeks,age_effect_mean,age_effect_lower,age_effect_upper)
-out_age_effect_sus_int$disease = "Susceptible"
+# out_age_effect_sus_int <- data.frame(weeks,age_effect_mean,age_effect_lower,age_effect_upper)
+# out_age_effect_sus_int$disease = "Susceptible"
 
-age_effect_plot_sus_int <- ggplot(data =out_age_effect_sus_int,aes(x = weeks))+
-  geom_line(aes(x = weeks,y=age_effect_mean),size=1)+
-#   geom_line(aes(x = weeks,y=age_effect_lower),size=1, linetype = "dashed")+
-#     geom_line(aes(x = weeks,y=age_effect_upper),size=1,linetype = "dashed")+
-  geom_ribbon(aes(ymin=age_effect_lower,ymax=age_effect_upper),alpha=.2,linetype=0)+
-  ggtitle("Susceptible Age Effect Posterior")+xlab("Age (Years)")+ylab("Effect Size")+
-  theme_bw()#+
+# age_effect_plot_sus_int <- ggplot(data =out_age_effect_sus_int,aes(x = weeks))+
+#   geom_line(aes(x = weeks,y=age_effect_mean),size=1)+
+# #   geom_line(aes(x = weeks,y=age_effect_lower),size=1, linetype = "dashed")+
+# #     geom_line(aes(x = weeks,y=age_effect_upper),size=1,linetype = "dashed")+
+#   geom_ribbon(aes(ymin=age_effect_lower,ymax=age_effect_upper),alpha=.2,linetype=0)+
+#   ggtitle("Susceptible Age Effect Posterior")+xlab("Age (Years)")+ylab("Effect Size")+
+#   theme_bw()#+
+# #   scale_x_continuous(breaks = seq(0,nT_age_surv,by=104),labels=seq(0,18,by=2))+
+# #   scale_color_manual("Year",values = met.brewer("Kandinsky", 2)) +
+# #   scale_fill_manual("Year",values = met.brewer("Kandinsky", 2))
+  
+#   # theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+# age_effect_plot_sus_int
+ 
+# # ggsave("figures/age_effect_sus_int.pdf",age_effect_plot_sus_int)
+# # ggsave("figures/age_effect_sus_int.png",age_effect_plot_sus_int)
+# ggsave(paste0("figures/",modelid,"/age_effect_sus_int",modelid,".png"),age_effect_plot_sus_int)
+
+# # ###
+# # ### combo plot of age effects for infected/susceptibles
+# # ###
+
+# out_age_effect_int <- rbind(out_age_effect_sus_int,out_age_effect_inf_int)
+# out_age_effect_int$disease <- factor(out_age_effect_int$disease,levels=c("Susceptible","Infected"))
+
+# age_effect_plot_combo_int <- ggplot(data =out_age_effect_int,aes(x = weeks,color=disease,fill=disease))+
+#   geom_line(aes(x = weeks,y=age_effect_mean),size=1)+
+#   geom_ribbon(aes(ymin=age_effect_lower,ymax=age_effect_upper),alpha=.2,linetype=0)+
+#   ggtitle("Age Effect Posterior")+xlab("Age (Years)")+ylab("Effect Size")+
+#   theme_bw()+
 #   scale_x_continuous(breaks = seq(0,nT_age_surv,by=104),labels=seq(0,18,by=2))+
 #   scale_color_manual("Year",values = met.brewer("Kandinsky", 2)) +
-#   scale_fill_manual("Year",values = met.brewer("Kandinsky", 2))
-  
-  # theme(axis.text.x = element_text(angle = 90, hjust = 1))
+#   scale_fill_manual("Year",values = met.brewer("Kandinsky", 2))+
+#   facet_wrap(.~disease)
+#   # theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
-age_effect_plot_sus_int
+# age_effect_plot_combo_int
  
-# ggsave("figures/age_effect_sus_int.pdf",age_effect_plot_sus_int)
-# ggsave("figures/age_effect_sus_int.png",age_effect_plot_sus_int)
-ggsave(paste0("figures/",modelid,"/age_effect_sus_int",modelid,".png"),age_effect_plot_sus_int)
-
-# ###
-# ### combo plot of age effects for infected/susceptibles
-# ###
-
-out_age_effect_int <- rbind(out_age_effect_sus_int,out_age_effect_inf_int)
-out_age_effect_int$disease <- factor(out_age_effect_int$disease,levels=c("Susceptible","Infected"))
-
-age_effect_plot_combo_int <- ggplot(data =out_age_effect_int,aes(x = weeks,color=disease,fill=disease))+
-  geom_line(aes(x = weeks,y=age_effect_mean),size=1)+
-  geom_ribbon(aes(ymin=age_effect_lower,ymax=age_effect_upper),alpha=.2,linetype=0)+
-  ggtitle("Age Effect Posterior")+xlab("Age (Years)")+ylab("Effect Size")+
-  theme_bw()+
-  scale_x_continuous(breaks = seq(0,nT_age_surv,by=104),labels=seq(0,18,by=2))+
-  scale_color_manual("Year",values = met.brewer("Kandinsky", 2)) +
-  scale_fill_manual("Year",values = met.brewer("Kandinsky", 2))+
-  facet_wrap(.~disease)
-  # theme(axis.text.x = element_text(angle = 90, hjust = 1))
-
-age_effect_plot_combo_int
- 
-# ggsave("figures/age_effect_combo_int.pdf",age_effect_plot_combo_int,height=4,width=8)
-# ggsave("figures/age_effect_combo_int.png",age_effect_plot_combo_int,height=4,width=8)
-ggsave(paste0("figures/",modelid,"/age_effect_plot_combo_int",modelid,".png"),age_effect_plot_combo_int)
+# # ggsave("figures/age_effect_combo_int.pdf",age_effect_plot_combo_int,height=4,width=8)
+# # ggsave("figures/age_effect_combo_int.png",age_effect_plot_combo_int,height=4,width=8)
+# ggsave(paste0("figures/",modelid,"/age_effect_plot_combo_int",modelid,".png"),age_effect_plot_combo_int)
 
 
-
+# ###############################################
 # ###############################################
 # ###
 # ### Plots of period effects for mortality hazard
 # ###
 # ###############################################
+# ###############################################
 
-# te_indx <- grep("period_effect",rownames(fit_sum))
+# te_indx <- grep("period_effect",rownames(fit_sum))[(nT_period_precollar_ext + 1):(nT_period_overall_ext)]
 
-# period_effect_mean <- fit_sum[te_indx,1] + beta0mn_inf
-# period_effect_lower <- fit_sum[te_indx,4] + beta0mn_inf
-# period_effect_upper <- fit_sum[te_indx,5] + beta0mn_inf
+# period_effect_mean <- fit_sum[te_indx,1] 
+# period_effect_lower <- fit_sum[te_indx,4] 
+# period_effect_upper <- fit_sum[te_indx,5]
 
-# weeks <- 1:nT_period
+# weeks <- 1:nT_period_collar
 
-# out_period_effect_inf_int <- data.frame(weeks,period_effect_mean,period_effect_lower,period_effect_upper)
-# out_period_effect_inf_int$disease <- "Infected"
+# out_period_effect <- data.frame(weeks,period_effect_mean,period_effect_lower,period_effect_upper)
+# # out_period_effect_inf_int$disease <- "Infected"
 
-# period_effect_plot_inf_int <- ggplot(data =out_period_effect_inf_int,aes(x = weeks))+
+# period_effect_plot <- ggplot(data =out_period_effect,aes(x = weeks))+
 #   geom_line(aes(x = weeks,y=period_effect_mean),size=1)+
 #   geom_ribbon(aes(ymin=period_effect_lower,ymax=period_effect_upper),alpha=.2,linetype=0)+
-#   ggtitle("Infected Period Effect Posterior")+xlab("Period (Weeks)")+ylab("Effect Size")+
-#   theme_bw()+
+#   ggtitle("Log Hazard Period Effect Posterior")+xlab("Period (Weeks)")+ylab("Effect Size")+
+#   theme_bw()
 #   # scale_x_continuous(breaks = seq(0,inf_nT_period,by=104),labels=seq(0,18,by=2))+
-#   scale_color_manual("CWD\nStatus",values = met.brewer("Kandinsky", 2)) +
-#   scale_fill_manual("CWD\nStatus",values = met.brewer("Kandinsky", 2))
-  
+#   # scale_color_manual("CWD\nStatus",values = met.brewer("Kandinsky", 2)) +
+#   # scale_fill_manual("CWD\nStatus",values = met.brewer("Kandinsky", 2))
 #   # theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
-# period_effect_plot_inf_int
+# period_effect_plot
 
-# ggsave("figures/period_effect_inf_int.pdf",period_effect_plot_inf_int)
-# ggsave("figures/period_effect_inf_int.png",period_effect_plot_inf_int)
+# # ggsave("figures/period_effect_inf_int.pdf",period_effect_plot_inf_int)
+# ggsave(paste0("figures/",modelid,"/period_effects_",modelid,".png"),period_effect_plot)
 
 # ###############################################
 # ###
