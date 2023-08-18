@@ -110,54 +110,55 @@ modelcode <- nimbleCode({
   ### FOI period effect cgam, sex-specific
   ##########################################################
 
-  tau_period_foi_male ~ dgamma(1, 1)
-  tau_period_foi_female ~ dgamma(1, 1)
+  # tau_period_foi_male ~ dgamma(1, 1)
+  # tau_period_foi_female ~ dgamma(1, 1)
 
-  for (k in 1:nknots_foi_cgam) {
-    ln_b_foi_cgam_f[k] ~ dnorm(0, tau_period_foi_female)
-    b_foi_cgam_f[k] <- exp(ln_b_foi_cgam_f[k])
-    
-    ln_b_foi_cgam_m[k] ~ dnorm(0, tau_period_foi_male)
-    b_foi_cgam_m[k] <- exp(ln_b_foi_cgam_m[k])
-  }
-  for (t in 1:n_year) {
-    m_period_foi_cgam_temp[t] <- inprod(b_foi_cgam_m[1:nknots_foi_cgam],
-                                 Z_foi_cgam[t, 1:nknots_foi_cgam])
-    m_period_foi_cgam[t] <- m_period_foi_cgam_temp[t] - m_mu_foi_cgam
+  # for (k in 1:nknots_foi_cgam) {
+  #   ln_b_foi_cgam_f[k] ~ dnorm(0, tau_period_foi_female)
+  #   b_foi_cgam_f[k] <- exp(ln_b_foi_cgam_f[k])
 
-    f_period_foi_cgam_temp[t] <- inprod(b_foi_cgam_f[1:nknots_foi_cgam],
-                                 Z_foi_cgam[t, 1:nknots_foi_cgam])
-    f_period_foi_cgam[t] <- f_period_foi_cgam_temp[t] - f_mu_foi_cgam
+  #   ln_b_foi_cgam_m[k] ~ dnorm(0, tau_period_foi_male)
+  #   b_foi_cgam_m[k] <- exp(ln_b_foi_cgam_m[k])
+  # }
+  # for (t in 1:n_year) {
+  #   m_period_foi_cgam_temp[t] <- inprod(b_foi_cgam_m[1:nknots_foi_cgam],
+  #                                Z_foi_cgam[t, 1:nknots_foi_cgam])
+  #   m_period_foi_cgam[t] <- m_period_foi_cgam_temp[t] - m_mu_foi_cgam
 
-  }
-  m_mu_foi_cgam <- mean(m_period_foi_cgam_temp[1:n_year])
-  f_mu_foi_cgam <- mean(f_period_foi_cgam_temp[1:n_year])
+  #   f_period_foi_cgam_temp[t] <- inprod(b_foi_cgam_f[1:nknots_foi_cgam],
+  #                                Z_foi_cgam[t, 1:nknots_foi_cgam])
+  #   f_period_foi_cgam[t] <- f_period_foi_cgam_temp[t] - f_mu_foi_cgam
 
-  ##########################################################
-  ### FOI period effect additive spline
-  ##########################################################
+  # }
+  # m_mu_foi_cgam <- mean(m_period_foi_cgam_temp[1:n_year])
+  # f_mu_foi_cgam <- mean(f_period_foi_cgam_temp[1:n_year])
 
-  tau_foi_spline_male ~ dgamma(.01, .01)
-  tau_foi_spline_female ~ dgamma(.01, .01)
-  for (k in 1:nknots_foi_spline) {
-    f_b_foi_spline[k] ~ ddexp(0, tau_foi_spline_female)
-    m_b_foi_spline[k] ~ ddexp(0, tau_foi_spline_male)
-  }
-  for (t in 1:(n_year/2)) {
-    m_period_foi_spline[t] <- inprod(m_b_foi_spline[1:nknots_foi_spline],
-                                   Z_foi_spline[t, 1:nknots_foi_spline])
-    f_period_foi_spline[t] <- inprod(f_b_foi_spline[1:nknots_foi_spline],
-                                   Z_foi_spline[t, 1:nknots_foi_spline])
-  }
+  # ##########################################################
+  # ### FOI period effect additive spline
+  # ##########################################################
 
-  f_period_foi[1:(n_year/2)] <- f_period_foi_cgam[1:(n_year/2)]
-  m_period_foi[1:(n_year/2)] <- m_period_foi_cgam[1:(n_year/2)]
-  f_period_foi[(n_year * .5 + 1):n_year]<- f_period_foi_cgam[(n_year * .5 + 1):n_year] + f_period_foi_spline[1:(n_year * .5)]
-  m_period_foi[(n_year * .5 + 1):n_year]<- m_period_foi_cgam[(n_year * .5 + 1):n_year] + m_period_foi_spline[1:(n_year * .5)]
+  # tau_foi_spline_male ~ dgamma(.01, .01)
+  # tau_foi_spline_female ~ dgamma(.01, .01)
+  # for (k in 1:nknots_foi_spline) {
+  #   f_b_foi_spline[k] ~ ddexp(0, tau_foi_spline_female)
+  #   m_b_foi_spline[k] ~ ddexp(0, tau_foi_spline_male)
+  # }
+  # for (t in 1:(n_year/2)) {
+  #   m_period_foi_spline[t] <- inprod(m_b_foi_spline[1:nknots_foi_spline],
+  #                                  Z_foi_spline[t, 1:nknots_foi_spline])
+  #   f_period_foi_spline[t] <- inprod(f_b_foi_spline[1:nknots_foi_spline],
+  #                                  Z_foi_spline[t, 1:nknots_foi_spline])
+  # }
+
+  # f_period_foi[1:(n_year/2)] <- f_period_foi_cgam[1:(n_year/2)]
+  # m_period_foi[1:(n_year/2)] <- m_period_foi_cgam[1:(n_year/2)]
+  # f_period_foi[(n_year * .5 + 1):n_year] <- f_period_foi_cgam[(n_year * .5 + 1):n_year] + f_period_foi_spline[1:(n_year * .5)]
+  # m_period_foi[(n_year * .5 + 1):n_year] <- m_period_foi_cgam[(n_year * .5 + 1):n_year] + m_period_foi_spline[1:(n_year * .5)]
 
   ##########################################################
   ### Random effect for East/West spatial model
   ##########################################################
+
   space[1] <- 0
   space[2]  <- space_temp * space_mix
 
@@ -194,23 +195,23 @@ modelcode <- nimbleCode({
   ### Priors for Age Effects Survival
   ########################################
 
-  # ### Age effects
-  # for (k in 1:nknots_age) {
-  #   ln_b_age_survival[k] ~ dnorm(0, tau_age_survival)
-  #   b_age_survival[k] <- exp(ln_b_age_survival[k])
-  # }
-  # tau_age_survival ~ dgamma(.01, .01)
+  ### Age effects
+  for (k in 1:nknots_age) {
+    ln_b_age_survival[k] ~ dnorm(0, tau_age_survival)
+    b_age_survival[k] <- exp(ln_b_age_survival[k])
+  }
+  tau_age_survival ~ dgamma(.01, .01)
 
-  # for (t in 1:nT_age_surv) {
-  #   age_effect_survival_temp[t] <- inprod(b_age_survival[1:nknots_age],
-  #                                    Z_age[t, 1:nknots_age])
-  # }
-  # mu_age_effect_survival_temp <- mean(age_effect_survival_temp[1:nT_age_surv])
+  for (t in 1:nT_age_surv) {
+    age_effect_survival_temp[t] <- inprod(b_age_survival[1:nknots_age],
+                                     Z_age[t, 1:nknots_age])
+  }
+  mu_age_effect_survival_temp <- mean(age_effect_survival_temp[1:nT_age_surv])
   
-  # for (t in 1:nT_age_surv) {
-  #   age_effect_survival[t] <-  age_effect_survival_temp[t] -
-  #                              mu_age_effect_survival_temp
-  # }
+  for (t in 1:nT_age_surv) {
+    age_effect_survival[t] <-  age_effect_survival_temp[t] -
+                               mu_age_effect_survival_temp
+  }
 
   ########################################
   ### Priors for Period Effects Survival
@@ -224,9 +225,8 @@ modelcode <- nimbleCode({
   for (t in 1:nT_period_collar) {
     period_effect_surv[t] <- inprod(b_period_survival[1:nknots_period],
                                     Z_period[t, 1:nknots_period]) +
-                              Z_cause_gun[t] * beta_harvest_gun + 
-                              Z_cause_ng[t] * beta_harvest_ng
-
+                              Z_collar_gun[t] * beta_harvest_gun +
+                              Z_collar_ng[t] * beta_harvest_ng
   }
 
   #additive effect of harvest on total mortality hazard
@@ -244,7 +244,7 @@ modelcode <- nimbleCode({
   # period_int_survival ~ dnorm(0, tau_period_precollar)
   # period_annual_survival[1:18] <- period_int_survival
   # period_annual_survival[19:(n_year_precollar+1)] <- 0
-
+                                                                                                                                                                                                                                                                       
   period_effect_survival[1:nT_period_overall_ext] <- set_period_effects_constant(
         n_year_precollar = n_year_precollar,
         n_year_precollar_ext = n_year_precollar_ext,

@@ -13,12 +13,12 @@
 fit_sum <- mcmcout$summary
 out <- mcmcout$samples
 
-modelid <- "Z"
+modelid <- "A"
 
 #############################
 ### Saving Model Description
 #############################
-sink(paste0("figures/",modelid,"/model_description_",modelid,".txt"))
+sink(paste0("figures/", modelid, "/model_description_", modelid, ".txt"))
 cat("Model description specifics:\n")
 cat("niter:  ",reps,"\n")
 cat("burnin:  ",bin,"\n")
@@ -29,10 +29,10 @@ cat("includes aging data aah likelihoods\n")
 cat("removed population model\n")
 cat("removed fecundity model \n")
 cat("includes cause-specific model \n")
-cat("includes FOI period effects\n")
-cat("collar only survival period effects, no precollar period effects survival, additive effect of harvest season time varying step fun\n")
+cat("no FOI period effects\n")
+cat("collar only survival period effects, no precollar period effects survival, additive effect of harvest season, time varying step fun\n")
 cat("NO survival age effects cgam convex \n\n")
-cat("runtime:  ",runtime,"\n")
+cat("runtime:  ", runtime, "\n")
 cat("Summary Stats:  \n")
 print(fit_sum)
 sink()
@@ -142,6 +142,12 @@ for(i in 1:n_ageclassm){
 }
 dev.off()
 
+
+pdf(paste0("figures/",modelid,"/traceplot_ln_b_age_survival_",modelid,".pdf"))
+for(i in 1:nknots_age){
+    traceplot(out[, paste0("ln_b_age_survival[",i,"]")], ylab = paste0("ln_b_age_survival[",i,"]"))
+}
+dev.off()
 
 
 #############################

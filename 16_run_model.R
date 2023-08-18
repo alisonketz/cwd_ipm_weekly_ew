@@ -196,16 +196,18 @@ nimConsts <- list(n_year = n_year,
     interval_cause = d_fit_hh$right_period_s - 1,
     # indx_mat_pe_surv = indx_mat_pe_surv,
     # intvl_step_yr = intvl_step_yr_weekly,
-    # m_period_foi = rep(0,n_year),
-    # f_period_foi = rep(0,n_year),
-    # age_effect_survival = rep(0,nT_age_surv),
+    m_period_foi = rep(0,n_year),
+    f_period_foi = rep(0,n_year),
+    # age_effect_survival = rep(0, nT_age_surv),
     period_annual_survival = rep(0,n_year_precollar + 1),
     # period_effect_survival = rep(0,nT_period_overall_ext)#,
     Z_foi_cgam = Z_foi_cgam,
     nknots_foi_cgam = nknots_foi_cgam,
     Z_foi_spline = Z_foi_spline,
-    nknots_foi_spline = nknots_foi_spline
-    )
+    nknots_foi_spline = nknots_foi_spline,
+    Z_collar_gun = Z_collar_gun,
+    Z_collar_ng = Z_collar_ng
+)
 
 
 #######################################
@@ -232,14 +234,14 @@ initsFun <- function()list(beta_male = rnorm(1, -.2, .01),
     # f_period_foi = seq(-.25, .25, length = n_year),
     # m_period_foi_temp = seq(-.25, .25, length = n_year),
     # f_period_foi_temp = seq(-.25, .25, length = n_year),
-    ln_b_foi_cgam_m = rnorm(nknots_foi_cgam) * 10^-4,
-    ln_b_foi_cgam_f = rnorm(nknots_foi_cgam) * 10^-4,
-    f_b_foi_spline = rnorm(nknots_foi_spline) * 10^-4,
-    m_b_foi_spline = rnorm(nknots_foi_spline) * 10^-4,
-    tau_foi_spline_male = runif(1, .1, 1),
-    tau_foi_spline_female = runif(1, .1, 1),
-    tau_period_foi_male = runif(1, 4.2, 6.8),
-    tau_period_foi_female = runif(1, 2.27, 3.44),
+    # ln_b_foi_cgam_m = rnorm(nknots_foi_cgam) * 10^-4,
+    # ln_b_foi_cgam_f = rnorm(nknots_foi_cgam) * 10^-4,
+    # f_b_foi_spline = rnorm(nknots_foi_spline) * 10^-4,
+    # m_b_foi_spline = rnorm(nknots_foi_spline) * 10^-4,
+    # tau_foi_spline_male = runif(1, .1, 1),
+    # tau_foi_spline_female = runif(1, .1, 1),
+    # tau_period_foi_male = runif(1, 4.2, 6.8),
+    # tau_period_foi_female = runif(1, 2.27, 3.44),
     tau_age_foi_male = runif(1, 1.5, 1.7),
     tau_age_foi_female = runif(1, 2.7, 4.2),
     m_age_foi = c(rnorm(1, -10.7, sd = .1),
@@ -320,9 +322,9 @@ parameters <- c(
             #   "sus_mix",
             #   "beta0_inf_temp",
             #   "inf_mix",
-              # "tau_age_survival",
-              # "age_effect_survival",
-              # "ln_b_age_survival",
+              "tau_age_survival",
+              "age_effect_survival",
+              "ln_b_age_survival",
               "b_period_survival",
               "tau_period_survival",
               # "tau_period_precollar",
@@ -361,7 +363,7 @@ CnimMCMC <- compileNimble(nimMCMC,
                          project = Rmodel)
 for(i in 1:10){beepr::beep(1)}
 
-reps <- 5000
+reps <- 1000
 bin <- 0 # reps*.5
 n_chains <- 1
 
