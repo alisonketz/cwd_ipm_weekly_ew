@@ -200,7 +200,7 @@ modelcode <- nimbleCode({
     ln_b_age_survival[k] ~ dnorm(0, tau_age_survival)
     b_age_survival[k] <- exp(ln_b_age_survival[k])
   }
-  tau_age_survival ~ dgamma(.01, .01)
+  tau_age_survival ~ dgamma(1, 1)
 
   for (t in 1:nT_age_surv) {
     age_effect_survival_temp[t] <- inprod(b_age_survival[1:nknots_age],

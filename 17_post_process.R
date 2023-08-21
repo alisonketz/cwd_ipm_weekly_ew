@@ -13,7 +13,7 @@
 fit_sum <- mcmcout$summary
 out <- mcmcout$samples
 
-modelid <- "A"
+modelid <- "C"
 
 #############################
 ### Saving Model Description
