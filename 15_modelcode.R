@@ -197,10 +197,11 @@ modelcode <- nimbleCode({
 
   ### Age effects
   for (k in 1:nknots_age) {
-    ln_b_age_survival[k] ~ dnorm(0, tau_age_survival)
+    # ln_b_age_survival[k] ~ dnorm(0, tau_age_survival)
+    ln_b_age_survival[k] ~ dnorm(0, 1)
     b_age_survival[k] <- exp(ln_b_age_survival[k])
   }
-  tau_age_survival ~ dgamma(1, 1)
+  # tau_age_survival ~ dgamma(1, 1)
 
   for (t in 1:nT_age_surv) {
     age_effect_survival_temp[t] <- inprod(b_age_survival[1:nknots_age],
@@ -217,21 +218,21 @@ modelcode <- nimbleCode({
   ### Priors for Period Effects Survival
   ########################################
 
-  ### Period effects from collar data
-  for (k in 1:nknots_period) {
-    b_period_survival[k] ~ dnorm(0, tau_period_survival)
-  }
-  tau_period_survival ~ dgamma(1, 1)
-  for (t in 1:nT_period_collar) {
-    period_effect_surv[t] <- inprod(b_period_survival[1:nknots_period],
-                                    Z_period[t, 1:nknots_period]) +
-                              Z_collar_gun[t] * beta_harvest_gun +
-                              Z_collar_ng[t] * beta_harvest_ng
-  }
+  # ### Period effects from collar data
+  # for (k in 1:nknots_period) {
+  #   b_period_survival[k] ~ dnorm(0, tau_period_survival)
+  # }
+  # tau_period_survival ~ dgamma(1, 1)
+  # for (t in 1:nT_period_collar) {
+  #   period_effect_surv[t] <- inprod(b_period_survival[1:nknots_period],
+  #                                   Z_period[t, 1:nknots_period]) +
+  #                             Z_collar_gun[t] * beta_harvest_gun +
+  #                             Z_collar_ng[t] * beta_harvest_ng
+  # }
 
-  #additive effect of harvest on total mortality hazard
-  beta_harvest_gun ~ dnorm(0, .01)
-  beta_harvest_ng ~ dnorm(0, .01)
+  # #additive effect of harvest on total mortality hazard
+  # beta_harvest_gun ~ dnorm(0, .01)
+  # beta_harvest_ng ~ dnorm(0, .01)
 
   # ### Period effects from aah data
   # tau_period_precollar ~ dgamma(1,1)
@@ -245,20 +246,20 @@ modelcode <- nimbleCode({
   # period_annual_survival[1:18] <- period_int_survival
   # period_annual_survival[19:(n_year_precollar+1)] <- 0
                                                                                                                                                                                                                                                                        
-  period_effect_survival[1:nT_period_overall_ext] <- set_period_effects_constant(
-        n_year_precollar = n_year_precollar,
-        n_year_precollar_ext = n_year_precollar_ext,
-        n_year_prestudy_ext = n_year_prestudy_ext,
-        nT_period_precollar_ext = nT_period_precollar_ext,
-        nT_period_precollar = nT_period_precollar,
-        nT_period_collar = nT_period_collar,
-        nT_period_overall_ext = nT_period_overall_ext,
-        nT_period_prestudy_ext = nT_period_prestudy_ext,
-        yr_start = yr_start[1:n_year],
-        yr_end = yr_end[1:n_year],
-        period_effect_surv = period_effect_surv[1:nT_period_collar],
-        period_annual_survival = period_annual_survival[1:(n_year_precollar + 1)]
-  )
+  # period_effect_survival[1:nT_period_overall_ext] <- set_period_effects_constant(
+  #       n_year_precollar = n_year_precollar,
+  #       n_year_precollar_ext = n_year_precollar_ext,
+  #       n_year_prestudy_ext = n_year_prestudy_ext,
+  #       nT_period_precollar_ext = nT_period_precollar_ext,
+  #       nT_period_precollar = nT_period_precollar,
+  #       nT_period_collar = nT_period_collar,
+  #       nT_period_overall_ext = nT_period_overall_ext,
+  #       nT_period_prestudy_ext = nT_period_prestudy_ext,
+  #       yr_start = yr_start[1:n_year],
+  #       yr_end = yr_end[1:n_year],
+  #       period_effect_surv = period_effect_surv[1:nT_period_collar],
+  #       period_annual_survival = period_annual_survival[1:(n_year_precollar + 1)]
+  # )
 
 #   period_effect_survival[1:nT_period_overall_ext] <- set_period_effects_ave(
 #         n_year_precollar = n_year_precollar,

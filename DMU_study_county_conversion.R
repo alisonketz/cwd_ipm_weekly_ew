@@ -100,7 +100,7 @@ dane <- vect(dane)
 
 deer_habitat <- terra::rast("/home/aketz/Documents/Data/230523_harvest_data/finalgrid_2017.tif")
 # deer_habitat <- terra::rast("/home/aketz/Documents/Data/230523_harvest_data/deer_habitat.tif")
-deer_habitat <- project(deer_habitat,"EPSG:3071")
+deer_habitat <- project(deer_habitat,"EPSG:3701")
 
 #crop the WI deer habitat to the three relevant counties
 hab <- crop(deer_habitat,county_tres_bound)

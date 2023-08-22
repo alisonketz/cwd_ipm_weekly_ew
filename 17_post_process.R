@@ -13,7 +13,7 @@
 fit_sum <- mcmcout$summary
 out <- mcmcout$samples
 
-modelid <- "C"
+modelid <- "D"
 
 #############################
 ### Saving Model Description
@@ -31,7 +31,7 @@ cat("removed fecundity model \n")
 cat("includes cause-specific model \n")
 cat("no FOI period effects\n")
 cat("collar only survival period effects, no precollar period effects survival, additive effect of harvest season, time varying step fun\n")
-cat("NO survival age effects cgam convex \n\n")
+cat("includes survival age effects cgam decconvex \n\n")
 cat("runtime:  ", runtime, "\n")
 cat("Summary Stats:  \n")
 print(fit_sum)
@@ -148,6 +148,13 @@ for(i in 1:nknots_age){
     traceplot(out[, paste0("ln_b_age_survival[",i,"]")], ylab = paste0("ln_b_age_survival[",i,"]"))
 }
 dev.off()
+
+
+# pdf(paste0("figures/",modelid,"/traceplot_b_age_survival_",modelid,".pdf"))
+# for(i in 1:nknots_age){
+#     traceplot(out[, paste0("b_age_survival[",i,"]")], ylab = paste0("b_age_survival[",i,"]"))
+# }
+# dev.off()
 
 
 #############################
