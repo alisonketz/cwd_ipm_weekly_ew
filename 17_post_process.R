@@ -13,7 +13,7 @@
 fit_sum <- mcmcout$summary
 out <- mcmcout$samples
 
-modelid <- "D"
+modelid <- "C"
 
 #############################
 ### Saving Model Description
@@ -30,7 +30,8 @@ cat("removed population model\n")
 cat("removed fecundity model \n")
 cat("includes cause-specific model \n")
 cat("no FOI period effects\n")
-cat("collar only survival period effects, no precollar period effects survival, additive effect of harvest season, time varying step fun\n")
+cat("no survival period effects\n")
+# cat("collar only survival period effects, no precollar period effects survival, additive effect of harvest season, time varying step fun\n")
 cat("includes survival age effects cgam decconvex \n\n")
 cat("runtime:  ", runtime, "\n")
 cat("Summary Stats:  \n")
